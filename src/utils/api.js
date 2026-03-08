@@ -34,7 +34,7 @@ auth.onIdTokenChanged((user) => {
 // ─── Axios Instance ───────────────────────────────────────────────────────────
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
-    timeout: 30000, // 30s request timeout — prevents hung connections
+    timeout: 90000, // 90s request timeout — prevents hung connections
 });
 
 // ─── Request Interceptor ──────────────────────────────────────────────────────
