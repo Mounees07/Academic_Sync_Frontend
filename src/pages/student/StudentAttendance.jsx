@@ -5,6 +5,8 @@ import { Loader, CheckCircle, AlertTriangle } from 'lucide-react';
 import { SEMESTER_START_DATE, calculateAttendance } from '../../utils/attendanceUtils';
 import { useSettings } from '../../context/SettingsContext';
 import './StudentAttendance.css';
+import { Hourglass } from 'ldrs/react';
+import 'ldrs/react/Hourglass.css';
 
 const StudentAttendance = () => {
     const { currentUser } = useAuth();
@@ -84,7 +86,7 @@ const StudentAttendance = () => {
 
     const handlePageChange = (page) => setCurrentPage(page);
 
-    if (loading) return <div className="loading-screen"><Loader className="animate-spin" /></div>;
+    if (loading) return <div className="loading-screen"><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>;
 
     return (
         <div className="attendance-page">

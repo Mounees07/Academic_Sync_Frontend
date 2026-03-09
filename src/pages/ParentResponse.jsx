@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../utils/api';
 import { Loader, CheckCircle, XCircle } from 'lucide-react';
+import { Hourglass } from 'ldrs/react';
+import 'ldrs/react/Hourglass.css';
 
 const ParentResponse = () => {
     const { token } = useParams();
@@ -37,7 +39,7 @@ const ParentResponse = () => {
         }
     };
 
-    if (loading) return <div className="loading-screen" style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Loader className="animate-spin" /></div>;
+    if (loading) return <div className="loading-screen" style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>;
 
     if (error) return (
         <div style={{ padding: '40px', textAlign: 'center', fontFamily: 'Inter, sans-serif' }}>

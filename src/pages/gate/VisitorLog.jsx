@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import { Loader, UserPlus, LogOut, Search, Clock, PlusCircle } from 'lucide-react';
 import './VisitorLog.css';
+import { Hourglass } from 'ldrs/react';
+import 'ldrs/react/Hourglass.css';
 
 const VisitorLog = () => {
     const [visitors, setVisitors] = useState([]);
@@ -140,7 +142,7 @@ const VisitorLog = () => {
             </header>
 
             {loading ? (
-                <div className="loading-screen"><Loader className="animate-spin" /></div>
+                <div className="loading-screen"><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>
             ) : (
                 <div className="visitor-table-card">
                     <div className="table-wrapper">

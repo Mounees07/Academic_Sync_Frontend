@@ -11,6 +11,8 @@ import {
 import api from '../../utils/api';
 import '../../pages/DashboardOverview.css';
 import './MentorshipManagement.css';
+import { Hourglass } from 'ldrs/react';
+import 'ldrs/react/Hourglass.css';
 
 const MentorshipManagement = () => {
     const [students, setStudents] = useState([]);
@@ -119,7 +121,7 @@ const MentorshipManagement = () => {
         document.body.removeChild(link);
     };
 
-    if (loading) return <div className="loading-screen"><Loader className="animate-spin" /></div>;
+    if (loading) return <div className="loading-screen"><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>;
 
     return (
         <div className="mentorship-mgmt">

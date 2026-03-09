@@ -14,6 +14,8 @@ import './DashboardOverview.css';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import { calculateAttendance } from '../utils/attendanceUtils';
+import { Hourglass } from 'ldrs/react';
+import 'ldrs/react/Hourglass.css';
 
 
 
@@ -170,7 +172,7 @@ const DashboardOverview = () => {
         return map[num] || num;
     };
 
-    if (loading) return <div className="loading-screen"><Loader className="animate-spin" /></div>;
+    if (loading) return <div className="loading-screen"><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>;
 
     const profile = studentProfile || authUserData || {};
     const studentInfo = {

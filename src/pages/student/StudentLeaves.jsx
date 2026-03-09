@@ -5,6 +5,8 @@ import { Plus, Search, Loader, Filter, ChevronRight, User, X, MailX } from 'luci
 import { useSettings } from '../../context/SettingsContext';
 import FeatureGate from '../../components/FeatureGate';
 import './StudentLeaves.css';
+import { Hourglass } from 'ldrs/react';
+import 'ldrs/react/Hourglass.css';
 
 const StudentLeaves = () => {
     const { currentUser, userData } = useAuth();
@@ -139,7 +141,7 @@ const StudentLeaves = () => {
         }
     };
 
-    if (loading) return <div className="loading-screen"><Loader className="animate-spin" /></div>;
+    if (loading) return <div className="loading-screen"><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>;
 
     return (
         <FeatureGate featureKey="feature.leave.enabled" title="Leave Management">

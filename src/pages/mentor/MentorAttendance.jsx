@@ -3,6 +3,8 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { Loader, Calendar, UserCheck } from 'lucide-react';
 import '../student/StudentAttendance.css'; // Reusing styles
+import { Hourglass } from 'ldrs/react';
+import 'ldrs/react/Hourglass.css';
 
 const MentorAttendance = () => {
     const { currentUser } = useAuth();
@@ -44,7 +46,7 @@ const MentorAttendance = () => {
             <div className="history-list glass-card">
                 <h2>Attendance for {date}</h2>
                 {loading ? (
-                    <div style={{ padding: '20px', textAlign: 'center' }}><Loader className="animate-spin" /></div>
+                    <div style={{ padding: '20px', textAlign: 'center' }}><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>
                 ) : attendanceList.length === 0 ? (
                     <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
                         <UserCheck size={48} style={{ opacity: 0.2, marginBottom: '16px' }} />

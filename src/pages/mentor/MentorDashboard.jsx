@@ -5,6 +5,8 @@ import './Mentor.css';
 import { useAuth } from '../../context/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
+import { Hourglass } from 'ldrs/react';
+import 'ldrs/react/Hourglass.css';
 
 const MentorDashboard = () => {
     const { currentUser, userData } = useAuth();
@@ -459,7 +461,7 @@ const MentorDashboard = () => {
     if (loading) {
         return (
             <div className="mw-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                <Loader className="animate-spin text-indigo-500" size={40} />
+                <Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" />
             </div>
         );
     }
@@ -787,7 +789,7 @@ const MentorDashboard = () => {
                                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', backgroundColor: 'white', borderRadius: '12px', border: '1px dashed #cbd5e1', padding: '32px 20px' }}>
                                     {generatedOtp ? (
                                         <>
-                                            <Loader size={28} className="animate-spin text-slate-400" style={{ margin: '0 auto 12px auto' }} />
+                                            <Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" />
                                             <h5 style={{ margin: '0 0 4px 0', fontSize: '15px', color: '#334155', fontWeight: '600' }}>Waiting for Responses</h5>
                                             <p style={{ margin: 0, color: '#64748b', fontSize: '13px', lineHeight: '1.5' }}>As students enter the code, their verification cards will appear here.</p>
                                         </>

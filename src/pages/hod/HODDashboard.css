@@ -1,10 +1,10 @@
 /* hod-dashboard-container */
 .hod-dashboard-container {
     padding: 24px;
-    background-color: #F8FAFC;
+    background-color: var(--bg-deep);
     min-height: 100vh;
     font-family: 'Inter', -apple-system, sans-serif;
-    color: #0F172A;
+    color: var(--text-primary);
 }
 
 /* Top Navigation */
@@ -12,24 +12,24 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #FFFFFF;
+    background: var(--bg-card);
     padding: 12px 24px;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 3px var(--shadow-subtle);
     margin-bottom: 32px;
 }
 
 .search-bar-container {
     display: flex;
     align-items: center;
-    background: #F1F5F9;
+    background: var(--bg-subtle);
     padding: 8px 16px;
     border-radius: 8px;
     width: 320px;
 }
 
 .search-icon {
-    color: #94A3B8;
+    color: var(--text-muted);
     margin-right: 8px;
 }
 
@@ -49,10 +49,10 @@
 
 .icon-btn {
     background: transparent;
-    border: 1px solid #E2E8F0;
+    border: 1px solid var(--glass-border);
     border-radius: 8px;
     padding: 8px;
-    color: #64748B;
+    color: var(--text-muted);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -61,8 +61,8 @@
 }
 
 .icon-btn:hover {
-    background: #F1F5F9;
-    color: #0F172A;
+    background: var(--bg-subtle);
+    color: var(--text-primary);
 }
 
 .primary-btn {
@@ -81,7 +81,7 @@
 }
 
 .primary-btn:hover {
-    background: #1D4ED8;
+    background: var(--primary-dark, #1D4ED8);
 }
 
 /* Page Header */
@@ -99,18 +99,18 @@
 }
 
 .title-section p {
-    color: #64748B;
+    color: var(--text-muted);
     font-size: 14px;
     margin: 0;
 }
 
 .semester-select {
     padding: 8px 16px;
-    border: 1px solid #E2E8F0;
+    border: 1px solid var(--glass-border);
     border-radius: 8px;
-    background: white;
+    background: var(--bg-card);
     font-size: 14px;
-    color: #0F172A;
+    color: var(--text-primary);
     outline: none;
     cursor: pointer;
 }
@@ -124,11 +124,11 @@
 }
 
 .hod-stat-card {
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
     border-radius: 12px;
     padding: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 1px 3px var(--shadow-subtle);
 }
 
 .stat-card-header {
@@ -140,19 +140,19 @@
 
 .stat-label {
     font-size: 13px;
-    color: #64748B;
+    color: var(--text-muted);
     font-weight: 500;
 }
 
 .stat-icon-top {
-    color: #94A3B8;
+    color: var(--text-muted);
 }
 
 .stat-value {
     font-size: 32px;
     font-weight: 700;
     margin-bottom: 12px;
-    color: #0F172A;
+    color: var(--text-primary);
 }
 
 .stat-trend {
@@ -169,7 +169,7 @@
 }
 
 .stat-trend.neutral {
-    color: #94A3B8;
+    color: var(--text-muted);
 }
 
 /* Middle Grid */
@@ -183,11 +183,11 @@
 .hod-chart-section,
 .hod-approvals-section,
 .hod-table-section {
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
     border-radius: 12px;
     padding: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 1px 3px var(--shadow-subtle);
 }
 
 .section-header {
@@ -210,7 +210,7 @@
 
 .legend-item {
     font-size: 12px;
-    color: #64748B;
+    color: var(--text-muted);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -227,20 +227,20 @@
 }
 
 .dot.previous {
-    background: #EFF6FF;
-    border: 1px solid #CBD5E1;
+    background: var(--bg-subtle);
+    border: 1px solid var(--glass-border);
 }
 
 .view-all-link {
     font-size: 13px;
-    color: #64748B;
+    color: var(--text-muted);
     text-decoration: none;
     font-weight: 500;
 }
 
 .view-all-link:hover {
     text-decoration: underline;
-    color: #0F172A;
+    color: var(--text-primary);
 }
 
 /* Approvals */
@@ -253,7 +253,7 @@
 .approval-item {
     display: flex;
     gap: 16px;
-    border-bottom: 1px solid #F1F5F9;
+    border-bottom: 1px solid var(--glass-border);
     padding-bottom: 20px;
 }
 
@@ -285,7 +285,7 @@
 }
 
 .approval-avatar.bg-gray {
-    background: #F1F5F9;
+    background: var(--bg-subtle);
 }
 
 .approval-content {
@@ -302,7 +302,7 @@
 .approval-name {
     font-size: 14px;
     font-weight: 600;
-    color: #0F172A;
+    color: var(--text-primary);
 }
 
 .approval-tag {
@@ -313,23 +313,23 @@
 }
 
 .approval-tag.warning {
-    background: #FFF7ED;
-    color: #EA580C;
+    background: rgba(234, 138, 12, 0.1);
+    color: var(--warning);
 }
 
 .approval-tag.default {
-    background: #F1F5F9;
-    color: #475569;
+    background: var(--bg-subtle);
+    color: var(--text-secondary);
 }
 
 .approval-tag.danger {
-    background: #FEF2F2;
-    color: #DC2626;
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--danger);
 }
 
 .approval-desc {
     font-size: 13px;
-    color: #64748B;
+    color: var(--text-muted);
     margin: 0 0 8px 0;
     line-height: 1.4;
 }
@@ -354,29 +354,29 @@
 }
 
 .action-link.text-muted {
-    color: #64748B;
+    color: var(--text-muted);
 }
 
 .action-link.text-muted:hover {
-    color: #0F172A;
+    color: var(--text-primary);
 }
 
 /* Table Section */
 .filter-btn {
     background: transparent;
-    border: 1px solid #E2E8F0;
+    border: 1px solid var(--glass-border);
     padding: 6px 12px;
     border-radius: 6px;
     font-size: 13px;
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #475569;
+    color: var(--text-secondary);
     cursor: pointer;
 }
 
 .filter-btn:hover {
-    background: #F8FAFC;
+    background: var(--bg-subtle);
 }
 
 .table-wrapper {
@@ -392,16 +392,16 @@
     text-align: left;
     padding: 12px 16px;
     font-size: 12px;
-    color: #64748B;
+    color: var(--text-muted);
     font-weight: 500;
-    border-bottom: 1px solid #E2E8F0;
+    border-bottom: 1px solid var(--glass-border);
 }
 
 .hod-progress-table td {
     padding: 16px;
     font-size: 14px;
-    border-bottom: 1px solid #F1F5F9;
-    color: #334155;
+    border-bottom: 1px solid var(--glass-border);
+    color: var(--text-secondary);
 }
 
 .hod-progress-table tr:last-child td {
@@ -410,7 +410,7 @@
 
 .font-medium {
     font-weight: 500;
-    color: #0F172A !important;
+    color: var(--text-primary) !important;
 }
 
 .instructor-cell {
@@ -431,8 +431,8 @@
 }
 
 .bg-light-blue {
-    background: #E0F2FE;
-    color: #0369A1;
+    background: var(--bg-subtle);
+    color: var(--accent-cyan);
 }
 
 .progress-cell {
@@ -444,7 +444,7 @@
 .progress-bar-bg {
     flex: 1;
     height: 6px;
-    background: #F1F5F9;
+    background: var(--bg-subtle);
     border-radius: 3px;
     overflow: hidden;
     max-width: 150px;
@@ -452,7 +452,7 @@
 
 .progress-bar-fill {
     height: 100%;
-    background: #2563EB;
+    background: var(--primary);
     border-radius: 3px;
 }
 

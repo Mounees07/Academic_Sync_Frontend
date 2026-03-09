@@ -3,6 +3,8 @@ import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { Loader, Upload, Download, FileText } from 'lucide-react';
 import '../hod/MentorshipManagement.css'; // Reusing HOD CSS for now or create generic one
+import { Hourglass } from 'ldrs/react';
+import 'ldrs/react/Hourglass.css';
 
 const COEExamSchedule = () => {
     const { currentUser } = useAuth();
@@ -120,7 +122,7 @@ const COEExamSchedule = () => {
                         className="btn-primary"
                         style={{ width: '100%', padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
                     >
-                        {uploading ? <Loader className="animate-spin" /> : <Upload size={20} />}
+                        {uploading ? <Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /> : <Upload size={20} />}
                         Publish Exam Schedule
                     </button>
                 </form>

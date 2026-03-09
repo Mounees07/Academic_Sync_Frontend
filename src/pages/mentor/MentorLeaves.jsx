@@ -3,6 +3,8 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { Loader, CheckCircle, XCircle, Clock, ShieldCheck, X } from 'lucide-react';
 import "../student/StudentLeaves.css";
+import { Hourglass } from 'ldrs/react';
+import 'ldrs/react/Hourglass.css';
 
 const MentorLeaves = () => {
     const { currentUser } = useAuth();
@@ -84,7 +86,7 @@ const MentorLeaves = () => {
         }
     };
 
-    if (loading) return <div className="loading-screen"><Loader className="animate-spin" /></div>;
+    if (loading) return <div className="loading-screen"><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>;
 
     return (
         <div className="leaves-page">

@@ -37,6 +37,11 @@ const HODCurriculum = React.lazy(() => import('./pages/hod/HODCurriculum'));
 const HODFaculty = React.lazy(() => import('./pages/hod/HODFaculty'));
 const HODStudents = React.lazy(() => import('./pages/hod/HODStudents'));
 const HODAnalytics = React.lazy(() => import('./pages/hod/HODAnalytics'));
+const HODAcademicPerformance = React.lazy(() => import('./pages/hod/HODAcademicPerformance'));
+const HODStudentAttendance = React.lazy(() => import('./pages/hod/HODStudentAttendance'));
+const HODFacultyWorkload = React.lazy(() => import('./pages/hod/HODFacultyWorkload'));
+const HODAdjustAllocations = React.lazy(() => import('./pages/hod/HODAdjustAllocations'));
+const HODResourceUtilization = React.lazy(() => import('./pages/hod/HODResourceUtilization'));
 const StudentCourseRegistration = React.lazy(() => import('./pages/student/StudentCourseRegistration'));
 const TeacherQuestionManager = React.lazy(() => import('./pages/teacher/TeacherQuestionManager'));
 const TeacherAttendanceLog = React.lazy(() => import('./pages/teacher/TeacherAttendanceLog'));
@@ -201,6 +206,11 @@ function App() {
                     <Route path="hod/meetings" element={<HODMeetings />} />
                     <Route path="curriculum" element={<HODCurriculum />} />
                     <Route path="department-analytics" element={<HODAnalytics />} />
+                    <Route path="department-analytics/academic-performance" element={<HODAcademicPerformance />} />
+                    <Route path="department-analytics/student-attendance" element={<HODStudentAttendance />} />
+                    <Route path="department-analytics/faculty-workload" element={<HODFacultyWorkload />} />
+                    <Route path="department-analytics/adjust-allocations" element={<HODAdjustAllocations />} />
+                    <Route path="department-analytics/resource-utilization" element={<HODResourceUtilization />} />
 
                     {/* Shared Routes */}
                     <Route path="my-profile" element={<MyProfile />} />

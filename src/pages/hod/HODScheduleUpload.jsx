@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { Loader, Upload, Download, FileText } from 'lucide-react';
+import { Hourglass } from 'ldrs/react';
+import 'ldrs/react/Hourglass.css';
 
 const HODScheduleUpload = () => {
     const { currentUser } = useAuth();
@@ -110,7 +112,7 @@ const HODScheduleUpload = () => {
                         className="btn-primary"
                         style={{ width: '100%', padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
                     >
-                        {uploading ? <Loader className="animate-spin" /> : <Upload size={20} />}
+                        {uploading ? <Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /> : <Upload size={20} />}
                         Upload Schedule
                     </button>
                 </form>

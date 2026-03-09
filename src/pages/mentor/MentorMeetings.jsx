@@ -3,6 +3,8 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { Loader, Trash2, Calendar, Clock, MapPin, User, Video, Edit } from 'lucide-react';
 import './MentorMeetings.css'; // We will create this or inline styles
+import { Hourglass } from 'ldrs/react';
+import 'ldrs/react/Hourglass.css';
 
 const MentorMeetings = () => {
     const { currentUser } = useAuth();
@@ -135,7 +137,7 @@ const MentorMeetings = () => {
         });
     };
 
-    if (loading) return <div className="loading-screen"><Loader className="animate-spin" /></div>;
+    if (loading) return <div className="loading-screen"><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>;
 
     return (
         <div className="meetings-page">

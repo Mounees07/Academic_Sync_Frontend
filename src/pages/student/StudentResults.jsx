@@ -4,6 +4,8 @@ import api from '../../utils/api';
 import { Award, BookOpen, Calendar, TrendingUp, Download, Loader } from 'lucide-react';
 import FeatureGate from '../../components/FeatureGate';
 import './StudentResults.css';
+import { Hourglass } from 'ldrs/react';
+import 'ldrs/react/Hourglass.css';
 
 const StudentResults = () => {
     const { currentUser } = useAuth();
@@ -76,7 +78,7 @@ const StudentResults = () => {
         return 'text-red-500';
     };
 
-    if (loading) return <div className="loading-screen"><Loader className="animate-spin" /></div>;
+    if (loading) return <div className="loading-screen"><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>;
 
     // Group results by Semester
     const groupedResults = results.reduce((acc, curr) => {

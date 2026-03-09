@@ -990,3 +990,43 @@
 .animate-fadeIn {
     animation: fadeIn 0.5s ease-out;
 }
+
+/* --- Mobile Responsiveness for List Pages --- */
+@media (max-width: 768px) {
+    .student-list-container {
+        padding: 16px;
+    }
+    .student-list-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .search-bar-wrapper {
+        width: 100%;
+    }
+    .student-table-card {
+        overflow-x: auto;
+    }
+    .student-table, 
+    .teacher-table {
+        min-width: 800px;
+    }
+    .table-footer {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .stat-value {
+        font-size: 1.5rem;
+    }
+}

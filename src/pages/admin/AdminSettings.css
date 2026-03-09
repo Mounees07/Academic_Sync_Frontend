@@ -466,7 +466,41 @@
     background: rgba(77, 68, 181, 0.1);
     border-radius: 12px;
     color: #7c6bdc;
-    margin-top: 24px;
     font-size: 0.9rem;
     border: 1px solid rgba(77, 68, 181, 0.2);
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+    .settings-container {
+        padding: 16px;
+    }
+    .settings-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+    .save-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    .settings-main-card {
+        padding: 16px;
+    }
+    .section-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    .settings-tabs-container {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+        border-bottom: none;
+    }
+    .tab-button {
+        min-width: unset;
+        white-space: nowrap;
+        padding: 8px 16px;
+    }
 }

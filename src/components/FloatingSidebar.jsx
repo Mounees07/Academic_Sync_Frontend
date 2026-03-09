@@ -52,11 +52,9 @@ const FloatingSidebar = ({ isOpen, setIsOpen }) => {
 
     const hodLinks = [
         { to: '/dashboard', icon: <LayoutDashboard size={22} />, label: 'Dashboard' },
+        { to: '/department-analytics', icon: <TrendingUp size={22} />, label: 'Analytics' },
         { to: '/mentorship-management', icon: <UserCheck size={22} />, label: 'Mentorship' },
-        { to: '/faculty-management', icon: <Users size={22} />, label: 'Faculty' },
-        { to: '/curriculum', icon: <BookOpen size={22} />, label: 'Curriculum' },
         { to: '/hod/schedule-upload', icon: <Calendar size={22} />, label: 'Timetable' },
-        { to: '/announcements', icon: <Bell size={22} />, label: 'Notices' },
     ];
 
     const adminLinks = [

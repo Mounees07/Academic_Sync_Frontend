@@ -2,9 +2,9 @@
 
 .hod-students-container-new {
     padding: 24px 32px;
-    background: #F8FAFC;
+    background: var(--bg-deep);
     min-height: 100vh;
-    color: #0F172A;
+    color: var(--text-primary);
     font-family: 'Inter', sans-serif;
 }
 
@@ -20,12 +20,12 @@
     font-size: 24px;
     font-weight: 700;
     margin: 0 0 4px 0;
-    color: #0F172A;
+    color: var(--text-primary);
 }
 
 .students-page-header p {
     font-size: 14px;
-    color: #64748B;
+    color: var(--text-muted);
     margin: 0;
 }
 
@@ -35,8 +35,8 @@
 }
 
 .import-btn {
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
     padding: 8px 16px;
     border-radius: 8px;
     display: flex;
@@ -44,14 +44,14 @@
     gap: 8px;
     font-size: 14px;
     font-weight: 500;
-    color: #334155;
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .import-btn:hover {
-    background: #F8FAFC;
-    border-color: #CBD5E1;
+    background: var(--bg-subtle);
+    border-color: var(--primary);
 }
 
 .add-student-btn {
@@ -70,7 +70,7 @@
 }
 
 .add-student-btn:hover {
-    background: #1D4ED8;
+    background: var(--primary-dark, #1D4ED8);
 }
 
 /* Stat Cards */
@@ -82,8 +82,8 @@
 }
 
 .s-stat-card {
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
     border-radius: 12px;
     padding: 20px;
     display: flex;
@@ -99,18 +99,18 @@
 
 .s-stat-label {
     font-size: 13px;
-    color: #64748B;
+    color: var(--text-muted);
     font-weight: 500;
 }
 
 .s-stat-icon {
-    color: #94A3B8;
+    color: var(--text-muted);
 }
 
 .s-stat-value {
     font-size: 32px;
     font-weight: 700;
-    color: #0F172A;
+    color: var(--text-primary);
     margin-bottom: 8px;
 }
 
@@ -138,8 +138,8 @@
 
 /* Directory Container & Toolbar */
 .students-directory-card {
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
     border-radius: 12px;
     overflow: hidden;
 }
@@ -148,7 +148,7 @@
     display: flex;
     gap: 24px;
     padding: 20px 24px 0;
-    border-bottom: 1px solid #E2E8F0;
+    border-bottom: 1px solid var(--glass-border);
 }
 
 .dir-tab {
@@ -157,19 +157,19 @@
     padding: 0 0 12px 0;
     font-size: 14px;
     font-weight: 500;
-    color: #64748B;
+    color: var(--text-muted);
     cursor: pointer;
     border-bottom: 2px solid transparent;
     transition: all 0.2s;
 }
 
 .dir-tab:hover {
-    color: #0F172A;
+    color: var(--text-primary);
 }
 
 .dir-tab.active {
-    color: #2563EB;
-    border-bottom-color: #2563EB;
+    color: var(--primary);
+    border-bottom-color: var(--primary);
 }
 
 .directory-toolbar {
@@ -177,7 +177,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 16px 24px;
-    border-bottom: 1px solid #E2E8F0;
+    border-bottom: 1px solid var(--glass-border);
 }
 
 .directory-search {
@@ -190,21 +190,22 @@
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: #94A3B8;
+    color: var(--text-muted);
 }
 
 .directory-search input {
     width: 100%;
     padding: 8px 12px 8px 36px;
-    border: 1px solid #E2E8F0;
+    border: 1px solid var(--glass-border);
     border-radius: 6px;
     font-size: 13px;
-    color: #334155;
+    color: var(--text-primary);
+    background: var(--bg-deep);
     outline: none;
 }
 
 .directory-search input:focus {
-    border-color: #94A3B8;
+    border-color: var(--primary);
 }
 
 .directory-filters {
@@ -217,17 +218,17 @@
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    border: 1px solid #E2E8F0;
+    border: 1px solid var(--glass-border);
     border-radius: 6px;
-    background: #FFFFFF;
-    color: #334155;
+    background: var(--bg-card);
+    color: var(--text-secondary);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
 }
 
 .filter-dropdown:hover {
-    background: #F8FAFC;
+    background: var(--bg-subtle);
 }
 
 .icon-btn-filter {
@@ -235,15 +236,15 @@
     align-items: center;
     justify-content: center;
     padding: 8px;
-    border: 1px solid #E2E8F0;
+    border: 1px solid var(--glass-border);
     border-radius: 6px;
-    background: #FFFFFF;
-    color: #64748B;
+    background: var(--bg-card);
+    color: var(--text-muted);
     cursor: pointer;
 }
 
 .icon-btn-filter:hover {
-    background: #F8FAFC;
+    background: var(--bg-subtle);
 }
 
 /* Directory Table */
@@ -261,14 +262,14 @@
     padding: 16px 24px;
     font-size: 12px;
     font-weight: 500;
-    color: #64748B;
-    border-bottom: 1px solid #E2E8F0;
-    background: #FFFFFF;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--glass-border);
+    background: var(--bg-card);
 }
 
 .directory-table td {
     padding: 16px 24px;
-    border-bottom: 1px solid #E2E8F0;
+    border-bottom: 1px solid var(--glass-border);
     vertical-align: middle;
 }
 
@@ -277,7 +278,7 @@
 }
 
 .directory-table tr:hover {
-    background: #F8FAFC;
+    background: var(--bg-subtle);
 }
 
 /* Cells formatting */
@@ -291,12 +292,12 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: #E2E8F0;
+    background: var(--bg-subtle);
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    color: #64748B;
+    color: var(--text-secondary);
     font-weight: 600;
     font-size: 14px;
 }
@@ -315,12 +316,12 @@
 .student-name {
     font-size: 14px;
     font-weight: 600;
-    color: #0F172A;
+    color: var(--text-primary);
 }
 
 .student-id {
     font-size: 12px;
-    color: #64748B;
+    color: var(--text-muted);
     margin-top: 2px;
 }
 
@@ -332,12 +333,12 @@
 .program-name {
     font-size: 14px;
     font-weight: 500;
-    color: #334155;
+    color: var(--text-secondary);
 }
 
 .program-type {
     font-size: 12px;
-    color: #94A3B8;
+    color: var(--text-muted);
     margin-top: 2px;
 }
 
@@ -349,19 +350,19 @@
 .year-name {
     font-size: 14px;
     font-weight: 500;
-    color: #334155;
+    color: var(--text-secondary);
 }
 
 .year-level {
     font-size: 12px;
-    color: #94A3B8;
+    color: var(--text-muted);
     margin-top: 2px;
 }
 
 .gpa-cell {
     font-size: 14px;
     font-weight: 600;
-    color: #0F172A;
+    color: var(--text-primary);
 }
 
 /* Status Badges */
@@ -383,9 +384,9 @@
 }
 
 .status-leave {
-    background: #F1F5F9;
-    color: #94A3B8;
-    border: 1px solid #E2E8F0;
+    background: var(--bg-subtle);
+    color: var(--text-muted);
+    border: 1px solid var(--glass-border);
 }
 
 .action-cell-right {
@@ -395,15 +396,15 @@
 .more-btn {
     background: none;
     border: none;
-    color: #94A3B8;
+    color: var(--text-muted);
     cursor: pointer;
     padding: 4px;
     border-radius: 4px;
 }
 
 .more-btn:hover {
-    background: #E2E8F0;
-    color: #334155;
+    background: var(--bg-subtle);
+    color: var(--text-secondary);
 }
 
 /* Footer Section */
@@ -412,12 +413,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-top: 1px solid #E2E8F0;
+    border-top: 1px solid var(--glass-border);
 }
 
 .showing-info {
     font-size: 13px;
-    color: #64748B;
+    color: var(--text-muted);
 }
 
 .pagination-controls {
@@ -431,17 +432,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
     border-radius: 6px;
-    color: #64748B;
+    color: var(--text-muted);
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .page-nav-btn:hover:not(:disabled) {
-    background: #F8FAFC;
-    color: #0F172A;
+    background: var(--bg-subtle);
+    color: var(--text-primary);
 }
 
 .page-nav-btn:disabled {

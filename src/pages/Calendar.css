@@ -676,3 +676,59 @@
         transform: translateY(0);
     }
 }
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+    .calendar-page {
+        padding: 16px;
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
+    }
+    .calendar-layout {
+        flex-direction: column;
+        height: auto;
+        overflow-y: visible;
+        gap: 16px;
+    }
+    .calendar-sidebar {
+        width: 100%;
+        gap: 16px;
+    }
+    .calendar-main {
+        padding: 16px;
+    }
+    .calendar-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    .nav-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .view-switcher, .nav-btn, .today-btn {
+        font-size: 0.8rem;
+    }
+    .month-title {
+        font-size: 1.5rem;
+    }
+    .calendar-grid {
+        min-height: 400px;
+    }
+    .day-cell {
+        padding: 6px;
+    }
+    .day-number {
+        width: 24px;
+        height: 24px;
+        font-size: 0.8rem;
+    }
+    .mini-event {
+        font-size: 0.6rem;
+        padding: 2px 4px;
+    }
+    .sidebar-widget {
+        padding: 16px;
+    }
+}

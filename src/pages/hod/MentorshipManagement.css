@@ -1,49 +1,138 @@
 .mentorship-mgmt {
-    padding: 20px;
+    padding: 32px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+}
+
+.header-content h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+
+.header-content p {
+    color: var(--text-muted);
+    font-size: 14px;
 }
 
 .header-actions {
     display: flex;
     gap: 12px;
+    align-items: center;
 }
 
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    text-transform: uppercase;
+}
+
+.btn-secondary {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+}
+.btn-secondary:hover {
+    background: var(--bg-subtle);
+}
+
+.btn-outline {
+    background: #FFFFFF;
+    color: #000000;
+    border: 1px solid #E5E7EB;
+}
+.btn-outline:hover {
+    background: #F3F4F6;
+}
+
+/* Make icons in the bright outline button inherit color */
+.btn-outline svg {
+    color: #000;
+}
+
+.btn-primary {
+    background: #3B82F6;
+    color: #FFFFFF;
+}
+.btn-primary:hover {
+    background: #2563EB;
+}
+
+.btn-block {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+}
+
+/* Grid Layout */
 .mgmt-grid {
     display: grid;
     grid-template-columns: 1fr 300px 1fr;
-    gap: 30px;
-    height: 70vh;
+    gap: 24px;
+    height: calc(100vh - 160px);
+    min-height: 500px;
 }
 
+/* Columns */
 .mgmt-column {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
-    padding: 0;
     overflow: hidden;
 }
 
 .column-header {
-    padding: 20px;
+    padding: 20px 24px;
     border-bottom: 1px solid var(--glass-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: var(--bg-card);
+}
+
+.column-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
 }
 
 .mini-search {
     display: flex;
     align-items: center;
-    background: var(--bg-subtle);
+    background: var(--bg-deep);
     border: 1px solid var(--glass-border);
-    border-radius: 8px;
-    padding: 4px 10px;
+    border-radius: 6px;
+    padding: 6px 12px;
     gap: 8px;
+}
+
+.mini-search svg {
+    color: var(--text-muted);
 }
 
 .mini-search input {
     background: transparent;
     border: none;
     color: var(--text-primary);
-    font-size: 0.85rem;
+    font-size: 13px;
     outline: none;
     width: 120px;
 }
@@ -51,100 +140,99 @@
 .item-list {
     flex: 1;
     overflow-y: auto;
-    padding: 10px;
+    padding: 12px;
 }
 
 .mgmt-item {
-    padding: 12px 16px;
-    margin-bottom: 8px;
-    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 4px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: transparent;
 }
 
 .mgmt-item:hover {
-    background: var(--glass-bg-hover);
+    background: var(--bg-subtle);
 }
 
 .mgmt-item.selected {
-    background: var(--primary);
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-}
-
-.mgmt-item.selected .sub {
-    color: rgba(255, 255, 255, 0.9);
-    /* Keep white for selected item contrast against primary */
+    background: var(--bg-subtle);
+    border-left: 2px solid #3B82F6;
 }
 
 .item-info {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
 }
 
 .item-info .name {
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 14px;
     color: var(--text-primary);
 }
 
 .item-info .sub {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
+    font-size: 12px;
+    color: var(--text-muted);
 }
 
 .assigned-icon {
-    color: var(--primary);
+    color: #10B981;
 }
 
-.selected .assigned-icon {
-    color: white;
-    /* Contrast against primary */
-}
-
+/* Middle Action Column */
 .action-column {
     display: flex;
     flex-direction: column;
-    justify-content: center;
 }
 
 .assignment-status {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
     padding: 24px;
-    text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
+    margin-top: auto;
+    margin-bottom: auto;
 }
 
 .status-box {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
     gap: 8px;
-    padding: 16px;
-    background: var(--bg-subtle);
-    border-radius: 12px;
-    border: 1px solid var(--glass-border);
+    padding: 24px;
+    background: var(--bg-deep);
+    border-radius: 8px;
+    text-align: center;
 }
 
 .status-box .label {
-    font-size: 0.7rem;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: var(--text-secondary);
+    font-weight: 600;
+    color: var(--text-muted);
 }
 
 .status-box .value {
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 16px;
     color: var(--text-primary);
 }
 
 .arrow-icon {
     display: flex;
     justify-content: center;
-    color: var(--primary);
+    color: #3B82F6;
 }
 
 @media (max-width: 1100px) {

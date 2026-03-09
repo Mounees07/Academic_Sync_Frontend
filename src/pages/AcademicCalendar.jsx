@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { Loader, Calendar, MapPin, Clock } from 'lucide-react';
+import { Hourglass } from 'ldrs/react';
+import 'ldrs/react/Hourglass.css';
 
 const AcademicCalendar = () => {
     const [events, setEvents] = useState([]);
@@ -35,7 +37,7 @@ const AcademicCalendar = () => {
 
     const filteredEvents = filter === 'ALL' ? events : events.filter(e => e.type === filter);
 
-    if (loading) return <div className="loading-screen"><Loader className="animate-spin" /></div>;
+    if (loading) return <div className="loading-screen"><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>;
 
     return (
         <div style={{ padding: '24px', maxWidth: '1000px', margin: '0 auto' }}>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import {
@@ -28,6 +29,7 @@ import './HODDashboard.css';
 
 const HODDashboard = () => {
     const { currentUser, userData } = useAuth();
+    const navigate = useNavigate();
     const [stats, setStats] = useState({
         faculty: 0,
         projects: 0,
@@ -103,7 +105,11 @@ const HODDashboard = () => {
 
             {/* 4 Stats Cards */}
             <div className="hod-stats-grid">
-                <div className="hod-stat-card">
+                <div 
+                    className="hod-stat-card" 
+                    onClick={() => navigate('/students-directory')}
+                    style={{ cursor: 'pointer' }}
+                >
                     <div className="stat-card-header">
                         <span className="stat-label">Total Students Enrolled</span>
                         <Users size={18} className="stat-icon-top" />
@@ -111,7 +117,11 @@ const HODDashboard = () => {
                     <div className="stat-value">{stats.students}</div>
                     <div className="stat-trend neutral">Live Data</div>
                 </div>
-                <div className="hod-stat-card">
+                <div 
+                    className="hod-stat-card"
+                    onClick={() => navigate('/faculty-management')}
+                    style={{ cursor: 'pointer' }}
+                >
                     <div className="stat-card-header">
                         <span className="stat-label">Active Faculty</span>
                         <GraduationCap size={18} className="stat-icon-top" />
@@ -119,7 +129,11 @@ const HODDashboard = () => {
                     <div className="stat-value">{stats.faculty}</div>
                     <div className="stat-trend neutral">Live Data</div>
                 </div>
-                <div className="hod-stat-card">
+                <div 
+                    className="hod-stat-card"
+                    onClick={() => navigate('/curriculum')}
+                    style={{ cursor: 'pointer' }}
+                >
                     <div className="stat-card-header">
                         <span className="stat-label">Ongoing Courses</span>
                         <BookOpen size={18} className="stat-icon-top" />
@@ -151,12 +165,12 @@ const HODDashboard = () => {
                     <div className="chart-container">
                         <ResponsiveContainer width="100%" height={260}>
                             <BarChart data={deptPerfData} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} dy={10} />
-                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
-                                <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
-                                <Bar dataKey="previous" fill="#EFF6FF" radius={[4, 4, 0, 0]} barSize={16} />
-                                <Bar dataKey="current" fill="#2563EB" radius={[4, 4, 0, 0]} barSize={16} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--glass-border)" />
+                                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 12 }} dy={10} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
+                                <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ backgroundColor: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--glass-border)', boxShadow: 'var(--shadow-subtle)', color: 'var(--text-primary)' }} />
+                                <Bar dataKey="previous" fill="var(--bg-subtle)" radius={[4, 4, 0, 0]} barSize={16} />
+                                <Bar dataKey="current" fill="var(--primary)" radius={[4, 4, 0, 0]} barSize={16} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -170,7 +184,7 @@ const HODDashboard = () => {
                     </div>
                     <div className="approvals-list">
                         {recentRequests.length === 0 ? (
-                            <div style={{ padding: '24px', textAlign: 'center', color: '#64748B' }}>
+                            <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>
                                 No pending approvals found.
                             </div>
                         ) : (
@@ -217,7 +231,7 @@ const HODDashboard = () => {
                         <tbody>
                             {coreCourses.length === 0 ? (
                                 <tr>
-                                    <td colSpan="4" style={{ textAlign: 'center', padding: '24px', color: '#64748B' }}>
+                                    <td colSpan="4" style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)' }}>
                                         No courses data available.
                                     </td>
                                 </tr>

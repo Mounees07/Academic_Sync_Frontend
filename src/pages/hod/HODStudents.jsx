@@ -27,8 +27,8 @@ const HODStudents = () => {
             const fetchedData = res.data;
             const fetchedStudents = fetchedData.students || [];
 
-            // Generate mapped array from actual backend data OR fallback to mock if completely empty
-            const displayStudents = fetchedStudents.length > 0 ? fetchedStudents.map((s, i) => ({
+            // Generate mapped array from actual backend data only
+            const displayStudents = fetchedStudents.map((s, i) => ({
                 id: s.id || i,
                 fullName: s.fullName,
                 rollNumber: s.rollNumber || '-',
@@ -39,16 +39,6 @@ const HODStudents = () => {
                 gpa: s.gpa || s.cgpa || '-',
                 status: s.studentStatus || 'Active',
                 profilePictureUrl: s.profilePictureUrl
-            })) : Array(8).fill(null).map((_, i) => ({
-                id: i,
-                fullName: ['Emma Watson', 'James Anderson', 'Sophia Chen', 'Liam Patel', 'Isabella Martinez', 'Omar Al-Fayed', 'Chloe Price', 'John Doe'][i % 8],
-                rollNumber: ['CS2021001', 'CS2020045', 'CS2022103', 'CS2023012', 'CS2019088', 'CS2021158', 'CS2022034', 'CS2021000'][i % 8],
-                programName: ['B.Sc. Computer Science', 'B.Sc. Computer Science', 'M.Sc. Data Science', 'B.Sc. Software Engineering', 'Ph.D. Computer Science', 'B.Sc. Computer Science', 'B.Sc. Artificial Intelligence', 'B.Sc. Computer Science'][i % 8],
-                programType: 'Full-time',
-                yearName: ['Junior', 'Senior', 'Postgrad', 'Freshman', 'Doctoral', 'Junior', 'Sophomore', 'Senior'][i % 8],
-                yearLevel: ['Year 3', 'Year 4', 'Year 1', 'Year 1', 'Year 5', 'Year 3', 'Year 2', 'Year 4'][i % 8],
-                gpa: [3.8, 3.5, 3.9, 2.1, 4.0, 3.1, 3.7, 3.2][i % 8],
-                status: ['Active', 'Active', 'Active', 'Academic Warning', 'Active', 'On Leave', 'Active', 'Active'][i % 8],
             }));
 
             setStudents(displayStudents);
@@ -57,10 +47,10 @@ const HODStudents = () => {
                 setStats(fetchedData.stats);
             } else {
                 setStats({
-                    totalStudents: 1428,
-                    undergraduates: 1120,
-                    postgraduates: 308,
-                    atRisk: 24
+                    totalStudents: 0,
+                    undergraduates: 0,
+                    postgraduates: 0,
+                    atRisk: 0
                 });
             }
         } catch (error) {
@@ -124,7 +114,7 @@ const HODStudents = () => {
                         <span className="s-stat-label">Total Students</span>
                         <Users size={18} className="s-stat-icon" />
                     </div>
-                    <div className="s-stat-value">1,428</div>
+                    <div className="s-stat-value">{stats.totalStudents || 0}</div>
                     <div className="s-stat-trend positive">↗ +4.2% from last semester</div>
                 </div>
                 <div className="s-stat-card">
@@ -132,7 +122,7 @@ const HODStudents = () => {
                         <span className="s-stat-label">Undergraduates</span>
                         <BookOpen size={18} className="s-stat-icon" />
                     </div>
-                    <div className="s-stat-value">1,120</div>
+                    <div className="s-stat-value">{stats.undergraduates || 0}</div>
                     <div className="s-stat-trend positive">↗ +2.5% from last semester</div>
                 </div>
                 <div className="s-stat-card">
@@ -140,7 +130,7 @@ const HODStudents = () => {
                         <span className="s-stat-label">Postgraduates</span>
                         <GraduationCap size={18} className="s-stat-icon" />
                     </div>
-                    <div className="s-stat-value">308</div>
+                    <div className="s-stat-value">{stats.postgraduates || 0}</div>
                     <div className="s-stat-trend positive">↗ +8.1% from last semester</div>
                 </div>
                 <div className="s-stat-card">
@@ -148,7 +138,7 @@ const HODStudents = () => {
                         <span className="s-stat-label">At-Risk Students</span>
                         <AlertTriangle size={18} className="s-stat-icon" />
                     </div>
-                    <div className="s-stat-value">24</div>
+                    <div className="s-stat-value">{stats.atRisk || 0}</div>
                     <div className="s-stat-trend negative">↘ -12% from last semester</div>
                 </div>
             </div>
