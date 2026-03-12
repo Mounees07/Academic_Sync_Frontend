@@ -51,10 +51,10 @@ const HODAnalytics = () => {
         fetchAnalytics();
     }, [currentUser, userData]);
 
-    const gpaData = analyticsData?.performanceDistribution?.map(p => ({
-        name: p.category,
-        gpa: p.count
-    })) || [
+    const gpaData = analyticsData?.performanceDistribution?.length > 0 ? analyticsData.performanceDistribution.map(p => ({
+        name: p.name,
+        gpa: p.value
+    })) : [
             { name: "Fall '21", gpa: 3.2 },
             { name: "Spr '22", gpa: 3.3 },
             { name: "Fall '22", gpa: 3.25 },
@@ -63,10 +63,10 @@ const HODAnalytics = () => {
             { name: "Spr '24", gpa: 3.6 },
         ];
 
-    const attendanceData = analyticsData?.attendanceByYear?.map(a => ({
-        name: a.year,
-        rate: a.avg
-    })) || [
+    const attendanceData = analyticsData?.attendanceByYear?.length > 0 ? analyticsData.attendanceByYear.map(a => ({
+        name: a.yearClass,
+        rate: a.attendance
+    })) : [
             { name: 'Sep', rate: 92 },
             { name: 'Oct', rate: 95 },
             { name: 'Nov', rate: 88 },
@@ -77,9 +77,9 @@ const HODAnalytics = () => {
 
     const recentReports = analyticsData?.topStudents?.map(s => ({
         title: s.name,
-        subtitle: `Roll: ${s.rollNumber}`,
+        subtitle: `Roll: ${s.roll}`,
         type: "Student",
-        date: `GPA: ${s.gpa}`,
+        date: `GPA: ${s.score}`,
         status: "Good",
         statusColor: "status-ready"
     })) || [];

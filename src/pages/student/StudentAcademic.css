@@ -1,0 +1,415 @@
+/* StudentAcademic.css */
+
+.sa-page {
+    padding: 28px;
+    max-width: 1200px;
+    margin: 0 auto;
+    animation: saFadeIn 0.35s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* ── Header ─────────────────────────────────────────── */
+.sa-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.sa-title {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+}
+
+.sa-sub {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.sa-header-stats {
+    display: flex;
+    gap: 12px;
+}
+
+.sa-hstat {
+    background: var(--bg-card);
+    border: 1.5px solid;
+    border-radius: 14px;
+    padding: 10px 20px;
+    text-align: center;
+    min-width: 100px;
+}
+
+.sa-hstat-val {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.sa-hstat-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* ── Section Title ─────────────────────────────────── */
+.sa-section-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+/* ── Quick Grid ─────────────────────────────────────── */
+.sa-quick-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+}
+
+@media (max-width: 1000px) { .sa-quick-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 560px)  { .sa-quick-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.sa-quick-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 18px 10px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+}
+
+.sa-quick-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    border-color: rgba(99,102,241,0.35);
+}
+
+.sa-quick-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sa-quick-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* ── Two-card row ───────────────────────────────────── */
+.sa-cards-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 860px) { .sa-cards-row { grid-template-columns: 1fr; } }
+
+/* ── Big Card ───────────────────────────────────────── */
+.sa-big-card {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sa-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sa-card-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sa-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.sa-card-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.sa-risk-badge {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #ef4444;
+    background: rgba(239,68,68,0.1);
+    padding: 3px 10px;
+    border-radius: 20px;
+    flex-shrink: 0;
+}
+
+.sa-avg-chip {
+    margin-left: auto;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    flex-shrink: 0;
+}
+
+/* Overall attendance bar */
+.sa-overall-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+}
+
+.sa-overall-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    flex-shrink: 0;
+    width: 72px;
+}
+
+.sa-overall-bar-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sa-overall-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--glass-border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.sa-overall-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease;
+}
+
+.sa-overall-pct {
+    font-size: 0.82rem;
+    font-weight: 800;
+    flex-shrink: 0;
+    width: 36px;
+    text-align: right;
+}
+
+/* Subject rows (attendance) */
+.sa-subject-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sa-subject-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--glass-border);
+    transition: background 0.15s;
+}
+
+.sa-subject-row:hover { background: rgba(255,255,255,0.05); }
+
+.sa-subject-info { flex: 1; min-width: 0; }
+
+.sa-subject-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sa-subject-meta {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.sa-risk-chip {
+    font-size: 0.67rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+/* Marks rows */
+.sa-marks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sa-mark-row { display: flex; flex-direction: column; gap: 5px; }
+
+.sa-mark-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sa-mark-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.sa-mark-pct {
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.sa-mark-bar-wrap {}
+
+.sa-mark-bar {
+    height: 7px;
+    background: var(--glass-border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.sa-mark-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease;
+}
+
+/* Grade strip */
+.sa-grade-strip {
+    display: flex;
+    gap: 16px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+}
+
+.sa-grade-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.sa-grade-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.sa-grade-count {
+    font-size: 0.85rem;
+    font-weight: 800;
+}
+
+.sa-grade-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+/* View buttons */
+.sa-view-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 11px 20px;
+    border-radius: 12px;
+    border: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    margin-top: auto;
+}
+
+.sa-view-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+.sa-view-btn.indigo { background: #6366f1; color: white; }
+.sa-view-btn.green  { background: #10b981; color: white; }
+
+/* ── Tips strip ─────────────────────────────────────── */
+.sa-tips-strip {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.sa-tip {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.sa-tip strong { color: var(--text-primary); }
+
+/* ── Responsive ─────────────────────────────────────── */
+@media (max-width: 700px) {
+    .sa-page { padding: 16px; }
+    .sa-header { flex-direction: column; align-items: flex-start; }
+    .sa-header-stats { width: 100%; }
+    .sa-hstat { flex: 1; }
+}
+
+@keyframes saFadeIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}

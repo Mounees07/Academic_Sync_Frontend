@@ -16,6 +16,8 @@ import api from '../utils/api';
 import { calculateAttendance } from '../utils/attendanceUtils';
 import { Hourglass } from 'ldrs/react';
 import 'ldrs/react/Hourglass.css';
+import AcademicHealthCard from '../components/AcademicHealthCard';
+
 
 
 
@@ -401,7 +403,7 @@ const DashboardOverview = () => {
                     {/* Fees Due */}
                     <div className="dashboard-flip-card">
                         <div className="dashboard-flip-card-inner">
-                            <div className="dashboard-flip-card-front" style={{ display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer' }} onClick={handlePayment}>
+                            <div className="dashboard-flip-card-front" style={{ display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer' }} onClick={() => navigate('/student/fees')}>
                                 <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(248, 113, 113, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
                                     💰
                                 </div>
@@ -411,7 +413,13 @@ const DashboardOverview = () => {
                                         ₹{Number(dashboardStats.feesDue).toLocaleString()}
                                     </div>
                                 </div>
-                                <div style={{ background: '#f87171', color: 'white', fontSize: '0.7rem', padding: '4px 8px', borderRadius: '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                                <div 
+                                    style={{ background: '#f87171', color: 'white', fontSize: '0.7rem', padding: '6px 12px', borderRadius: '12px', fontWeight: 'bold', textTransform: 'uppercase', cursor: 'pointer' }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handlePayment();
+                                    }}
+                                >
                                     Pay Now
                                 </div>
                             </div>
@@ -434,7 +442,7 @@ const DashboardOverview = () => {
                     {/* Placement Status */}
                     <div className="dashboard-flip-card">
                         <div className="dashboard-flip-card-inner">
-                            <div className="dashboard-flip-card-front" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                            <div className="dashboard-flip-card-front" style={{ display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer' }} onClick={() => navigate('/student/placement')}>
                                 <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(52, 211, 153, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
                                     💼
                                 </div>
@@ -465,7 +473,8 @@ const DashboardOverview = () => {
             <div className="dashboard-sidebar-col">
 
 
-
+                {/* Academic Health Card */}
+                <AcademicHealthCard />
 
                 {/* 2. Recent ClipboardList & Biometric Log */}
                 <div className="dash-card ClipboardList-card" style={{ marginTop: '20px' }}>

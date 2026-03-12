@@ -43,6 +43,12 @@ const HODFacultyWorkload = React.lazy(() => import('./pages/hod/HODFacultyWorklo
 const HODAdjustAllocations = React.lazy(() => import('./pages/hod/HODAdjustAllocations'));
 const HODResourceUtilization = React.lazy(() => import('./pages/hod/HODResourceUtilization'));
 const StudentCourseRegistration = React.lazy(() => import('./pages/student/StudentCourseRegistration'));
+const StudentAttendanceAnalytics = React.lazy(() => import('./pages/student/StudentAttendanceAnalytics'));
+const StudentFeeHistory = React.lazy(() => import('./pages/student/StudentFeeHistory'));
+const StudentPerformance = React.lazy(() => import('./pages/student/StudentPerformance'));
+const StudentNotifications = React.lazy(() => import('./pages/student/StudentNotifications'));
+const StudentPlacement = React.lazy(() => import('./pages/student/StudentPlacement'));
+
 const TeacherQuestionManager = React.lazy(() => import('./pages/teacher/TeacherQuestionManager'));
 const TeacherAttendanceLog = React.lazy(() => import('./pages/teacher/TeacherAttendanceLog'));
 const COEDashboard = React.lazy(() => import('./pages/coe/COEDashboard'));
@@ -174,6 +180,12 @@ function App() {
                     <Route path="student/leaves" element={<StudentLeaves />} />
                     <Route path="student/academic" element={<StudentAcademic />} />
                     <Route path="attendance" element={<StudentAttendance />} />
+                    <Route path="student/attendance-analytics" element={<StudentAttendanceAnalytics />} />
+                    <Route path="student/fees" element={<StudentFeeHistory />} />
+                    <Route path="student/performance" element={<StudentPerformance />} />
+                    <Route path="student/notifications" element={<StudentNotifications />} />
+                    <Route path="student/placement" element={<StudentPlacement />} />
+
 
                     {/* Teacher Routes */}
                     <Route path="teacher/dashboard" element={<MentorDashboard />} />

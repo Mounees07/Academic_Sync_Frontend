@@ -20,6 +20,27 @@ import {
 import api from '../../utils/api';
 import './StudentCourseDetails.css';
 
+const parseQuizOptions = (rawOptions) => {
+    if (!rawOptions) return [];
+
+    try {
+        const parsed = JSON.parse(rawOptions);
+        if (Array.isArray(parsed)) {
+            return parsed.map(option => String(option).trim()).filter(Boolean);
+        }
+    } catch (error) {
+        // Fall back to legacy comma-separated option strings.
+    }
+
+    return String(rawOptions)
+        .split(',')
+        .map(option => option.trim())
+        .filter(Boolean);
+};
+
+const normalizeAnswer = (answer) => String(answer ?? '').trim();
+const QUIZ_RESULTS_STORAGE_PREFIX = 'student_quiz_results_';
+
 const StudentCourseDetails = () => {
     const { sectionId } = useParams();
     const navigate = useNavigate();
@@ -139,19 +160,53 @@ const StudentCourseDetails = () => {
         }));
     };
 
-    const handleSubmitQuiz = () => {
+    const handleSubmitQuiz = async () => {
         if (!activeQuiz) return;
         let score = 0;
         activeQuiz.questions.forEach(q => {
-            if (userAnswers[q.id] === q.correctAnswer) {
+            if (normalizeAnswer(userAnswers[q.id]) === normalizeAnswer(q.correctAnswer)) {
                 score++;
             }
         });
-        setQuizResult({
+        const result = {
             score,
             total: activeQuiz.questions.length,
             percentage: Math.round((score / activeQuiz.questions.length) * 100)
-        });
+        };
+
+        setQuizResult(result);
+
+        if (currentUser?.uid && section?.course) {
+            const storageKey = `${QUIZ_RESULTS_STORAGE_PREFIX}${currentUser.uid}`;
+            const existingResults = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const nextResult = {
+                quizId: activeQuiz.id,
+                sectionId: Number(sectionId),
+                courseId: section.course.id,
+                subjectCode: section.course.code,
+                subjectName: section.course.name,
+                title: activeQuiz.title || 'Course Assessment',
+                ...result,
+                submittedAt: new Date().toISOString()
+            };
+
+            const filteredResults = existingResults.filter(item =>
+                !(item.quizId === nextResult.quizId && item.sectionId === nextResult.sectionId)
+            );
+
+            localStorage.setItem(storageKey, JSON.stringify([...filteredResults, nextResult]));
+
+            try {
+                await api.post(`/courses/quizzes/${activeQuiz.id}/attempts`, {
+                    studentUid: currentUser.uid,
+                    score: result.score,
+                    total: result.total,
+                    percentage: result.percentage
+                });
+            } catch (error) {
+                console.error('Failed to persist quiz attempt', error);
+            }
+        }
     };
 
     const handleMarkAttendance = async () => {
@@ -459,53 +514,65 @@ const StudentCourseDetails = () => {
 
             {/* Quiz Modal */}
             {showQuizModal && activeQuiz && createPortal(
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-xl z-[99999] flex items-center justify-center p-4">
-                    <div className="max-w-4xl w-full max-h-[90vh] flex flex-col animate-fade-in border border-[var(--glass-border)] shadow-2xl rounded-3xl overflow-hidden bg-[var(--bg-card)]">
+                <div className="quiz-modal-overlay">
+                    <div className="quiz-modal-card">
+                        
                         {/* Header */}
-                        <div className="p-8 border-b border-[var(--glass-border)] flex items-center justify-between bg-[var(--bg-subtle)]">
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-indigo-500/10 rounded-xl text-indigo-500">
+                        <div className="quiz-modal-header">
+                            <div className="quiz-modal-header-left">
+                                <div className="quiz-modal-icon">
                                     <HelpCircle size={24} />
                                 </div>
-                                <div>
-                                    <h3 className="text-2xl font-black text-[var(--text-primary)] uppercase tracking-tight">{activeQuiz.title}</h3>
-                                    <p className="text-xs text-[var(--text-secondary)] font-bold uppercase tracking-widest mt-1">Assessment Session • {activeQuiz.questions.length} Questions</p>
+                                <div className="quiz-modal-title-box">
+                                    <h3>{activeQuiz.title || 'Course Assessment'}</h3>
+                                    <div className="quiz-modal-subtitle">
+                                        <div className="quiz-pulse-dot"></div>
+                                        <p>Assessment Session • {activeQuiz.questions.length} Questions</p>
+                                    </div>
                                 </div>
                             </div>
-                            <button onClick={() => setShowQuizModal(false)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors p-2 hover:bg-[var(--bg-deep)] rounded-full">
-                                <X size={24} />
+                            <button 
+                                onClick={() => setShowQuizModal(false)} 
+                                className="quiz-modal-close-btn"
+                            >
+                                <X size={20} />
                             </button>
                         </div>
 
                         {/* Content */}
-                        <div className="p-10 overflow-y-auto custom-scrollbar flex-1 bg-[var(--bg-deep)]">
+                        <div className="quiz-modal-body custom-scrollbar">
                             {!quizResult ? (
-                                <div className="space-y-10 max-w-3xl mx-auto">
+                                <div className="quiz-questions-list">
                                     {activeQuiz.questions.map((q, idx) => (
-                                        <div key={q.id} className="quiz-question group">
-                                            <div className="flex gap-6">
-                                                <div className="text-indigo-500/20 font-black text-4xl leading-none select-none group-hover:text-indigo-500 transition-colors">
+                                        <div key={q.id} className="quiz-question-card">
+                                            <div className="quiz-question-inner">
+                                                <div className="quiz-question-number">
                                                     {String(idx + 1).padStart(2, '0')}
                                                 </div>
-                                                <div className="flex-1 pt-2">
-                                                    <p className="text-xl font-bold text-[var(--text-primary)] mb-6 leading-relaxed">{q.questionText}</p>
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                        {q.options && q.options.split(',').map((opt, optIdx) => (
-                                                            <label key={optIdx} className={`flex items-center gap-4 p-5 rounded-xl border transition-all cursor-pointer relative overflow-hidden ${userAnswers[q.id] === opt.trim() ? 'bg-indigo-600 text-white border-indigo-500 shadow-xl' : 'bg-[var(--bg-card)] border-[var(--glass-border)] hover:border-[var(--text-muted)] text-[var(--text-primary)]'}`}>
-                                                                <input
-                                                                    type="radio"
-                                                                    name={`q-${q.id}`}
-                                                                    value={opt.trim()}
-                                                                    checked={userAnswers[q.id] === opt.trim()}
-                                                                    onChange={() => handleAnswerChange(q.id, opt.trim())}
-                                                                    className="hidden"
-                                                                />
-                                                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 ${userAnswers[q.id] === opt.trim() ? 'border-white' : 'border-[var(--text-muted)]'}`}>
-                                                                    {userAnswers[q.id] === opt.trim() && <div className="w-2.5 h-2.5 bg-white rounded-full" />}
-                                                                </div>
-                                                                <span className="text-sm font-bold tracking-wide">{opt.trim()}</span>
-                                                            </label>
-                                                        ))}
+                                                <div className="quiz-question-details">
+                                                    <p className="quiz-question-text">{q.questionText}</p>
+                                                    <div className="quiz-options-grid">
+                                                        {parseQuizOptions(q.options).map((opt, optIdx) => {
+                                                            const isSelected = normalizeAnswer(userAnswers[q.id]) === normalizeAnswer(opt);
+                                                            return (
+                                                                <label key={optIdx} className={`quiz-option-label ${isSelected ? 'selected' : ''}`}>
+                                                                    <div className="quiz-radio-wrapper">
+                                                                        <input
+                                                                            type="radio"
+                                                                            name={`q-${q.id}`}
+                                                                            value={opt}
+                                                                            checked={isSelected}
+                                                                            onChange={() => handleAnswerChange(q.id, opt)}
+                                                                            className="quiz-radio-input"
+                                                                        />
+                                                                        <div className={`quiz-radio-custom ${isSelected ? 'selected' : ''}`}>
+                                                                            {isSelected && <div className="quiz-radio-dot" />}
+                                                                        </div>
+                                                                    </div>
+                                                                    <span className="quiz-option-text">{opt}</span>
+                                                                </label>
+                                                            );
+                                                        })}
                                                     </div>
                                                 </div>
                                             </div>
@@ -513,47 +580,62 @@ const StudentCourseDetails = () => {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="flex flex-col items-center justify-center h-full text-center py-10">
-                                    <div className="mb-8 p-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 shadow-[0_0_100px_rgba(99,102,241,0.5)] animate-fade-in-up">
-                                        <Award size={80} className="text-white" />
+                                <div className="quiz-result-view">
+                                    <div className="quiz-result-icon-wrapper">
+                                        <div className="quiz-result-icon-glow"></div>
+                                        <div className="quiz-result-icon">
+                                            {quizResult.percentage >= 70 ? (
+                                                <Award size={80} className="quiz-icon-success" />
+                                            ) : (
+                                                <HelpCircle size={80} className="quiz-icon-failure" />
+                                            )}
+                                        </div>
                                     </div>
-                                    <h2 className="text-5xl font-black text-white mb-4 uppercase tracking-tighter">Assessment Complete</h2>
-                                    <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 mb-8 tracking-tighter">
-                                        {quizResult.score}<span className="text-4xl text-gray-600 px-4">/</span>{quizResult.total}
+                                    
+                                    <h2 className="quiz-result-title">Assessment Complete</h2>
+                                    
+                                    <div className="quiz-score-display">
+                                        <span className="quiz-score-value">{quizResult.score}</span>
+                                        <span className="quiz-score-total">/ {quizResult.total}</span>
                                     </div>
-                                    <div className="w-64 h-2 bg-gray-800 rounded-full mb-8 overflow-hidden">
+                                    
+                                    <div className="quiz-progress-bar">
                                         <div
-                                            className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-1000"
+                                            className={`quiz-progress-fill ${quizResult.percentage >= 70 ? 'success' : 'warning'}`}
                                             style={{ width: `${quizResult.percentage}%` }}
                                         />
                                     </div>
-                                    <p className="text-[var(--text-secondary)] font-medium max-w-md mx-auto leading-relaxed text-lg">
-                                        You have successfully validated your knowledge for this course module.
-                                        {quizResult.percentage >= 70 ? ' Outstanding performance!' : ' Review the materials and try again.'}
+                                    
+                                    <p className="quiz-result-message">
+                                        {quizResult.percentage >= 70 
+                                            ? 'Excellent work! You have successfully validated your knowledge for this course module.' 
+                                            : 'Keep practicing! Review the materials and try again to improve your score.'}
                                     </p>
                                 </div>
                             )}
                         </div>
 
                         {/* Footer */}
-                        <div className="p-8 border-t border-[var(--glass-border)] bg-[var(--bg-card)] flex justify-end">
+                        <div className="quiz-modal-footer">
                             {!quizResult ? (
                                 <button
                                     onClick={handleSubmitQuiz}
-                                    className="btn-primary !px-10 !py-4"
                                     disabled={Object.keys(userAnswers).length !== activeQuiz.questions.length}
+                                    className="quiz-submit-btn"
                                 >
-                                    Submit Answers
+                                    <span>Submit Answers</span>
+                                    {Object.keys(userAnswers).length === activeQuiz.questions.length && <CheckCircle size={18} />}
                                 </button>
                             ) : (
                                 <button
                                     onClick={() => setShowQuizModal(false)}
-                                    className="px-8 py-4 rounded-xl border border-[var(--glass-border)] text-[var(--text-primary)] font-bold text-xs uppercase tracking-widest hover:bg-[var(--glass-bg-hover)] transition-colors"
+                                    className="quiz-close-btn"
                                 >
                                     Close Assessment
                                 </button>
                             )}
                         </div>
+                        
                     </div>
                 </div>,
                 document.body

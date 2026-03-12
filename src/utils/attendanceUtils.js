@@ -3,7 +3,7 @@
 // must import from here so percentages always match.
 
 /** The official semester start date. Change ONLY here — both pages update. */
-export const SEMESTER_START_DATE = new Date('2026-02-12');
+export const SEMESTER_START_DATE = new Date('2026-03-09');
 
 /**
  * Count working days (Mon–Sat, excluding Sundays) between two dates inclusive.

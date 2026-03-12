@@ -1,0 +1,448 @@
+/* StudentAttendanceAnalytics.css */
+
+.saa-page {
+    padding: 28px;
+    max-width: 1200px;
+    margin: 0 auto;
+    animation: fadeInUp 0.4s ease;
+}
+
+/* ── Header ── */
+.saa-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.saa-header h1 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.saa-subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.saa-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* ── Trend badge ── */
+.saa-trend-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 24px;
+    border: 2px solid;
+    font-weight: 700;
+    font-size: 0.9rem;
+    background: var(--bg-card);
+    white-space: nowrap;
+}
+
+/* ── Live indicator ── */
+.saa-live-strip {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border-radius: 20px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    white-space: nowrap;
+}
+
+.saa-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    animation: pulse-ring 1.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+    flex-shrink: 0;
+}
+
+.saa-live-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #10b981;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.saa-live-countdown {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+/* ── Refresh button ── */
+.saa-refresh-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-family: var(--font-main);
+    white-space: nowrap;
+}
+
+.saa-refresh-btn:hover:not(:disabled) {
+    background: rgba(99, 102, 241, 0.08);
+    border-color: rgba(99, 102, 241, 0.3);
+    color: #818cf8;
+}
+
+.saa-refresh-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.saa-refresh-btn.spinning svg {
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+/* ── Last updated bar ── */
+.saa-last-updated {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    padding: 8px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.saa-last-updated strong {
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+
+
+
+/* ── Summary Stats Strip ── */
+.saa-stats-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.saa-stat-box {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.saa-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.saa-stat-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.saa-stat-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* ── Risk Warning Banner ── */
+.saa-risk-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 12px;
+    color: #ef4444;
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+}
+
+/* ── Section Title ── */
+.saa-section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+}
+
+/* ── Subjects Grid ── */
+.saa-subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+/* Subject Card */
+.subj-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--glass-border);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.subj-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+.subj-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.subj-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+    max-width: 140px;
+}
+
+.subj-code {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.subj-ring-wrap svg { display: block; }
+
+.subj-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.subj-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.subj-stat-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.subj-stat-val {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.subj-progress-bar {
+    height: 6px;
+    background: var(--glass-border);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.subj-progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+}
+
+.subj-risk-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #ef4444;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 10px;
+    padding: 4px 8px;
+    background: rgba(239, 68, 68, 0.08);
+    border-radius: 6px;
+    width: fit-content;
+}
+
+/* ── Classes needed tip ── */
+.subj-need-tip {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+    font-style: italic;
+}
+
+/* ── Bottom Row ── */
+.saa-bottom-row {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 20px;
+}
+
+.saa-chart-card,
+.saa-pred-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--glass-border);
+}
+
+.saa-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.saa-card-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+}
+
+/* Chart Legend */
+.chart-legend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.legend-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+/* ── Prediction list ── */
+.pred-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.pred-item {
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+}
+
+.pred-subject {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.pred-values {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    flex-wrap: wrap;
+}
+
+.pred-current { color: var(--text-muted); }
+.pred-arrow { color: var(--text-muted); font-weight: 700; }
+.pred-final { font-weight: 700; }
+
+.pred-risk-tag {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+/* ── Empty State ── */
+.saa-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 48px 24px;
+    text-align: center;
+    background: var(--bg-card);
+    border: 1px dashed var(--glass-border);
+    border-radius: 16px;
+    margin-bottom: 24px;
+}
+
+.saa-empty-state p {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.saa-empty-state span {
+    font-size: 0.83rem;
+    color: var(--text-muted);
+    max-width: 380px;
+    line-height: 1.5;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .saa-bottom-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .saa-page { padding: 14px; }
+    .saa-subjects-grid { grid-template-columns: 1fr; }
+    .saa-header h1 { font-size: 1.35rem; }
+    .saa-stats-strip { grid-template-columns: repeat(2, 1fr); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+}

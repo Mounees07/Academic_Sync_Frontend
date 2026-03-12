@@ -117,22 +117,6 @@ const HODDashboard = () => {
 
     return (
         <div className="hod-dashboard-container">
-            {/* Top Navigation Layout */}
-            <header className="hod-top-nav">
-                <div className="search-bar-container">
-                    <Search size={18} className="search-icon" />
-                    <input type="text" placeholder="Search students, faculty, or courses..." className="hod-search-input" />
-                </div>
-                <div className="nav-actions">
-                    <button className="icon-btn"><Bell size={18} /></button>
-                    <button className="icon-btn"><MessageSquare size={18} /></button>
-                    <button className="primary-btn new-meeting-btn">
-                        <Plus size={16} /> New Meeting
-                    </button>
-                </div>
-            </header>
-
-            {/* Page Title & Semester Dropdown */}
             <div className="hod-page-header">
                 <div className="title-section">
                     <h1>Department Overview</h1>

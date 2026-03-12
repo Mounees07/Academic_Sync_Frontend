@@ -593,9 +593,7 @@
     transform-style: preserve-3d;
 }
 
-.dashboard-flip-card:hover .dashboard-flip-card-inner {
-    transform: rotateY(180deg);
-}
+/* .dashboard-flip-card:hover .dashboard-flip-card-inner removed to disable flip */
 
 .dashboard-flip-card-front,
 .dashboard-flip-card-back {

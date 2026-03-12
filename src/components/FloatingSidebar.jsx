@@ -26,10 +26,10 @@ const FloatingSidebar = ({ isOpen, setIsOpen }) => {
 
     const studentLinks = [
         { to: '/dashboard', icon: <LayoutDashboard size={22} />, label: 'Overview' },
-        { to: '/student/academic', icon: <BookOpen size={22} />, label: 'Academic' },
-        { to: '/student/leaves', icon: <FileText size={22} />, label: 'Leave' },
-        { to: '/attendance', icon: <UserCheck size={22} />, label: 'Attendance' },
-        { to: '/academic-calendar', icon: <Calendar size={22} />, label: 'Calendar' },
+               { to: '/student/academic', icon: <BookOpen size={22} />, label: 'Academic' },
+               { to: '/attendance', icon: <UserCheck size={22} />, label: 'Attendance' },
+               { to: '/student/leaves', icon: <FileText size={22} />, label: 'Leave Status' },
+               { to: '/academic-calendar', icon: <Calendar size={22} />, label: 'Academic Calendar' },
     ];
 
     const teacherLinks = [
@@ -67,7 +67,7 @@ const FloatingSidebar = ({ isOpen, setIsOpen }) => {
         { to: '/admin/reports', icon: <FileText size={22} />, label: 'Reports' },
         { to: '/admin/settings', icon: <Settings size={22} />, label: 'Settings' },
     ];
-
+ 
     const coeLinks = [
         { to: '/dashboard', icon: <LayoutDashboard size={22} />, label: 'Dashboard' },
         { to: '/coe/schedule-exams', icon: <Calendar size={22} />, label: 'Exams' },
