@@ -9,6 +9,8 @@
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
 }
 
 .header-content h1 {
@@ -27,6 +29,7 @@
     display: flex;
     gap: 12px;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .btn {

@@ -490,8 +490,8 @@ const TeacherCourseManage = () => {
                         {sectionDetails?.course?.name}
                     </h1>
                     <div className="banner-stats">
-                        <div className="stat-item"><Users size={16} style={{ color: 'var(--primary)' }} /><span>Instructor <b className="stat-value">{sectionDetails?.faculty?.fullName}</b></span></div>
-                        <div className="stat-item"><Clock size={16} style={{ color: 'var(--primary)' }} /><span>Difficulty: <b className="stat-value">{sectionDetails?.course?.difficultyLevel || 'Standard'}</b></span></div>
+                        <div className="stat-item"><Users size={16} style={{ color: 'var(--primary)' }} /><span>Instructor <b className="stat-value" style={{ color: '#eef2ff' }}>{sectionDetails?.faculty?.fullName}</b></span></div>
+                        <div className="stat-item"><Clock size={16} style={{ color: 'var(--primary)' }} /><span>Difficulty: <b className="stat-value" style={{ color: '#eef2ff' }}>{sectionDetails?.course?.difficultyLevel || 'Standard'}</b></span></div>
                     </div>
 
                     <div className="banner-actions">
@@ -634,7 +634,7 @@ const TeacherCourseManage = () => {
                     {(userData?.role === 'TEACHER' || userData?.role === 'ADMIN' || userData?.role === 'MENTOR') && (
                         <form onSubmit={handleAddLesson} className="lesson-form">
                             <span className="form-label-mini">New Lesson Title</span><input className="premium-input" placeholder="Instructional Title" value={newLesson.title} onChange={(e) => setNewLesson({ ...newLesson, title: e.target.value })} required />
-                            <div className="flex gap-4 mb-4"><div className="flex-1"><span className="form-label-mini">Media Type</span><select className="premium-input" value={newLesson.contentType} onChange={(e) => setNewLesson({ ...newLesson, contentType: e.target.value })}><option value="VIDEO">Video</option><option value="PDF">PDF Document</option><option value="DOC">Document</option></select></div></div>
+                            <div className="flex flex-wrap gap-4 mb-4"><div className="flex-1 min-w-[140px]"><span className="form-label-mini">Media Type</span><select className="premium-input" value={newLesson.contentType} onChange={(e) => setNewLesson({ ...newLesson, contentType: e.target.value })}><option value="VIDEO">Video</option><option value="PDF">PDF Document</option><option value="DOC">Document</option></select></div></div>
                             <span className="form-label-mini">Resource URL</span><input className="premium-input" placeholder="Vimeo/Drive/PDF URL" value={newLesson.contentUrl} onChange={(e) => setNewLesson({ ...newLesson, contentUrl: e.target.value })} required />
                             <button type="submit" className="btn-publish" disabled={isSubmitting}>{isSubmitting ? 'Publishing...' : 'Add Lesson'}</button>
                         </form>
@@ -660,12 +660,12 @@ const TeacherCourseManage = () => {
                             <span className="form-label-mini">Description</span>
                             <textarea className="premium-input" style={{ minHeight: '80px', resize: 'vertical' }} placeholder="Instructions..." value={newAssignment.description} onChange={(e) => setNewAssignment({ ...newAssignment, description: e.target.value })} />
 
-                            <div className="flex gap-4">
-                                <div className="flex-1">
+                            <div className="flex flex-wrap gap-4">
+                                <div className="flex-1 min-w-[140px]">
                                     <span className="form-label-mini">Due Date</span>
                                     <input type="datetime-local" className="premium-input" value={newAssignment.dueDate} onChange={(e) => setNewAssignment({ ...newAssignment, dueDate: e.target.value })} required />
                                 </div>
-                                <div className="flex-1">
+                                <div className="flex-1 min-w-[140px]">
                                     <span className="form-label-mini">Max Points</span>
                                     <input type="number" className="premium-input" value={newAssignment.maxPoints} onChange={(e) => setNewAssignment({ ...newAssignment, maxPoints: e.target.value })} required />
                                 </div>
@@ -699,7 +699,7 @@ const TeacherCourseManage = () => {
                 <h3 className="card-title" style={{ marginBottom: '2.5rem' }}>Academic Performance Results</h3>
                 <div className="overflow-x-auto">
                     {submissions.length === 0 ? (
-                        <div className="text-center py-20 rounded-3xl border border-dashed" style={{ background: 'var(--bg-subtle)', borderColor: 'var(--glass-border)' }}><Award size={48} className="mx-auto mb-4" style={{ color: 'var(--primary)', opacity: 0.5 }} /><p className="font-bold text-xs uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Data will synchronize once students submit assignments</p></div>
+                        <div className="text-center w-full py-20 rounded-3xl border border-dashed" style={{ background: 'var(--bg-subtle)', borderColor: 'var(--glass-border)' }}><Award size={48} className="mx-auto mb-4" style={{ color: 'var(--primary)', opacity: 0.5 }} /><p className="font-bold text-xs uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Data will synchronize once students submit assignments</p></div>
                     ) : (
                         <table className="premium-table">
                             <thead>

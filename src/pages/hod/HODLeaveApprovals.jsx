@@ -74,20 +74,20 @@ const HODLeaveApprovals = () => {
                         Review and approve leave requests from your department faculty
                     </p>
                 </div>
-                <div className="fl-workflow-banner" style={{ margin: 0, padding: '10px 16px' }}>
-                    <div className="fl-wf-step done">
+                <div className="fl-workflow-banner" style={{ margin: 0, padding: '10px 16px', flexWrap: 'wrap' }}>
+                    <div className="fl-wf-step done" style={{ flexWrap: 'wrap', textAlign: 'center' }}>
                         <div className="fl-wf-dot" style={{ background: '#e0e7ff', color: '#6366f1' }}>1</div>
-                        <span>Faculty Applies</span>
+                        <span style={{ whiteSpace: 'nowrap' }}>Faculty Applies</span>
                     </div>
                     <span style={{ color: 'var(--text-muted)', fontSize: 14 }}>›</span>
-                    <div className="fl-wf-step active">
+                    <div className="fl-wf-step active" style={{ flexWrap: 'wrap', textAlign: 'center' }}>
                         <div className="fl-wf-dot">2</div>
-                        <span>HOD Reviews (You)</span>
+                        <span style={{ whiteSpace: 'nowrap' }}>HOD Reviews (You)</span>
                     </div>
                     <span style={{ color: 'var(--text-muted)', fontSize: 14 }}>›</span>
-                    <div className="fl-wf-step">
+                    <div className="fl-wf-step" style={{ flexWrap: 'wrap', textAlign: 'center' }}>
                         <div className="fl-wf-dot">3</div>
-                        <span>Admin Final</span>
+                        <span style={{ whiteSpace: 'nowrap' }}>Admin Final</span>
                     </div>
                 </div>
             </div>
@@ -102,7 +102,7 @@ const HODLeaveApprovals = () => {
             </div>
 
             {/* Stats */}
-            <div className="fl-stats-row" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+            <div className="fl-stats-row" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
                 <div className="fl-stat-card">
                     <div className="fl-stat-icon" style={{ color: '#f59e0b' }}><Clock size={18} /></div>
                     <div>

@@ -308,7 +308,8 @@ const DashboardOverview = () => {
                                 <div style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-primary)', marginTop: '4px' }}>{dashboardStats.sgpa}</div>
                             </div>
                             <div style={{ width: '120px', height: '50px' }}>
-                                <BarChart width={120} height={50} data={sgpaHistory} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+                                {sgpaHistory && sgpaHistory.length > 0 && (
+                                    <BarChart width={120} height={50} data={sgpaHistory} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
                                     <YAxis hide domain={[0, 10]} />
                                     <Tooltip
                                         cursor={{ fill: 'transparent' }}
@@ -325,7 +326,8 @@ const DashboardOverview = () => {
                                             />
                                         ))}
                                     </Bar>
-                                </BarChart>
+                                    </BarChart>
+                                )}
                             </div>
                         </div>
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>

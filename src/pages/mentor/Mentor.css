@@ -178,9 +178,16 @@
     display: grid;
     grid-template-columns: 2fr 1.1fr;
     gap: 1.5rem;
+    min-width: 0;
 }
 
-@media (max-width: 100%) {
+.mw-main,
+.mw-sidebar {
+    min-width: 0;
+    max-width: 100%;
+}
+
+@media (max-width: 1024px) {
     .mw-grid {
         grid-template-columns: 1fr;
     }
@@ -206,6 +213,8 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
 }
 
 [data-theme='dark'] .mw-card {
@@ -363,12 +372,8 @@
     display: flex;
     gap: 0.5rem;
     margin-bottom: 1.25rem;
-    overflow-x: auto;
     padding-bottom: 4px;
-}
-
-.mw-filters::-webkit-scrollbar {
-    height: 4px;
+    flex-wrap: wrap;
 }
 
 .mw-filters::-webkit-scrollbar-thumb {
@@ -576,6 +581,8 @@
     border-radius: 12px;
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    word-break: break-word;
 }
 
 [data-theme='dark'] .mw-summary-item {
@@ -589,6 +596,7 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 0.5rem;
+    word-break: break-word;
 }
 
 .sum-value {
@@ -616,7 +624,7 @@
 /* kanban columns */
 .mw-kanban {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(var(--kanban-cols, 3), 1fr);
     gap: 0.75rem;
 }
 
@@ -1235,6 +1243,7 @@
     overflow-x: auto;
     flex: 1;
     padding-bottom: 1rem;
+    min-width: 0;
 }
 
 .kanban-board-col {
@@ -2338,6 +2347,12 @@
     }
 }
 
+@media (max-width: 1024px) {
+    .mw-kanban {
+        --kanban-cols: 1;
+    }
+}
+
 /* ============================================================
    RESPONSIVE — BOARD (≤ 900px)
    ============================================================ */
@@ -2504,6 +2519,9 @@
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         padding-bottom: 6px;
+        min-width: 0;
+        max-width: 100%;
+        width: 100%;
     }
 
     .mw-filter-btn {
@@ -2608,6 +2626,7 @@
         border-radius: 16px 16px 0 0;
         max-height: 90vh;
         overflow-y: auto;
+        box-sizing: border-box;
     }
 
     /* Mentee detail view full width */
@@ -2619,5 +2638,193 @@
 
     .detail-stat-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* MENTEE DETAILS VIEW */
+.mentee-details-view {
+    padding: 0;
+    margin-top: 16px;
+}
+
+.mentee-profile-card {
+    margin-bottom: 24px;
+    padding: 24px 32px;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+}
+
+.profile-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    min-width: 0;
+}
+
+.profile-main-info {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    min-width: 0;
+    flex: 1;
+}
+
+.profile-name-section {
+    min-width: 0;
+}
+
+.profile-name-section h2 {
+    font-size: 1.6rem;
+    margin: 0;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    font-weight: 800;
+}
+
+.profile-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    flex-wrap: wrap;
+}
+
+.profile-actions-flex {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.student-info-grid {
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.info-item-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    font-weight: bold;
+}
+
+.info-item-value {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+@media (max-width: 640px) {
+    .mentee-profile-card {
+        padding: 1.5rem;
+    }
+    .profile-header-flex {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .profile-main-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .profile-name-section h2 {
+        font-size: 1.25rem;
+    }
+    .profile-actions-flex {
+        width: 100%;
+        margin-top: 1rem;
+    }
+    .profile-actions-flex button {
+        flex: 1;
+        justify-content: center;
+        min-width: 120px;
+    }
+    .student-info-grid {
+        grid-template-columns: 1fr;
+        padding: 1.25rem;
+        gap: 1rem;
+    }
+    .mw-summary-grid {
+        grid-template-columns: 1fr;
+    }
+    .snapshot-grid {
+        grid-template-columns: 1fr;
+        padding: 0 1.25rem 1.25rem;
+        gap: 0.75rem;
+    }
+}
+
+/* OTP Display Panel */
+.otp-attendance-layout {
+    display: flex;
+    gap: 24px;
+    align-items: stretch;
+}
+
+.otp-control-panel {
+    flex: 1;
+    background-color: #ffffff;
+    padding: 32px;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.otp-participants-panel {
+    width: 420px;
+    background-color: #f8fafc;
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+}
+
+[data-theme='dark'] .otp-control-panel,
+[data-theme='dark'] .otp-participants-panel {
+    background-color: var(--bg-secondary);
+    border-color: var(--glass-border);
+}
+
+.profile-main-info {
+    flex-wrap: wrap;
+}
+
+.profile-name-section h2 {
+    word-break: break-word;
+}
+
+@media (max-width: 1024px) {
+    .otp-attendance-layout {
+        flex-direction: column;
+    }
+    .otp-participants-panel {
+        width: 100%;
+        max-width: 100vw;
+    }
+    .otp-control-panel {
+        padding: 20px;
+    }
+    .student-info-grid {
+        grid-template-columns: 1fr !important;
+        padding: 1.25rem;
+        gap: 1rem;
+    }
+    .info-item-value {
+        word-break: break-all;
     }
 }

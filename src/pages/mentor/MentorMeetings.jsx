@@ -158,7 +158,16 @@ const MentorMeetings = () => {
                     <div className="empty-state">
                         <Calendar size={48} style={{ opacity: 0.2, margin: '20px auto' }} />
                         <p>No upcoming meetings found.</p>
-                        <button className="btn-text" onClick={handleCreate}>Schedule your first meeting</button>
+                        <button className="btn-text" style={{ 
+                            background: 'var(--primary, #6366f1)', 
+                            color: 'white', 
+                            padding: '8px 16px', 
+                            borderRadius: '8px', 
+                            border: 'none', 
+                            fontWeight: '700', 
+                            cursor: 'pointer',
+                            marginTop: '12px'
+                        }} onClick={handleCreate}>Schedule your first meeting</button>
                     </div>
                 ) : meetings.map(meeting => {
                     const isOrganizer = meeting.mentor && meeting.mentor.firebaseUid === currentUser.uid;

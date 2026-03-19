@@ -945,9 +945,9 @@ const MentorDashboard = () => {
                 </div>
 
                 {attendanceMode === 'otp' ? (
-                    <div className="otp-attendance-layout" style={{ display: 'flex', gap: '24px', alignItems: 'stretch' }}>
+                    <div className="otp-attendance-layout">
                         {/* LEFT COLUMN: OTP GENERATION / DISPLAY */}
-                        <div className="otp-control-panel" style={{ flex: '1', backgroundColor: '#ffffff', padding: '32px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
+                        <div className="otp-control-panel">
                             {selectedDate !== new Date().toISOString().split('T')[0] ? (
                                 /* ── Past date: read-only historical notice ── */
                                 <div style={{ textAlign: 'center', margin: '40px auto', maxWidth: '360px' }}>
@@ -1010,7 +1010,7 @@ const MentorDashboard = () => {
                         </div>
 
                         {/* RIGHT COLUMN: RECENTLY VERIFIED CARDS */}
-                        <div className="otp-participants-panel" style={{ width: '420px', backgroundColor: '#f8fafc', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column' }}>
+                        <div className="otp-participants-panel">
                             <h4 style={{ margin: '0 0 20px 0', color: '#1e293b', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <Users size={18} className="text-indigo-500" />
                                 {selectedDate === new Date().toISOString().split('T')[0]
@@ -1475,23 +1475,23 @@ const MentorDashboard = () => {
         }
 
         return (
-            <div className="mentee-details-view animate-fade-in" style={{ padding: '0 0px', marginTop: '16px' }}>
-                <div className="mw-card" style={{ marginBottom: '24px', padding: '24px 32px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '24px' }}>
-                        <span style={{ cursor: 'pointer', color: 'var(--primary)' }} onClick={() => setIsViewingMenteeDetails(false)}>My Mentees</span>
+            <div className="mentee-details-view animate-fade-in">
+                <div className="mw-card mentee-profile-card">
+                    <div className="breadcrumb">
+                        <span onClick={() => setIsViewingMenteeDetails(false)}>My Mentees</span>
                         <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>&gt;</span>
-                        <span style={{ color: 'var(--text-primary)', fontWeight: '500' }}>{selectedMentee.fullName || 'Student'}</span>
+                        <span className="current-mentee">{selectedMentee.fullName || 'Student'}</span>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                    <div className="profile-header-flex">
+                        <div className="profile-main-info">
                             <div className={`mentee-avatar bg-indigo`} style={{ width: '72px', height: '72px', fontSize: '2.2rem', borderRadius: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', flexShrink: 0 }}>
                                 {getInitials(selectedMentee.fullName)}
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <h2 style={{ fontSize: '1.6rem', margin: '0', textTransform: 'uppercase', color: 'var(--text-primary)', fontWeight: '800' }}>{selectedMentee.fullName || 'Unknown Student'}</h2>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '500' }}>
+                            <div className="profile-name-section">
+                                <h2>{selectedMentee.fullName || 'Unknown Student'}</h2>
+                                <div className="profile-meta-row">
                                     <span>{sem} {dept}</span>
                                     <span>&middot;</span>
                                     <span>Roll: {rollNo}</span>
@@ -1501,7 +1501,7 @@ const MentorDashboard = () => {
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        <div className="profile-actions-flex">
                             <button className="mw-text-btn" style={{ background: 'transparent', border: '1px solid var(--glass-border)', padding: '8px 12px', borderRadius: '8px', color: 'var(--text-primary)', fontWeight: '600', display: 'flex', alignItems: 'center', fontSize: '0.9rem' }} onClick={() => {
                                 setEditMenteeData({
                                     rollNumber: selectedMentee.rollNumber || '',
@@ -1530,30 +1530,30 @@ const MentorDashboard = () => {
                                 </div>
                                 <button className="mw-text-btn">View full records</button>
                             </div>
-                            <div style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                            <div className="student-info-grid">
                                 <div>
-                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', fontWeight: 'bold' }}>Email Address</div>
-                                    <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: '500' }}>{selectedMentee.email || 'Not provided'}</div>
+                                    <div className="info-item-label">Email Address</div>
+                                    <div className="info-item-value">{selectedMentee.email || 'Not provided'}</div>
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', fontWeight: 'bold' }}>Phone Number</div>
-                                    <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: '500' }}>{selectedMentee.mobileNumber || 'Not provided'}</div>
+                                    <div className="info-item-label">Phone Number</div>
+                                    <div className="info-item-value">{selectedMentee.mobileNumber || 'Not provided'}</div>
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', fontWeight: 'bold' }}>Parent Contact</div>
-                                    <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: '500' }}>{selectedMentee.parentContact || 'Not provided'} {selectedMentee.fatherName ? `(${selectedMentee.fatherName})` : ''}</div>
+                                    <div className="info-item-label">Parent Contact</div>
+                                    <div className="info-item-value">{selectedMentee.parentContact || 'Not provided'} {selectedMentee.fatherName ? `(${selectedMentee.fatherName})` : ''}</div>
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', fontWeight: 'bold' }}>Accommodation</div>
-                                    <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: '500' }}>{selectedMentee.hostellerDayScholar === 'Hosteller' ? `${selectedMentee.hostelName || 'Hostel'} (Room ${selectedMentee.hostelRoomNo || 'N/A'})` : (selectedMentee.hostellerDayScholar || 'Not provided')}</div>
+                                    <div className="info-item-label">Accommodation</div>
+                                    <div className="info-item-value">{selectedMentee.hostellerDayScholar === 'Hosteller' ? `${selectedMentee.hostelName || 'Hostel'} (Room ${selectedMentee.hostelRoomNo || 'N/A'})` : (selectedMentee.hostellerDayScholar || 'Not provided')}</div>
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', fontWeight: 'bold' }}>Date of Birth</div>
-                                    <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: '500' }}>{selectedMentee.dob || selectedMentee.studentDetails?.dob || 'Not provided'}</div>
+                                    <div className="info-item-label">Date of Birth</div>
+                                    <div className="info-item-value">{selectedMentee.dob || selectedMentee.studentDetails?.dob || 'Not provided'}</div>
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', fontWeight: 'bold' }}>Mentoring Batch</div>
-                                    <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: '500' }}>{selectedMentee.batch || 'Not provided'}</div>
+                                    <div className="info-item-label">Mentoring Batch</div>
+                                    <div className="info-item-value">{selectedMentee.batch || 'Not provided'}</div>
                                 </div>
                             </div>
                         </div>
@@ -1605,7 +1605,7 @@ const MentorDashboard = () => {
                                 <h2 style={{ color: 'var(--text-primary)' }}>Academic Snapshot</h2>
                                 <p>Current semester performance</p>
                             </div>
-                            <div style={{ padding: '0 24px 24px 24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                            <div className="snapshot-grid">
                                 <div className="dashed-box" style={{ padding: '16px', borderRadius: '8px', border: '1px dashed var(--glass-border)' }}>
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Current CGPA</div>
                                     <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{gpa || 'N/A'}</div>

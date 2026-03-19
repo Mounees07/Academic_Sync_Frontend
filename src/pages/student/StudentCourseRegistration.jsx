@@ -208,16 +208,17 @@ const StudentCourseRegistration = () => {
                                         {/* End Point (Selection) */}
                                         <div className="route-point">
                                             <div className="rp-icon"></div>
-                                            <div className="rp-details">
+                                            <div className="rp-details" style={{ minWidth: 0, flex: 1, paddingRight: '8px' }}>
                                                 <div className="rp-title">Assigned Faculty</div>
                                                 {isEnrolled && locked ? (
-                                                    <div className="rp-sub font-bold text-gray-800">
+                                                    <div className="rp-sub font-bold text-gray-800" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                         {group.sections.find(s => s.id === enrollment.sectionId)?.faculty?.fullName || enrollment.facultyName}
                                                     </div>
                                                 ) : (
-                                                    <div className="selection-area">
+                                                    <div className="selection-area" style={{ width: '100%' }}>
                                                         <select
                                                             className="custom-select"
+                                                            style={{ textOverflow: 'ellipsis', maxWidth: '100%' }}
                                                             value={selectedSections[course.id] || (isEnrolled ? enrollment.sectionId : "")}
                                                             onChange={(e) => {
                                                                 setSelectedSections({

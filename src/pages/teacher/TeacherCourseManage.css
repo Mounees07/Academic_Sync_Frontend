@@ -1,5 +1,9 @@
 /* TeacherCourseManage.css */
 
+.teacher-manage-container * {
+    box-sizing: border-box;
+}
+
 .teacher-manage-container {
     padding: 2rem;
     max-width: 100%;
@@ -7,6 +11,12 @@
     background: var(--bg-deep);
     min-height: 100vh;
     color: var(--text-primary);
+}
+
+@media (max-width: 640px) {
+    .teacher-manage-container {
+        padding: 1rem;
+    }
 }
 
 .back-btn {
@@ -38,6 +48,14 @@
     flex-direction: column;
     gap: 3rem;
     box-shadow: var(--shadow-subtle);
+}
+
+@media (max-width: 640px) {
+    .manage-banner {
+        padding: 1.5rem;
+        gap: 1.5rem;
+        border-radius: 20px;
+    }
 }
 
 @media (min-width: 1024px) {
@@ -93,6 +111,12 @@
     text-transform: uppercase;
     letter-spacing: -0.05em;
     color: var(--text-primary);
+}
+
+@media (max-width: 640px) {
+    .course-title-main {
+        font-size: 2rem;
+    }
 }
 
 .banner-stats {
@@ -186,6 +210,15 @@
     padding: 2.5rem;
     box-shadow: var(--shadow-subtle);
     border: 1px solid var(--glass-border);
+    min-width: 0;
+    max-width: 100%;
+}
+
+@media (max-width: 640px) {
+    .content-card {
+        padding: 1.25rem;
+        border-radius: 20px;
+    }
 }
 
 .card-header-flex {
@@ -263,6 +296,13 @@
     color: var(--text-primary);
     text-transform: uppercase;
     letter-spacing: -0.025em;
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .premium-table {
+        min-width: 500px;
+    }
 }
 
 .email-cell {
@@ -308,6 +348,8 @@
     font-size: 0.875rem;
     margin-bottom: 1rem;
     transition: all 0.3s;
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 .premium-input:focus {
@@ -326,6 +368,8 @@
     margin-bottom: 1rem;
     border: 1px solid var(--glass-border);
     cursor: pointer;
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 .select-label {
@@ -351,6 +395,8 @@
     letter-spacing: 0.1em;
     transition: all 0.3s;
     margin-top: 0.5rem;
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 .btn-publish:hover {
@@ -514,6 +560,7 @@
     padding: 2.5rem;
     margin: auto;
     animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
 }
 
 @keyframes scaleUp {
@@ -549,6 +596,8 @@
     margin-bottom: 2rem;
     transition: all 0.3s ease;
     box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 .classic-input-field:focus {
@@ -573,6 +622,8 @@
     margin-top: 1rem;
     transition: all 0.3s;
     box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 .classic-btn:hover {
@@ -1057,6 +1108,17 @@
     color: var(--text-primary);
 }
 
+@media (max-width: 640px) {
+    .otp-digits {
+        gap: 0.25rem;
+    }
+    .otp-digit {
+        width: 3rem;
+        height: 4rem;
+        font-size: 1.75rem;
+    }
+}
+
 .otp-timer {
     width: 100%;
     max-width: 300px;
@@ -1115,6 +1177,14 @@
     gap: 3rem;
     padding: 1.5rem 2rem;
     border-bottom: 1px solid var(--glass-border);
+}
+
+@media (max-width: 640px) {
+    .otp-stats-row {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
 }
 
 .otp-stat {

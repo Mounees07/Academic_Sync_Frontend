@@ -11,6 +11,12 @@
     color: var(--text-primary, #111827);
 }
 
+@media (max-width: 640px) {
+    .att-log-page {
+        padding: 1rem;
+    }
+}
+
 /* ── Page Header ── */
 .att-log-header {
     display: flex;
@@ -19,6 +25,19 @@
     margin-bottom: 2rem;
     gap: 1rem;
     flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+    .att-log-header {
+        margin-bottom: 1.5rem;
+    }
+    .att-log-title {
+        font-size: 1.25rem;
+    }
+    .att-export-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 .att-log-header-left {
@@ -101,7 +120,17 @@
     flex-direction: column;
     gap: 6px;
     flex: 1;
-    min-width: 180px;
+    min-width: 240px;
+}
+
+@media (max-width: 640px) {
+    .att-filters-row {
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+    .att-filter-group {
+        min-width: 100%;
+    }
 }
 
 .att-filter-label {
@@ -300,9 +329,13 @@
     align-items: start;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
     .att-content-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .att-left-panel, .att-right-panel {
+        width: 100%;
     }
 }
 
@@ -458,6 +491,17 @@
     letter-spacing: 0;
 }
 
+@media (max-width: 640px) {
+    .att-otp-digits {
+        gap: 6px;
+    }
+    .att-otp-digit {
+        width: 40px;
+        height: 52px;
+        font-size: 1.4rem;
+    }
+}
+
 .att-otp-timer {
     background: var(--bg-subtle, #f9fafb);
     border-radius: 12px;
@@ -555,6 +599,18 @@
     border: 1px solid var(--glass-border, #e5e7eb);
     background: var(--bg-subtle, #f9fafb);
     transition: background 0.2s;
+}
+
+@media (max-width: 640px) {
+    .att-manual-row {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+    }
+    .att-manual-status-group {
+        width: 100%;
+        justify-content: space-between;
+    }
 }
 
 .att-manual-row:hover {
@@ -795,6 +851,21 @@
     padding: 0.9rem 1.5rem;
     gap: 0.75rem;
     transition: background 0.15s;
+}
+
+@media (max-width: 640px) {
+    .att-student-row {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+        gap: 0.5rem;
+    }
+    .att-student-right {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 }
 
 .att-student-row:hover {

@@ -7,6 +7,12 @@
     min-height: calc(100vh - 80px);
     font-family: 'Inter', sans-serif;
     box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+}
+.dashboard-main-col {
+    min-width: 0;
+    max-width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -28,6 +34,8 @@
     position: relative;
     overflow: hidden;
     transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .dash-card h3 {
