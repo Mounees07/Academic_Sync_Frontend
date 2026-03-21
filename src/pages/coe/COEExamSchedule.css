@@ -1,0 +1,434 @@
+.coe-exam-page {
+    --coe-exam-ink: #eef2ff;
+    --coe-exam-muted: #94a3b8;
+    --coe-exam-line: rgba(148, 163, 184, 0.16);
+    --coe-exam-primary: #6366f1;
+    --coe-exam-primary-strong: #7c3aed;
+    --coe-exam-accent: #10b981;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 32px 0 48px;
+    color: var(--coe-exam-ink);
+    box-sizing: border-box;
+}
+
+.coe-exam-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.85fr);
+    gap: 24px;
+    align-items: stretch;
+    margin-bottom: 24px;
+}
+
+.coe-exam-kicker,
+.coe-exam-section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--coe-exam-primary);
+}
+
+.coe-exam-copy h1 {
+    margin: 10px 0 12px;
+    font-size: clamp(2rem, 3vw, 3rem);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+}
+
+.coe-exam-copy p {
+    max-width: 760px;
+    margin: 0;
+    color: var(--coe-exam-muted);
+    line-height: 1.7;
+    font-size: 1rem;
+}
+
+.coe-exam-hero-panel,
+.coe-exam-shell,
+.coe-exam-block {
+    background: rgba(17, 17, 21, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(16px);
+}
+
+.coe-exam-hero-panel {
+    border-radius: 28px;
+    padding: 24px;
+    background: linear-gradient(145deg, rgba(26, 26, 34, 0.98), rgba(18, 18, 24, 0.95));
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.coe-exam-chip {
+    width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(99, 102, 241, 0.16);
+    color: var(--coe-exam-primary);
+    font-weight: 700;
+}
+
+.coe-exam-highlights {
+    display: grid;
+    gap: 10px;
+}
+
+.coe-exam-highlights span {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(12, 12, 18, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    color: var(--coe-exam-ink);
+    font-weight: 600;
+}
+
+.coe-exam-shell {
+    border-radius: 30px;
+    padding: 28px;
+}
+
+.coe-exam-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+    gap: 18px;
+    align-items: start;
+}
+
+.coe-exam-block {
+    border-radius: 26px;
+    padding: 24px;
+    background: linear-gradient(180deg, rgba(23, 23, 29, 0.98), rgba(18, 18, 24, 0.96));
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+}
+
+.coe-exam-block h3 {
+    margin: 10px 0 8px;
+    font-size: 1.25rem;
+    letter-spacing: -0.03em;
+}
+
+.coe-exam-block p {
+    margin: 0;
+    color: var(--coe-exam-muted);
+    line-height: 1.65;
+}
+
+.coe-exam-callout {
+    margin-top: 18px;
+    padding: 18px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(79, 70, 229, 0.08));
+    border: 1px solid rgba(124, 58, 237, 0.18);
+}
+
+.coe-exam-callout strong {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.coe-exam-template-btn,
+.coe-exam-submit-btn {
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.coe-exam-template-btn:hover,
+.coe-exam-submit-btn:hover {
+    transform: translateY(-1px);
+}
+
+.coe-exam-template-btn {
+    margin-top: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: var(--bg-subtle, #111318);
+    border: 1px solid var(--coe-exam-line);
+    color: var(--coe-exam-ink);
+    font-weight: 700;
+}
+
+.coe-exam-upload-card {
+    height: 100%;
+}
+
+.coe-exam-upload-box {
+    margin-top: 18px;
+    border: 1.5px dashed rgba(99, 102, 241, 0.24);
+    border-radius: 24px;
+    background: linear-gradient(180deg, rgba(19, 19, 25, 0.98), rgba(14, 14, 19, 0.95));
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.coe-exam-upload-box:hover {
+    border-color: rgba(99, 102, 241, 0.45);
+    transform: translateY(-1px);
+    box-shadow: 0 16px 30px rgba(99, 102, 241, 0.12);
+}
+
+.coe-exam-upload-box input {
+    display: none;
+}
+
+.coe-exam-upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 240px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.coe-exam-upload-icon {
+    width: 68px;
+    height: 68px;
+    display: grid;
+    place-items: center;
+    border-radius: 22px;
+    background: rgba(99, 102, 241, 0.16);
+    color: var(--coe-exam-primary);
+}
+
+.coe-exam-upload-label span {
+    font-size: 1.08rem;
+    font-weight: 700;
+    color: var(--coe-exam-ink);
+}
+
+.coe-exam-upload-label small {
+    color: var(--coe-exam-muted);
+    max-width: 320px;
+    line-height: 1.6;
+}
+
+.coe-exam-message {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+.coe-exam-message.success {
+    background: rgba(17, 165, 154, 0.08);
+    color: #0c887f;
+    border: 1px solid rgba(17, 165, 154, 0.18);
+}
+
+.coe-exam-message.error {
+    background: rgba(226, 77, 70, 0.1);
+    color: #b2332c;
+    border: 1px solid rgba(226, 77, 70, 0.18);
+}
+
+.coe-exam-submit-btn {
+    width: 100%;
+    margin-top: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--coe-exam-primary), var(--coe-exam-primary-strong));
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.32);
+    font-weight: 700;
+}
+
+.coe-exam-submit-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.coe-exam-side-panel {
+    display: grid;
+    gap: 18px;
+}
+
+.coe-exam-stat {
+    display: grid;
+    gap: 10px;
+    padding: 18px;
+    border-radius: 22px;
+    background: rgba(23, 23, 28, 0.98);
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+}
+
+.coe-exam-stat strong {
+    font-size: 1.6rem;
+    line-height: 1;
+    letter-spacing: -0.04em;
+}
+
+.coe-exam-stat-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--coe-exam-muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.coe-exam-mini-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.coe-exam-mini-item {
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: rgba(17, 17, 21, 0.9);
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+}
+
+.coe-exam-mini-item strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.coe-exam-mini-item p {
+    margin: 0;
+    font-size: 0.94rem;
+}
+
+[data-theme='dark'] .coe-exam-page {
+    --coe-exam-ink: #eef2ff;
+    --coe-exam-muted: #94a3b8;
+    --coe-exam-line: rgba(148, 163, 184, 0.16);
+    --coe-exam-primary: #6366f1;
+    --coe-exam-primary-strong: #7c3aed;
+    --coe-exam-accent: #10b981;
+}
+
+[data-theme='dark'] .coe-exam-hero-panel,
+[data-theme='dark'] .coe-exam-shell,
+[data-theme='dark'] .coe-exam-block {
+    background: rgba(13, 17, 28, 0.84);
+    border-color: rgba(124, 147, 255, 0.14);
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.42);
+}
+
+[data-theme='dark'] .coe-exam-hero-panel {
+    background: linear-gradient(145deg, rgba(22, 30, 48, 0.96), rgba(17, 24, 40, 0.92));
+}
+
+[data-theme='dark'] .coe-exam-chip {
+    background: rgba(124, 147, 255, 0.16);
+    color: #c8d4ff;
+}
+
+[data-theme='dark'] .coe-exam-highlights span,
+[data-theme='dark'] .coe-exam-mini-item {
+    background: rgba(17, 24, 40, 0.82);
+    border-color: rgba(124, 147, 255, 0.14);
+    color: var(--coe-exam-ink);
+}
+
+[data-theme='dark'] .coe-exam-block {
+    background: linear-gradient(180deg, rgba(19, 24, 38, 0.98), rgba(14, 19, 31, 0.95));
+}
+
+[data-theme='dark'] .coe-exam-callout {
+    background: linear-gradient(135deg, rgba(42, 57, 101, 0.5), rgba(15, 83, 90, 0.36));
+    border-color: rgba(124, 147, 255, 0.14);
+}
+
+[data-theme='dark'] .coe-exam-template-btn {
+    background: rgba(18, 24, 40, 0.94);
+    border-color: rgba(124, 147, 255, 0.14);
+    color: var(--coe-exam-ink);
+}
+
+[data-theme='dark'] .coe-exam-upload-box {
+    background: linear-gradient(180deg, rgba(18, 24, 40, 0.98), rgba(13, 18, 31, 0.94));
+    border-color: rgba(124, 147, 255, 0.24);
+}
+
+[data-theme='dark'] .coe-exam-upload-box:hover {
+    border-color: rgba(124, 147, 255, 0.42);
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .coe-exam-upload-icon {
+    background: rgba(124, 147, 255, 0.16);
+    color: #d2dbff;
+}
+
+[data-theme='dark'] .coe-exam-message.success {
+    background: rgba(49, 199, 184, 0.12);
+    color: #97f0e5;
+    border-color: rgba(49, 199, 184, 0.14);
+}
+
+[data-theme='dark'] .coe-exam-message.error {
+    background: rgba(226, 77, 70, 0.12);
+    color: #ff9a93;
+    border-color: rgba(226, 77, 70, 0.14);
+}
+
+[data-theme='dark'] .coe-exam-stat {
+    background: linear-gradient(180deg, rgba(19, 24, 38, 0.98), rgba(15, 20, 33, 0.94));
+    border-color: rgba(124, 147, 255, 0.12);
+}
+
+@media (max-width: 1080px) {
+    .coe-exam-hero,
+    .coe-exam-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 980px) {
+    .coe-exam-page {
+        padding: 24px 0 40px;
+    }
+
+    .coe-exam-shell {
+        padding: 20px;
+        border-radius: 24px;
+    }
+
+    .coe-exam-block {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 640px) {
+    .coe-exam-page {
+        padding: 12px 0 32px;
+    }
+
+    .coe-exam-copy h1 {
+        font-size: 2rem;
+    }
+
+    .coe-exam-upload-label {
+        min-height: 200px;
+        padding: 20px;
+    }
+}

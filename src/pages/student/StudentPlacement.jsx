@@ -66,6 +66,7 @@ const RadialProgress = ({ value, size = 140, stroke = 10, color = '#6366f1' }) =
 const StudentPlacement = () => {
     const { currentUser, userData } = useAuth();
     const [profile, setProfile] = useState(null);
+    const [driveApplyingId, setDriveApplyingId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [resumeSaving, setResumeSaving] = useState(false);
@@ -175,6 +176,19 @@ const StudentPlacement = () => {
             console.error('Failed to update resume:', error);
         } finally {
             setResumeSaving(false);
+        }
+    };
+
+    const handleApplyToDrive = async (driveId) => {
+        if (!currentUser) return;
+        setDriveApplyingId(driveId);
+        try {
+            const res = await api.put(`/placement/student/${currentUser.uid}/drives/${driveId}/apply`);
+            setProfile((prev) => ({ ...prev, availableDrives: res.data || [] }));
+        } catch (error) {
+            console.error('Failed to apply for drive:', error);
+        } finally {
+            setDriveApplyingId(null);
         }
     };
 
@@ -386,6 +400,51 @@ const StudentPlacement = () => {
                             </div>
                         ))}
                     </div>
+
+                    {!canManagePlacement ? (
+                        <div className="placement-drive-list-card">
+                            <div className="pc-title">Eligible Drives</div>
+                            {!profile.availableDrives?.length ? (
+                                <div className="pref-item">No active drive is assigned to you yet.</div>
+                            ) : (
+                                <div className="placement-drive-stack">
+                                    {profile.availableDrives.map((drive) => (
+                                        <article key={drive.id} className="placement-drive-item">
+                                            <div className="placement-drive-head">
+                                                <div>
+                                                    <strong>{drive.companyName}</strong>
+                                                    <span>{drive.roleTitle}</span>
+                                                </div>
+                                                <span className={`placement-drive-status ${String(drive.applicationStatus || 'ELIGIBLE').toLowerCase()}`}>
+                                                    {drive.applicationStatus}
+                                                </span>
+                                            </div>
+                                            <p>{drive.description || drive.eligibilityCriteria || 'Check requirements before applying.'}</p>
+                                            <small>
+                                                Date: {drive.driveDate || 'To be announced'} | Location: {drive.location || 'TBA'} | Reminders: {drive.reminderCount || 0}/2
+                                            </small>
+                                            {drive.coordinatorRemarks ? (
+                                                <div className="placement-drive-note">Coordinator: {drive.coordinatorRemarks}</div>
+                                            ) : null}
+                                            <div className="placement-drive-actions">
+                                                <button
+                                                    className="btn-save-scores"
+                                                    onClick={() => handleApplyToDrive(drive.id)}
+                                                    disabled={!drive.canApply || driveApplyingId === drive.id}
+                                                >
+                                                    {driveApplyingId === drive.id
+                                                        ? 'Applying...'
+                                                        : drive.canApply
+                                                            ? 'Apply For Drive'
+                                                            : 'Already Submitted'}
+                                                </button>
+                                            </div>
+                                        </article>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ) : null}
                 </div>
             </div>
         </div>

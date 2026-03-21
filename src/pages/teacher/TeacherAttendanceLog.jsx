@@ -49,6 +49,7 @@ const TeacherAttendanceLog = () => {
     const [generatingOtp, setGeneratingOtp] = useState(false);
     const [timeLeft, setTimeLeft] = useState(0);
     const [otpProgress, setOtpProgress] = useState(100);
+    const [attendanceWindow, setAttendanceWindow] = useState(null);
 
     // Manual entry state
     const [manualAttendance, setManualAttendance] = useState({});
@@ -117,6 +118,26 @@ const TeacherAttendanceLog = () => {
             setActiveOtpSession(null);
         }
     };
+
+    const fetchAttendanceWindowStatus = useCallback(async () => {
+        if (!selectedSectionId || !currentUser?.uid) return;
+        try {
+            const res = await api.get(`/course-attendance/sessions/section/${selectedSectionId}/window-status`, {
+                params: { facultyUid: currentUser.uid }
+            });
+            setAttendanceWindow(res.data || null);
+        } catch (e) {
+            setAttendanceWindow({
+                allowed: false,
+                message: e.response?.data?.message || 'Unable to verify mapped class timing for this section.'
+            });
+        }
+    }, [selectedSectionId, currentUser]);
+
+    useEffect(() => {
+        if (!selectedSectionId) return;
+        fetchAttendanceWindowStatus();
+    }, [selectedSectionId, fetchAttendanceWindowStatus]);
 
     // ─── Fetch sessions & present list when section or date changes ────────────
     useEffect(() => {
@@ -203,9 +224,10 @@ const TeacherAttendanceLog = () => {
             if (activeOtpSession?.id) {
                 fetchPresentStudents(activeOtpSession.id);
             }
+            fetchAttendanceWindowStatus();
         }, 5000);
         return () => clearInterval(interval);
-    }, [activeOtpSession, selectedSectionId, selectedDate]);
+    }, [activeOtpSession, selectedSectionId, selectedDate, fetchAttendanceWindowStatus]);
 
     const formatTime = (seconds) => {
         const m = Math.floor(seconds / 60);
@@ -220,13 +242,14 @@ const TeacherAttendanceLog = () => {
         try {
             const res = await api.post(`/course-attendance/sessions/generate/${selectedSectionId}?facultyUid=${currentUser.uid}`);
             setActiveOtpSession(res.data);
+            fetchAttendanceWindowStatus();
             alert(`OTP Generated: ${res.data.otp}`);
             // Reload sessions for today
             if (selectedDate === today) {
                 setTimeout(fetchSessionsForDate, 500);
             }
         } catch (e) {
-            alert('Failed to generate OTP: ' + (e.response?.data || e.message));
+            alert('Failed to generate OTP: ' + (e.response?.data?.message || e.response?.data || e.message));
         } finally {
             setGeneratingOtp(false);
         }
@@ -237,6 +260,7 @@ const TeacherAttendanceLog = () => {
         try {
             await api.post(`/course-attendance/sessions/${activeOtpSession.id}/deactivate?facultyUid=${currentUser.uid}`);
             setActiveOtpSession(null);
+            fetchAttendanceWindowStatus();
             if (selectedDate === today) fetchSessionsForDate();
         } catch (e) {
             alert('Failed to deactivate session');
@@ -253,10 +277,11 @@ const TeacherAttendanceLog = () => {
                 status
             }));
             await api.post(`/course-attendance/sessions/bulk/${selectedSectionId}?facultyUid=${currentUser.uid}`, data);
+            fetchAttendanceWindowStatus();
             alert('Attendance saved successfully!');
             if (selectedDate === today) fetchSessionsForDate();
         } catch (e) {
-            alert('Failed to save attendance: ' + (e.response?.data || e.message));
+            alert('Failed to save attendance: ' + (e.response?.data?.message || e.response?.data || e.message));
         } finally {
             setSavingManual(false);
         }
@@ -280,6 +305,15 @@ const TeacherAttendanceLog = () => {
         const time = new Date(session.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const type = session.otp === 'MANUAL' ? 'Manual' : 'OTP';
         return `${time} — ${type}${session.active ? ' (Active)' : ''}`;
+    };
+
+    const formatScheduleSlot = (schedule) => {
+        if (!schedule) return 'No mapped class slot';
+        const sessionName = schedule.session ? `${schedule.session} ` : '';
+        const start = schedule.startTime?.slice(0, 5) || '--:--';
+        const end = schedule.endTime?.slice(0, 5) || '--:--';
+        const venue = schedule.location || 'Venue not set';
+        return `${sessionName}${start} - ${end} • ${venue}`;
     };
 
     // ─── Export CSV ────────────────────────────────────────────────────────────
@@ -414,10 +448,16 @@ const TeacherAttendanceLog = () => {
                     <span className="att-stat-dot dot-red" />
                     Absent: <b>{absentCount > 0 ? absentCount : 0}</b>
                 </div>
+                {attendanceWindow?.currentSchedule && (
+                    <div className="att-stat-item att-stat-session-info">
+                        <BookOpen size={13} />
+                        Mapped Slot: <b>{formatScheduleSlot(attendanceWindow.currentSchedule)}</b>
+                    </div>
+                )}
                 {selectedSession && (
                     <div className="att-stat-item att-stat-session-info">
                         <Clock size={13} />
-                        Session: <b>{new Date(selectedSession.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</b>
+                        Session: <b>{selectedSession.sessionLabel || new Date(selectedSession.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</b>
                     </div>
                 )}
             </div>
@@ -445,6 +485,14 @@ const TeacherAttendanceLog = () => {
                 <div className="att-left-panel">
                     {activeTab === 'otp' && (
                         <div className="att-panel-card">
+                            {attendanceWindow?.message && (
+                                <div className="att-empty-state" style={{ marginBottom: '16px', padding: '16px', textAlign: 'left' }}>
+                                    <p className="att-empty-title" style={{ marginBottom: '6px' }}>
+                                        {attendanceWindow.allowed ? 'Mapped Attendance Window Active' : 'OTP Restricted'}
+                                    </p>
+                                    <p className="att-empty-sub">{attendanceWindow.message}</p>
+                                </div>
+                            )}
                             {!activeOtpSession || !activeOtpSession.active || timeLeft <= 0 ? (
                                 /* Generate OTP State */
                                 <div className="att-otp-empty">
@@ -456,7 +504,7 @@ const TeacherAttendanceLog = () => {
                                     <button
                                         className="att-otp-generate-btn"
                                         onClick={handleGenerateOtp}
-                                        disabled={generatingOtp || !selectedSectionId}
+                                        disabled={generatingOtp || !selectedSectionId || attendanceWindow?.allowed === false}
                                     >
                                         <Clock size={18} />
                                         {generatingOtp ? 'Generating...' : 'Enable OTP Sign-in'}
@@ -539,9 +587,9 @@ const TeacherAttendanceLog = () => {
                                     <button
                                         className="att-save-manual-btn"
                                         onClick={handleSaveManual}
-                                        disabled={savingManual}
+                                        disabled={savingManual || attendanceWindow?.allowed === false}
                                     >
-                                        {savingManual ? 'Saving...' : 'Save Attendance'}
+                                        {savingManual ? 'Saving...' : attendanceWindow?.allowed === false ? 'Save Attendance Locked' : 'Save Attendance'}
                                     </button>
                                 </>
                             )}

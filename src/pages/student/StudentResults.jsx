@@ -146,6 +146,9 @@ const StudentResults = () => {
                                         <tr>
                                             <th>Subject Code</th>
                                             <th>Subject Name</th>
+                                            <th>Internal</th>
+                                            <th>Semester</th>
+                                            <th>Total</th>
                                             <th>Credits</th>
                                             <th>Grade</th>
                                             <th>Result</th>
@@ -156,6 +159,9 @@ const StudentResults = () => {
                                             <tr key={idx}>
                                                 <td className="font-mono">{result.subjectCode}</td>
                                                 <td>{result.subjectName}</td>
+                                                <td>{result.internalMarks ?? '—'}</td>
+                                                <td>{result.semesterMarks ?? '—'}</td>
+                                                <td>{result.totalMarks ?? '—'}</td>
                                                 <td>{result.credits}</td>
                                                 <td className={`font-bold ${getGradeColor(result.grade)}`}>{result.grade}</td>
                                                 <td>

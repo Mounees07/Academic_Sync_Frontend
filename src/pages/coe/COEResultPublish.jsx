@@ -1,15 +1,97 @@
-import React, { useState } from 'react';
-import { Upload, FileText, Download, CheckCircle, AlertTriangle } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+    AlertTriangle,
+    BookOpen,
+    Calculator,
+    CheckCircle,
+    Download,
+    FileSpreadsheet,
+    GraduationCap,
+    RefreshCw,
+    Upload,
+    Users
+} from 'lucide-react';
 import api from '../../utils/api';
 import './COEResultPublish.css';
 
+const departments = ['CSE', 'ECE', 'EEE', 'MECH'];
+const semesters = ['1', '2', '3', '4', '5', '6', '7', '8'];
+
+const getGrade = (score) => {
+    if (score >= 91) return 'O';
+    if (score >= 81) return 'A+';
+    if (score >= 71) return 'A';
+    if (score >= 61) return 'B+';
+    if (score >= 50) return 'B';
+    return 'RA';
+};
+
+const getGradePoints = (grade) => {
+    switch (grade) {
+        case 'O': return 10;
+        case 'A+': return 9;
+        case 'A': return 8;
+        case 'B+': return 7;
+        case 'B': return 6;
+        default: return 0;
+    }
+};
+
+const round2 = (value) => Math.round((Number(value) || 0) * 100) / 100;
+
+const recalculateStudent = (student) => {
+    const subjects = (student.subjects || []).map((subject) => {
+        const internalMarks = round2(subject.internalMarks);
+        const semesterMarks = round2(subject.semesterMarks);
+        const totalMarks = round2(internalMarks + semesterMarks);
+        const finalPercentage = round2((internalMarks + semesterMarks) / 2);
+        const grade = getGrade(finalPercentage);
+        return {
+            ...subject,
+            internalMarks,
+            semesterMarks,
+            totalMarks,
+            finalPercentage,
+            grade
+        };
+    });
+
+    const totalCredits = subjects.reduce((sum, subject) => sum + (Number(subject.credits) || 0), 0);
+    const weightedPoints = subjects.reduce((sum, subject) => {
+        const credits = Number(subject.credits) || 0;
+        return sum + (getGradePoints(subject.grade) * credits);
+    }, 0);
+
+    return {
+        ...student,
+        subjects,
+        sgpa: totalCredits > 0 ? round2(weightedPoints / totalCredits) : 0
+    };
+};
+
+const getLogTone = (log) => {
+    const value = String(log || '').toLowerCase();
+    if (value.includes('updated results') || value.includes('published results') || value.includes('published results with sgpa')) {
+        return 'success';
+    }
+    if (value.includes('skipped')) {
+        return 'warning';
+    }
+    return 'error';
+};
+
 const COEResultPublish = () => {
+    const [mode, setMode] = useState('manual');
     const [file, setFile] = useState(null);
     const [uploading, setUploading] = useState(false);
+    const [publishingManual, setPublishingManual] = useState(false);
     const [logs, setLogs] = useState([]);
+    const [sheetLoading, setSheetLoading] = useState(false);
+    const [entrySheet, setEntrySheet] = useState([]);
+    const [manualApiReady, setManualApiReady] = useState(true);
 
-    const [dept, setDept] = useState("CSE");
-    const [sem, setSem] = useState("8");
+    const [dept, setDept] = useState('CSE');
+    const [sem, setSem] = useState('8');
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
@@ -28,24 +110,53 @@ const COEResultPublish = () => {
             a.download = `result_template_${dept}_Sem${sem}.csv`;
             a.click();
         } catch (err) {
-            let errorMsg = "Unknown error";
+            let errorMsg = 'Unknown error';
             if (err.response?.data instanceof Blob) {
                 try {
                     errorMsg = await err.response.data.text();
-                    // Try to parse JSON if possible
                     const json = JSON.parse(errorMsg);
                     if (json.message) errorMsg = json.message;
-                } catch (e) { /* use raw text */ }
+                } catch (e) {
+                    // Use raw text when response is not JSON.
+                }
             } else if (err.message) {
                 errorMsg = err.message;
             }
-            alert("Failed to download template: " + errorMsg);
+            alert('Failed to download template: ' + errorMsg);
         }
     };
 
+    const fetchEntrySheet = async () => {
+        setSheetLoading(true);
+        try {
+            const res = await api.get('/results/entry-sheet', {
+                params: { dept, sem: Number(sem) }
+            });
+            setManualApiReady(true);
+            setEntrySheet((res.data || []).map(recalculateStudent));
+        } catch (err) {
+            setEntrySheet([]);
+            if (err.response?.status === 404) {
+                setManualApiReady(false);
+                setLogs(['Manual result entry needs the updated backend. Restart the backend server to load /api/results/entry-sheet and /api/results/publish-manual.']);
+            } else {
+                setManualApiReady(true);
+                setLogs([`Manual sheet load failed: ${err.response?.data?.message || err.message}`]);
+            }
+        } finally {
+            setSheetLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (mode === 'manual') {
+            fetchEntrySheet();
+        }
+    }, [dept, sem, mode]);
+
     const handleUpload = async () => {
         if (!file) {
-            alert("Please select a CSV file first.");
+            alert('Please select a CSV file first.');
             return;
         }
 
@@ -57,103 +168,341 @@ const COEResultPublish = () => {
             const res = await api.post('/results/publish-bulk', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            setLogs(res.data);
-            if (res.data.some(l => l.includes('✅'))) {
-                // partial or full success
+            setLogs(res.data || []);
+            if (mode === 'manual') {
+                fetchEntrySheet();
             }
         } catch (err) {
-            setLogs(["❗ Critical Error: " + (err.response?.data?.message || err.message)]);
+            setLogs([`Critical Error: ${err.response?.data?.message || err.message}`]);
         } finally {
             setUploading(false);
         }
     };
 
+    const updateSemesterMark = (studentIndex, subjectIndex, value) => {
+        setEntrySheet((prev) => prev.map((student, sIdx) => {
+            if (sIdx !== studentIndex) return student;
+            const updatedStudent = {
+                ...student,
+                subjects: student.subjects.map((subject, subIdx) => (
+                    subIdx === subjectIndex
+                        ? { ...subject, semesterMarks: value === '' ? 0 : Number(value) }
+                        : subject
+                ))
+            };
+            return recalculateStudent(updatedStudent);
+        }));
+    };
+
+    const publishManual = async () => {
+        if (entrySheet.length === 0) {
+            alert('No mapped students or subjects found for the selected department and semester.');
+            return;
+        }
+
+        setPublishingManual(true);
+        try {
+            const payload = {
+                dept,
+                sem: Number(sem),
+                students: entrySheet.map((student) => ({
+                    studentUid: student.studentUid,
+                    subjects: student.subjects.map((subject) => ({
+                        subjectCode: subject.subjectCode,
+                        internalMarks: round2(subject.internalMarks),
+                        semesterMarks: round2(subject.semesterMarks)
+                    }))
+                }))
+            };
+
+            const res = await api.post('/results/publish-manual', payload);
+            setManualApiReady(true);
+            setLogs(res.data || []);
+            fetchEntrySheet();
+        } catch (err) {
+            if (err.response?.status === 404) {
+                setManualApiReady(false);
+                setLogs(['Manual publish endpoint is not available on the running backend yet. Restart the backend server and try again.']);
+            } else {
+                setManualApiReady(true);
+                setLogs([`Manual publish failed: ${err.response?.data?.message || err.message}`]);
+            }
+        } finally {
+            setPublishingManual(false);
+        }
+    };
+
+    const overallSummary = useMemo(() => {
+        const studentCount = entrySheet.length;
+        const subjectCount = entrySheet.reduce((sum, student) => sum + (student.subjects?.length || 0), 0);
+        const avgSgpa = studentCount > 0
+            ? round2(entrySheet.reduce((sum, student) => sum + (Number(student.sgpa) || 0), 0) / studentCount)
+            : 0;
+        return { studentCount, subjectCount, avgSgpa };
+    }, [entrySheet]);
+
     return (
-        <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
-            <h1>Publish Exam Results</h1>
-            <p className="text-muted">Generate templates with student data, enter marks, and upload to auto-calculate CGPA.</p>
-
-            <div className="glass-card" style={{ padding: '30px', marginTop: '24px' }}>
-                <div style={{ marginBottom: '20px' }}>
-                    <h3>1. Generate & Download Template</h3>
-                    <p className="text-muted" style={{ fontSize: '0.9rem' }}>Select batch details to get a pre-filled list of students.</p>
-
-                    <div className="flex gap-4 mb-4" style={{ display: 'flex', gap: '16px' }}>
-                        <div className="form-group" style={{ flex: 1 }}>
-                            <label>Department</label>
-                            <select value={dept} onChange={e => setDept(e.target.value)} className="form-input">
-                                <option value="CSE">CSE</option>
-                                <option value="ECE">ECE</option>
-                                <option value="EEE">EEE</option>
-                                <option value="MECH">MECH</option>
-                            </select>
-                        </div>
-                        <div className="form-group" style={{ flex: 1 }}>
-                            <label>Semester</label>
-                            <select value={sem} onChange={e => setSem(e.target.value)} className="form-input">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                                <option value="7">7</option>
-                                <option value="8">8</option>
-                            </select>
-                        </div>
+        <div className="coe-result-page">
+            <section className="coe-result-hero">
+                <div className="coe-result-hero-copy">
+                    <span className="coe-result-kicker">Controller of Examinations</span>
+                    <h1>Publish Semester Results</h1>
+                    <p>
+                        Review eligible students, verify internal and semester marks, and publish polished semester results from one controlled workspace.
+                    </p>
+                </div>
+                <div className="coe-result-hero-panel">
+                    <div className="coe-hero-chip">
+                        <GraduationCap size={18} />
+                        Semester Exam Result Console
                     </div>
+                    <div className="coe-hero-meta">
+                        <span>Department: {dept}</span>
+                        <span>Semester: {sem}</span>
+                    </div>
+                </div>
+            </section>
 
-                    <button onClick={downloadTemplate} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Download size={18} /> Download Pre-filled CSV
+            <section className="coe-result-shell">
+                <div className="coe-mode-toggle" role="tablist" aria-label="Result publish mode">
+                    <button
+                        className={`coe-mode-btn ${mode === 'manual' ? 'active' : ''}`}
+                        onClick={() => setMode('manual')}
+                        type="button"
+                    >
+                        <Calculator size={16} />
+                        Manual Entry
                     </button>
-                    <div className="card-note mt-2">
-                        <strong>Instructions:</strong>
-                        <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
-                            <li>The CSV contains student details. <strong>Do not change Email/RegNo.</strong></li>
-                            <li><strong>Add columns</strong> for each subject code (e.g. <code>CS801</code>, <code>CS802</code>).</li>
-                            <li>Enter <strong>Marks (0-100)</strong> under each subject code.</li>
-                            <li>The system will detect codes, calculate Grades & SGPA automatically.</li>
-                        </ul>
+                    <button
+                        className={`coe-mode-btn ${mode === 'csv' ? 'active' : ''}`}
+                        onClick={() => setMode('csv')}
+                        type="button"
+                    >
+                        <FileSpreadsheet size={16} />
+                        CSV Upload
+                    </button>
+                </div>
+
+                <div className="coe-filter-row">
+                    <label className="coe-filter-card">
+                        <span className="coe-filter-label">Department</span>
+                        <select value={dept} onChange={(e) => setDept(e.target.value)} className="coe-filter-input">
+                            {departments.map((department) => (
+                                <option key={department} value={department}>{department}</option>
+                            ))}
+                        </select>
+                    </label>
+
+                    <label className="coe-filter-card">
+                        <span className="coe-filter-label">Semester</span>
+                        <select value={sem} onChange={(e) => setSem(e.target.value)} className="coe-filter-input">
+                            {semesters.map((semester) => (
+                                <option key={semester} value={semester}>{semester}</option>
+                            ))}
+                        </select>
+                    </label>
+                </div>
+
+                <div className="coe-summary-grid">
+                    <div className="coe-summary-banner">
+                        <span className="coe-section-label">{mode === 'manual' ? 'Manual Result Entry' : 'CSV Result Upload'}</span>
+                        <h2>{mode === 'manual' ? 'Validate marks before publication' : 'Upload result sheets with confidence'}</h2>
+                        <p>
+                            {mode === 'manual'
+                                ? 'Internal marks are preloaded. Enter semester marks, check totals and SGPA, and publish only after the sheet looks right.'
+                                : 'Download a prefilled sheet, update semester marks in bulk, then upload the CSV for automated total, grade, and SGPA generation.'}
+                        </p>
+                    </div>
+
+                    <div className="coe-stat-grid">
+                        <div className="coe-stat-card">
+                            <span className="coe-stat-label"><Users size={15} /> Students</span>
+                            <strong>{overallSummary.studentCount}</strong>
+                        </div>
+                        <div className="coe-stat-card">
+                            <span className="coe-stat-label"><BookOpen size={15} /> Subjects</span>
+                            <strong>{overallSummary.subjectCount}</strong>
+                        </div>
+                        <div className="coe-stat-card">
+                            <span className="coe-stat-label"><GraduationCap size={15} /> Average SGPA</span>
+                            <strong>{overallSummary.avgSgpa}</strong>
+                        </div>
                     </div>
                 </div>
 
-                <div className="divider"></div>
+                {mode === 'csv' && (
+                    <div className="coe-panel">
+                        <div className="coe-panel-header">
+                            <div>
+                                <span className="coe-section-label">CSV Workflow</span>
+                                <h3>Download, update, and publish in bulk</h3>
+                            </div>
+                            <button onClick={downloadTemplate} className="coe-btn coe-btn-secondary" type="button">
+                                <Download size={16} />
+                                Download Template
+                            </button>
+                        </div>
 
-                <div style={{ marginBottom: '20px' }}>
-                    <h3>2. Upload Results</h3>
-                    <div className="file-drop-area">
-                        <input type="file" accept=".csv" onChange={handleFileChange} id="fileInput" />
-                        <label htmlFor="fileInput" className="drop-label">
-                            <Upload size={32} className="mb-2" />
-                            {file ? file.name : "Click to browse CSV file"}
-                        </label>
+                        <div className="coe-callout">
+                            <strong>Template format</strong>
+                            <p>Each scheduled subject includes an `_Internal` and `_Semester` column. Keep student identifiers unchanged and update only the semester marks where required.</p>
+                        </div>
+
+                        <div className="coe-upload-box">
+                            <input type="file" accept=".csv" onChange={handleFileChange} id="fileInput" />
+                            <label htmlFor="fileInput" className="coe-upload-label">
+                                <Upload size={26} />
+                                <span>{file ? file.name : 'Choose the semester result CSV file'}</span>
+                                <small>Only scheduled semester-exam subjects will be processed.</small>
+                            </label>
+                        </div>
+
+                        <button
+                            className="coe-btn coe-btn-primary coe-btn-wide"
+                            onClick={handleUpload}
+                            disabled={uploading || !file}
+                            type="button"
+                        >
+                            <Upload size={16} />
+                            {uploading ? 'Publishing...' : 'Publish Results From CSV'}
+                        </button>
                     </div>
-                </div>
+                )}
 
-                <button
-                    className="btn btn-primary w-full"
-                    onClick={handleUpload}
-                    disabled={uploading || !file}
-                >
-                    {uploading ? 'Publishing...' : 'Publish Results'}
-                </button>
-            </div>
+                {mode === 'manual' && (
+                    <div className="coe-panel">
+                        <div className="coe-panel-header">
+                            <div>
+                                <span className="coe-section-label">Manual Workflow</span>
+                                <h3>Review student cards and publish with control</h3>
+                            </div>
+                            <div className="coe-header-actions">
+                                <button className="coe-btn coe-btn-secondary" onClick={fetchEntrySheet} type="button">
+                                    <RefreshCw size={16} />
+                                    Refresh Sheet
+                                </button>
+                                <button
+                                    className="coe-btn coe-btn-primary"
+                                    onClick={publishManual}
+                                    type="button"
+                                    disabled={publishingManual || sheetLoading || entrySheet.length === 0}
+                                >
+                                    <CheckCircle size={16} />
+                                    {publishingManual ? 'Publishing...' : 'Publish Manual Results'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {!manualApiReady ? (
+                            <div className="coe-message coe-message-warning">
+                                <AlertTriangle size={16} />
+                                Manual entry is ready in the codebase, but the running backend has not loaded the required routes yet. Restart the backend and refresh this page.
+                            </div>
+                        ) : sheetLoading ? (
+                            <div className="coe-message coe-message-info">Loading mapped students and internal marks...</div>
+                        ) : entrySheet.length === 0 ? (
+                            <div className="coe-message coe-message-info">
+                                No students or scheduled semester-exam subjects were found for {dept} semester {sem}.
+                            </div>
+                        ) : (
+                            <div className="coe-student-stack">
+                                {entrySheet.map((student, studentIndex) => (
+                                    <article key={student.studentUid} className="coe-student-card">
+                                        <div className="coe-student-top">
+                                            <div className="coe-student-identity">
+                                                <div className="coe-student-avatar">
+                                                    {(student.studentName || 'S').trim().charAt(0)}
+                                                </div>
+                                                <div>
+                                                    <h3>{student.studentName}</h3>
+                                                    <p>{student.registerNumber} • {student.studentEmail}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="coe-student-meta">
+                                                <span><strong>Dept</strong> {student.department || '—'}</span>
+                                                <span><strong>Sem</strong> {student.semester || '—'}</span>
+                                                <span><strong>SGPA</strong> {student.sgpa}</span>
+                                            </div>
+                                        </div>
+
+                                        {student.subjects.length === 0 ? (
+                                            <div className="coe-message coe-message-inline">
+                                                This student is available, but no semester subjects or internal-mark mappings were found yet.
+                                            </div>
+                                        ) : (
+                                            <div className="coe-table-wrap">
+                                                <table className="coe-results-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Subject</th>
+                                                            <th>Code</th>
+                                                            <th>Credits</th>
+                                                            <th>Internal</th>
+                                                            <th>Semester</th>
+                                                            <th>Total</th>
+                                                            <th>Final %</th>
+                                                            <th>Grade</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {student.subjects.map((subject, subjectIndex) => (
+                                                            <tr key={`${student.studentUid}-${subject.subjectCode}`}>
+                                                                <td>
+                                                                    <div className="coe-subject-name">{subject.subjectName}</div>
+                                                                </td>
+                                                                <td className="coe-code">{subject.subjectCode}</td>
+                                                                <td>{subject.credits}</td>
+                                                                <td>{subject.internalMarks}</td>
+                                                                <td>
+                                                                    <input
+                                                                        type="number"
+                                                                        min="0"
+                                                                        max="100"
+                                                                        value={subject.semesterMarks}
+                                                                        onChange={(e) => updateSemesterMark(studentIndex, subjectIndex, e.target.value)}
+                                                                        className="coe-score-input"
+                                                                    />
+                                                                </td>
+                                                                <td>{subject.totalMarks}</td>
+                                                                <td>{subject.finalPercentage}</td>
+                                                                <td>
+                                                                    <span className={`coe-grade-pill grade-${String(subject.grade).toLowerCase().replace('+', 'plus')}`}>
+                                                                        {subject.grade}
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+                                    </article>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </section>
 
             {logs.length > 0 && (
-                <div className="glass-card mt-6" style={{ padding: '20px' }}>
-                    <h3>Upload Logs</h3>
-                    <div className="logs-container" style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem' }}>
-                        {logs.map((log, i) => (
-                            <div key={i} style={{
-                                color: log.includes('✅') ? '#4ade80' : '#f87171',
-                                display: 'flex', alignItems: 'center', gap: '8px'
-                            }}>
-                                {log.includes('✅') ? <CheckCircle size={14} /> : <AlertTriangle size={14} />}
-                                {log}
-                            </div>
-                        ))}
+                <section className="coe-log-panel">
+                    <div className="coe-log-header">
+                        <span className="coe-section-label">Publish Logs</span>
+                        <h3>Recent processing feedback</h3>
                     </div>
-                </div>
+                    <div className="coe-log-list">
+                        {logs.map((log, i) => {
+                            const tone = getLogTone(log);
+                            return (
+                                <div key={i} className={`coe-log-item ${tone}`}>
+                                    {tone === 'success' ? <CheckCircle size={16} /> : <AlertTriangle size={16} />}
+                                    <span>{log}</span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </section>
             )}
         </div>
     );

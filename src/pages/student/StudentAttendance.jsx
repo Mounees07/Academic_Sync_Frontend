@@ -1,203 +1,431 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
-import { Loader, CheckCircle, AlertTriangle } from 'lucide-react';
-import { SEMESTER_START_DATE, calculateAttendance } from '../../utils/attendanceUtils';
-import { useSettings } from '../../context/SettingsContext';
+import { BookOpen, CheckCircle, XCircle, AlertTriangle, Fingerprint, CalendarDays } from 'lucide-react';
 import './StudentAttendance.css';
 import { Hourglass } from 'ldrs/react';
 import 'ldrs/react/Hourglass.css';
 
+const isCoursePresent = (status) => ['P', 'PRESENT', 'L', 'LATE'].includes((status || '').toUpperCase());
+const PAGE_SIZE_OPTIONS = [5, 10, 20, 50, 100];
+
+const paginateRows = (rows, page, pageSize) => {
+    const startIndex = (page - 1) * pageSize;
+    return rows.slice(startIndex, startIndex + pageSize);
+};
+
 const StudentAttendance = () => {
     const { currentUser } = useAuth();
-    const { settings: liveSettings } = useSettings();
-
-    // Read admin-configured threshold (fallback 75 if not yet loaded)
-    const threshold = Number(liveSettings?.['policy.attendance.threshold'] ?? 75);
-    const detainThreshold = Number(liveSettings?.['policy.attendance.detain'] ?? 65);
-
-    const [history, setHistory] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [courseHistory, setCourseHistory] = useState([]);
+    const [biometricHistory, setBiometricHistory] = useState([]);
     const [alreadyMarked, setAlreadyMarked] = useState(false);
-    const [todayStatus, setTodayStatus] = useState(null);
-
-    // Pagination State
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    const [loading, setLoading] = useState(true);
+    const [markingBiometric, setMarkingBiometric] = useState(false);
+    const [attendanceType, setAttendanceType] = useState('BOTH');
+    const [filterCourse, setFilterCourse] = useState('ALL');
+    const [loadErrors, setLoadErrors] = useState([]);
+    const [biometricPage, setBiometricPage] = useState(1);
+    const [coursePage, setCoursePage] = useState(1);
+    const [biometricRowsPerPage, setBiometricRowsPerPage] = useState(10);
+    const [courseRowsPerPage, setCourseRowsPerPage] = useState(10);
 
     useEffect(() => {
-        fetchData();
-        checkToday();
+        refreshAttendance();
     }, [currentUser]);
 
-    const fetchData = async () => {
+    useEffect(() => {
+        setCoursePage(1);
+    }, [filterCourse]);
+
+    const refreshAttendance = async () => {
+        if (!currentUser?.uid) return;
+        setLoading(true);
+        setLoadErrors([]);
         try {
-            const res = await api.get(`/attendance/student/${currentUser.uid}`);
-            setHistory(res.data);
-        } catch (err) {
-            console.error(err);
+            const results = await Promise.allSettled([
+                api.get(`/course-attendance/student/${currentUser.uid}/timeline`),
+                api.get(`/attendance/student/${currentUser.uid}`),
+                api.get(`/attendance/check-today/${currentUser.uid}`)
+            ]);
+            const nextErrors = [];
+
+            if (results[0].status === 'fulfilled') {
+                setCourseHistory(results[0].value.data || []);
+            } else {
+                console.error('Failed to fetch course attendance', results[0].reason);
+                setCourseHistory([]);
+                nextErrors.push('Course attendance could not be loaded.');
+            }
+
+            if (results[1].status === 'fulfilled') {
+                setBiometricHistory(results[1].value.data || []);
+            } else {
+                console.error('Failed to fetch biometric attendance', results[1].reason);
+                setBiometricHistory([]);
+                nextErrors.push('Biometric attendance could not be loaded.');
+            }
+
+            if (results[2].status === 'fulfilled') {
+                setAlreadyMarked(Boolean(results[2].value.data));
+            } else {
+                console.error('Failed to check biometric attendance status', results[2].reason);
+                setAlreadyMarked(false);
+                nextErrors.push('Today biometric status could not be confirmed.');
+            }
+
+            setLoadErrors(nextErrors);
         } finally {
             setLoading(false);
         }
     };
 
-    const checkToday = async () => {
-        try {
-            const res = await api.get(`/attendance/check-today/${currentUser.uid}`);
-            setAlreadyMarked(res.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    const handleMarkAttendance = async () => {
+    const handleMarkBiometric = async () => {
+        if (!currentUser?.uid || alreadyMarked) return;
+        setMarkingBiometric(true);
         try {
             const res = await api.post(`/attendance/mark?studentUid=${currentUser.uid}`);
+            setBiometricHistory((prev) => [res.data, ...prev]);
             setAlreadyMarked(true);
-            setTodayStatus(res.data);
-            fetchData();
-            alert(`Attendance Marked: ${res.data.status}`);
         } catch (err) {
-            alert('Failed: ' + (err.response?.data?.error || err.message));
+            await refreshAttendance();
+            alert('Failed to mark biometric attendance: ' + (err.response?.data?.error || err.message));
+        } finally {
+            setMarkingBiometric(false);
         }
     };
 
-    // ─── Attendance Calculation (shared utility) ────────────────────────────────
-    const { percentage, presentDays, absentDays, totalWorkingDays } = calculateAttendance(history);
+    const courses = useMemo(
+        () => ['ALL', ...new Set(courseHistory.map((item) => item.courseName).filter(Boolean))],
+        [courseHistory]
+    );
 
-    const semesterStartLabel = SEMESTER_START_DATE.toLocaleDateString('en-GB', {
-        day: 'numeric', month: 'short', year: 'numeric',
-    });
+    const filteredCourseHistory = useMemo(
+        () => courseHistory.filter((item) => filterCourse === 'ALL' || item.courseName === filterCourse),
+        [courseHistory, filterCourse]
+    );
 
-    // Status colour — uses live threshold from admin settings
-    const getStatusColor = (pct) => {
-        if (pct >= threshold + 10) return { color: '#10b981', label: 'Excellent' };
-        if (pct >= threshold) return { color: '#f59e0b', label: 'Satisfactory' };
-        if (pct >= detainThreshold) return { color: '#ef4444', label: 'Low – Action Required' };
-        return { color: '#dc2626', label: 'Risk of Detainment' };
-    };
-    const statusInfo = getStatusColor(percentage);
+    const biometricTotalPages = Math.max(1, Math.ceil(biometricHistory.length / biometricRowsPerPage));
+    const courseTotalPages = Math.max(1, Math.ceil(filteredCourseHistory.length / courseRowsPerPage));
 
-    // Pagination
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentHistory = history.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(history.length / itemsPerPage);
+    useEffect(() => {
+        setBiometricPage((currentPage) => Math.min(currentPage, biometricTotalPages));
+    }, [biometricTotalPages]);
 
-    const handlePageChange = (page) => setCurrentPage(page);
+    useEffect(() => {
+        setCoursePage((currentPage) => Math.min(currentPage, courseTotalPages));
+    }, [courseTotalPages]);
 
-    if (loading) return <div className="loading-screen"><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>;
+    const paginatedBiometricHistory = useMemo(
+        () => paginateRows(biometricHistory, biometricPage, biometricRowsPerPage),
+        [biometricHistory, biometricPage, biometricRowsPerPage]
+    );
+
+    const paginatedCourseHistory = useMemo(
+        () => paginateRows(filteredCourseHistory, coursePage, courseRowsPerPage),
+        [filteredCourseHistory, coursePage, courseRowsPerPage]
+    );
+
+    const courseAttendedCount = filteredCourseHistory.filter((item) => isCoursePresent(item.status)).length;
+    const courseAbsentCount = filteredCourseHistory.length - courseAttendedCount;
+    const coursePercentage = filteredCourseHistory.length ? Math.round((courseAttendedCount * 100) / filteredCourseHistory.length) : 0;
+
+    const biometricPresentDays = biometricHistory.filter((item) => ['PRESENT', 'LATE'].includes((item.status || '').toUpperCase())).length;
+    const biometricLateDays = biometricHistory.filter((item) => (item.status || '').toUpperCase() === 'LATE').length;
+    const biometricPercentage = biometricHistory.length ? Math.round((biometricPresentDays * 100) / biometricHistory.length) : 0;
+
+    if (loading) {
+        return <div className="loading-screen"><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>;
+    }
 
     return (
         <div className="attendance-page">
-            {/* ── Header ── */}
             <div className="attendance-header">
                 <div>
-                    <h1>My Attendance</h1>
-                    <p className="att-subtext">
-                        Tracking from {semesterStartLabel} · Sundays excluded
-                    </p>
+                    <h1>Attendance</h1>
+                    <p className="att-subtext">Biometric daily presence and course session attendance in one page.</p>
                 </div>
-                <div className="mark-section">
-                    <button
-                        className="btn-mark"
-                        onClick={handleMarkAttendance}
-                        disabled={alreadyMarked}
-                        style={{ opacity: alreadyMarked ? 0.8 : 1 }}
+                <div className="attendance-header-actions">
+                    <select
+                        className="form-input"
+                        style={{ minWidth: 220 }}
+                        value={attendanceType}
+                        onChange={(e) => setAttendanceType(e.target.value)}
                     >
-                        <CheckCircle size={16} /> {alreadyMarked ? 'Marked' : 'Mark for today'}
-                    </button>
+                        <option value="BOTH">Both Attendances</option>
+                        <option value="BIOMETRIC">Biometric Attendance</option>
+                        <option value="COURSE">Course Attendance</option>
+                    </select>
+                    {(attendanceType === 'COURSE' || attendanceType === 'BOTH') && (
+                        <select
+                            className="form-input"
+                            style={{ minWidth: 220 }}
+                        value={filterCourse}
+                            onChange={(e) => setFilterCourse(e.target.value)}
+                        >
+                            {courses.map((course) => (
+                                <option key={course} value={course}>
+                                    {course === 'ALL' ? 'All Courses' : course}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+                    {(attendanceType === 'BIOMETRIC' || attendanceType === 'BOTH') && (
+                        <button
+                            className="btn-mark"
+                            onClick={handleMarkBiometric}
+                            disabled={alreadyMarked || markingBiometric}
+                        >
+                            <Fingerprint size={16} />
+                            {markingBiometric ? 'Marking...' : alreadyMarked ? 'Biometric Marked' : 'Mark Biometric'}
+                        </button>
+                    )}
                 </div>
             </div>
 
-            {/* ── Stats Cards ── */}
-            <div className="attendance-stats">
-                {/* Attendance Status Card */}
-                <div className="stat-card stat-card-left-align">
-                    <h3>ATTENDANCE</h3>
-                    <p className="stat-value-text">
-                        {percentage >= threshold
-                            ? `${percentage}%`
-                            : `Below ${threshold}% threshold`}
-                    </p>
-                    <span className="att-status-pill" style={{
-                        background: percentage >= threshold ? '#dcfce7' : percentage >= detainThreshold ? '#fef08a' : '#fee2e2',
-                        color: percentage >= threshold ? '#166534' : percentage >= detainThreshold ? '#a16207' : '#991b1b'
-                    }}>
-                        {statusInfo.label}
-                    </span>
+            {loadErrors.length > 0 && (
+                <div className="attendance-error-banner">
+                    {loadErrors.join(' ')}
                 </div>
+            )}
 
-                <div className="stat-card stat-card-left-align">
-                    <h3>PRESENT DAYS</h3>
-                    <p className="stat-value">{presentDays}</p>
-                    <span className="stat-sub">out of {totalWorkingDays} working days</span>
-                </div>
+            {(attendanceType === 'BIOMETRIC' || attendanceType === 'BOTH') && (
+                <section className="attendance-block">
+                    <div className="history-header">
+                        <h2><Fingerprint size={18} style={{ verticalAlign: 'text-bottom', marginRight: 8 }} />Biometric Attendance</h2>
+                        <span className="history-subtext">Daily college entry attendance fetched from the biometric attendance records.</span>
+                    </div>
 
-                <div className="stat-card stat-card-left-align">
-                    <h3>ABSENT DAYS</h3>
-                    <p className="stat-value">{absentDays}</p>
-                    <span className="stat-sub">Sundays not counted</span>
-                </div>
+                    <div className="attendance-stats">
+                        <div className="stat-card-left-align">
+                            <h3>BIOMETRIC RATE</h3>
+                            <p className="stat-value-text">{biometricPercentage}%</p>
+                            <span className="att-status-pill" style={{
+                                background: biometricPercentage >= 75 ? '#dcfce7' : '#fee2e2',
+                                color: biometricPercentage >= 75 ? '#166534' : '#991b1b'
+                            }}>
+                                {biometricPercentage >= 75 ? 'Regular' : 'Needs Attention'}
+                            </span>
+                        </div>
+                        <div className="stat-card-left-align">
+                            <h3>PRESENT DAYS</h3>
+                            <p className="stat-value">{biometricPresentDays}</p>
+                            <span className="stat-sub">including late check-ins</span>
+                        </div>
+                        <div className="stat-card-left-align">
+                            <h3>LATE DAYS</h3>
+                            <p className="stat-value">{biometricLateDays}</p>
+                            <span className="stat-sub">late biometric entries</span>
+                        </div>
+                        <div className="stat-card-left-align">
+                            <h3>TOTAL RECORDS</h3>
+                            <p className="stat-value">{biometricHistory.length}</p>
+                            <span className="stat-sub">daily biometric logs</span>
+                        </div>
+                    </div>
 
-                <div className="stat-card stat-card-left-align">
-                    <h3>WORKING DAYS</h3>
-                    <p className="stat-value">{totalWorkingDays}</p>
-                    <span className="stat-sub">since {semesterStartLabel}</span>
-                </div>
-            </div>
-
-            {/* ── History Table ── */}
-            <div className="history-section">
-                <div className="history-header">
-                    <h2>Attendance History</h2>
-                    <span className="history-subtext">Recent entries • Latest on top</span>
-                </div>
-
-                {history.length === 0 ? (
-                    <p className="empty-text">No attendance records found.</p>
-                ) : (
                     <div className="table-container">
                         <table className="attendance-table">
                             <thead>
                                 <tr>
-                                    <th className="col-id">#</th>
-                                    <th className="col-date">Date</th>
-                                    <th className="col-time">Time</th>
-                                    <th className="col-status">Status</th>
+                                    <th>Date</th>
+                                    <th>Check-In</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {currentHistory.map((record, idx) => (
-                                    <tr key={record.id}>
-                                        <td className="col-id">{indexOfFirstItem + idx + 1}</td>
-                                        <td className="col-date">{record.date}</td>
-                                        <td className="col-time">{record.checkInTime}</td>
-                                        <td className="col-status">
-                                            <span className={`status-badge ${record.status === 'LATE' ? 'status-late' : 'status-present'}`}>
-                                                {record.status === 'LATE' ? 'LATE' : 'PRESENT'}
-                                            </span>
-                                        </td>
+                                {biometricHistory.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="3" className="empty-text">No biometric attendance records found in the database.</td>
                                     </tr>
-                                ))}
+                                ) : (
+                                    paginatedBiometricHistory.map((record) => (
+                                        <tr key={record.id}>
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                    <CalendarDays size={14} />
+                                                    {record.date}
+                                                </div>
+                                            </td>
+                                            <td>{record.checkInTime || '—'}</td>
+                                            <td>
+                                                <span className={`status-badge ${record.status === 'LATE' ? 'status-late' : 'status-present'}`}>
+                                                    {record.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
-
-                        <div className="pagination-controls">
-                            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
-                                Previous
-                            </button>
-                            <div className="pagination-numbers">
-                                {/* Page Buttons could go here, but for now we'll match simple style */}
-                                <span>Page <strong>{currentPage}</strong> of {totalPages > 0 ? totalPages : 1}</span>
+                        {biometricHistory.length > 0 && (
+                            <div className="pagination-controls">
+                                <div className="pagination-rows">
+                                    <span>Rows per page</span>
+                                    <select
+                                        className="pagination-select"
+                                        value={biometricRowsPerPage}
+                                        onChange={(e) => {
+                                            setBiometricRowsPerPage(Number(e.target.value));
+                                            setBiometricPage(1);
+                                        }}
+                                    >
+                                        {PAGE_SIZE_OPTIONS.map((size) => (
+                                            <option key={size} value={size}>{size}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="pagination-numbers">
+                                    <button
+                                        type="button"
+                                        onClick={() => setBiometricPage((page) => Math.max(1, page - 1))}
+                                        disabled={biometricPage === 1}
+                                    >
+                                        Previous
+                                    </button>
+                                    <span>
+                                        Page <strong>{biometricPage}</strong> of <strong>{biometricTotalPages}</strong>
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() => setBiometricPage((page) => Math.min(biometricTotalPages, page + 1))}
+                                        disabled={biometricPage === biometricTotalPages}
+                                    >
+                                        Next
+                                    </button>
+                                </div>
                             </div>
-                            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage >= totalPages}>
-                                Next
-                            </button>
+                        )}
+                    </div>
+                </section>
+            )}
+
+            {(attendanceType === 'COURSE' || attendanceType === 'BOTH') && (
+                <section className="attendance-block">
+                    <div className="history-header">
+                        <h2><BookOpen size={18} style={{ verticalAlign: 'text-bottom', marginRight: 8 }} />Course Attendance</h2>
+                        <span className="history-subtext">Mapped from academic schedule by day and session slot, fetched from course attendance records.</span>
+                    </div>
+
+                    <div className="attendance-stats">
+                        <div className="stat-card-left-align">
+                            <h3>COURSE RATE</h3>
+                            <p className="stat-value-text">{coursePercentage}%</p>
+                            <span className="att-status-pill" style={{
+                                background: coursePercentage >= 75 ? '#dcfce7' : '#fee2e2',
+                                color: coursePercentage >= 75 ? '#166534' : '#991b1b'
+                            }}>
+                                {coursePercentage >= 75 ? 'On Track' : 'Below Threshold'}
+                            </span>
+                        </div>
+                        <div className="stat-card-left-align">
+                            <h3>SESSIONS ATTENDED</h3>
+                            <p className="stat-value">{courseAttendedCount}</p>
+                            <span className="stat-sub">present or late</span>
+                        </div>
+                        <div className="stat-card-left-align">
+                            <h3>ABSENT SESSIONS</h3>
+                            <p className="stat-value">{courseAbsentCount}</p>
+                            <span className="stat-sub">session-wise misses</span>
+                        </div>
+                        <div className="stat-card-left-align">
+                            <h3>TOTAL SLOTS</h3>
+                            <p className="stat-value">{filteredCourseHistory.length}</p>
+                            <span className="stat-sub">allocated timetable slots</span>
                         </div>
                     </div>
-                )}
-            </div>
+
+                    <div className="table-container">
+                        <table className="attendance-table">
+                            <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Day</th>
+                                    <th>Session</th>
+                                    <th>Timing</th>
+                                    <th>Venue</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredCourseHistory.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="6" className="empty-text">No course attendance records found in the database for the selected course.</td>
+                                    </tr>
+                                ) : (
+                                    paginatedCourseHistory.map((record) => {
+                                        const status = (record.status || '').toUpperCase();
+                                        const isPresent = ['P', 'PRESENT'].includes(status);
+                                        const isLate = ['L', 'LATE'].includes(status);
+                                        return (
+                                            <tr key={record.id}>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                        <BookOpen size={14} />
+                                                        <div>
+                                                            <div style={{ fontWeight: 600 }}>{record.courseName}</div>
+                                                            <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>{record.courseCode || 'Course'}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>{record.date || '—'}</td>
+                                                <td>{record.session || '—'}</td>
+                                                <td>{record.startTime && record.endTime ? `${record.startTime} - ${record.endTime}` : '—'}</td>
+                                                <td>{record.venue || '—'}</td>
+                                                <td>
+                                                    <span className={`status-badge ${isPresent ? 'status-present' : 'status-late'}`}>
+                                                        {isPresent && <CheckCircle size={13} />}
+                                                        {isLate && <AlertTriangle size={13} />}
+                                                        {!isPresent && !isLate && <XCircle size={13} />}
+                                                        {isPresent ? 'PRESENT' : isLate ? 'LATE' : 'ABSENT'}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+                        {filteredCourseHistory.length > 0 && (
+                            <div className="pagination-controls">
+                                <div className="pagination-rows">
+                                    <span>Rows per page</span>
+                                    <select
+                                        className="pagination-select"
+                                        value={courseRowsPerPage}
+                                        onChange={(e) => {
+                                            setCourseRowsPerPage(Number(e.target.value));
+                                            setCoursePage(1);
+                                        }}
+                                    >
+                                        {PAGE_SIZE_OPTIONS.map((size) => (
+                                            <option key={size} value={size}>{size}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="pagination-numbers">
+                                    <button
+                                        type="button"
+                                        onClick={() => setCoursePage((page) => Math.max(1, page - 1))}
+                                        disabled={coursePage === 1}
+                                    >
+                                        Previous
+                                    </button>
+                                    <span>
+                                        Page <strong>{coursePage}</strong> of <strong>{courseTotalPages}</strong>
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() => setCoursePage((page) => Math.min(courseTotalPages, page + 1))}
+                                        disabled={coursePage === courseTotalPages}
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </section>
+            )}
         </div>
     );
 };

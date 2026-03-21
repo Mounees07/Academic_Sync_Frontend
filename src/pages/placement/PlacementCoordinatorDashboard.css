@@ -909,6 +909,49 @@
     padding: 24px;
 }
 
+.pc-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.pc-overview-card-list {
+    display: grid;
+    gap: 12px;
+}
+
+.pc-overview-mini-card {
+    padding: 16px 18px;
+    border-radius: 18px;
+    border: 1px solid var(--glass-border, rgba(99, 102, 241, 0.12));
+    background: var(--bg-secondary, #f8fafc);
+}
+
+.pc-overview-mini-card span {
+    color: var(--text-secondary, #64748b);
+    font-size: 0.9rem;
+}
+
+.pc-overview-mini-card strong {
+    display: block;
+    margin-top: 8px;
+    color: var(--text-primary, #0f172a);
+    font-size: 1.25rem;
+}
+
+.pc-inline-link {
+    margin-top: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--primary, #6366f1);
+    font-weight: 700;
+    cursor: pointer;
+}
+
 .placement-coordinator-empty {
     display: flex;
     flex-direction: column;
@@ -950,6 +993,7 @@
         grid-template-columns: 1fr;
     }
 
+    .pc-overview-grid,
     .pc-analytics-top-grid,
     .pc-analytics-bottom-grid {
         grid-template-columns: 1fr;
@@ -967,6 +1011,7 @@
 
     .pc-stats-grid,
     .pc-section-grid,
+    .pc-overview-grid,
     .pc-drive-assignments,
     .pc-form-grid,
     .pc-filter-row,

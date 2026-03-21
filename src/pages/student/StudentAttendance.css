@@ -24,6 +24,24 @@
     margin-bottom: 32px;
 }
 
+.attendance-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.attendance-error-banner {
+    margin-bottom: 20px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    background: rgba(239, 68, 68, 0.08);
+    color: #b91c1c;
+    font-size: 13px;
+    font-weight: 600;
+}
+
 .attendance-header h1 {
     font-size: 24px;
     font-weight: 700;
@@ -70,12 +88,21 @@
     /* teal-500 */
 }
 
+.btn-mark:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+}
+
 /* ── Stats Cards ── */
 .attendance-stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     margin-bottom: 40px;
+}
+
+.attendance-block {
+    margin-bottom: 36px;
 }
 
 @media (max-width: 900px) {
@@ -241,15 +268,35 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
     padding: 16px 24px;
     background: var(--bg-card, #ffffff);
     border-top: 1px solid var(--glass-border, #e2e8f0);
+}
+
+.pagination-rows {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .pagination-numbers {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.pagination-select {
+    min-width: 84px;
+    padding: 6px 10px;
+    border: 1px solid var(--glass-border, #e2e8f0);
+    border-radius: 4px;
+    background: var(--bg-card, #ffffff);
+    color: var(--text-primary, #0f172a);
+    font-size: 13px;
 }
 
 .pagination-controls button {
@@ -280,6 +327,18 @@
 
 .pagination-controls strong {
     color: var(--text-primary, #0f172a);
+}
+
+@media (max-width: 768px) {
+    .pagination-controls {
+        align-items: stretch;
+    }
+
+    .pagination-rows,
+    .pagination-numbers {
+        width: 100%;
+        justify-content: space-between;
+    }
 }
 
 .empty-text {

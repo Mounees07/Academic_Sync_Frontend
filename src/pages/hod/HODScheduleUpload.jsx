@@ -42,9 +42,9 @@ const HODScheduleUpload = () => {
     };
 
     const downloadTemplate = () => {
-        const headers = "Title,Type,Date,Session(FN/AN),StartTime,EndTime,Subject Name,Description";
+        const headers = "Title,Type,Date,Session(FN/AN),StartTime,EndTime,Subject Name,Description,Venue";
         // Updated sample to reflect HOD's new scope (Class Schedule instead of Exams)
-        const sample = "Regular Class,ACADEMIC,2026-06-01,FN,09:00,10:00,Operating Systems,Unit 1 Introduction";
+        const sample = "Regular Class,ACADEMIC,2026-06-01,FN,09:00,10:00,Operating Systems,Unit 1 Introduction,Lab Block A";
         const content = headers + "\n" + sample;
 
         const blob = new Blob([content], { type: 'text/csv' });
@@ -69,6 +69,8 @@ const HODScheduleUpload = () => {
                     </button>
                     <div style={{ marginTop: '10px', fontSize: '0.8rem', background: 'var(--bg-subtle)', padding: '10px', borderRadius: '4px' }}>
                         <strong>Allowed Types:</strong> ACADEMIC, LAB_SLOT, SKILL_TRAINING, FACULTY_MEETING
+                        <br />
+                        <span>Required columns for attendance mapping: <strong>Subject Name, Date, Session, StartTime, EndTime, Venue</strong>.</span>
                         <br />
                         <span style={{ color: 'var(--danger)' }}>Note: Exam schedules are now handled by COE.</span>
                     </div>

@@ -45,6 +45,7 @@ const StudentAcademic = () => {
     const { currentUser } = useAuth();
     const [attendance, setAttendance] = useState(null);
     const [marks, setMarks] = useState(null);
+    const [recentSessions, setRecentSessions] = useState([]);
 
     useEffect(() => {
         if (!currentUser) return;
@@ -55,6 +56,10 @@ const StudentAcademic = () => {
         api.get(`/internal-marks/student/${currentUser.uid}`)
             .then(res => setMarks(res.data || []))
             .catch(() => setMarks([]));
+
+        api.get(`/course-attendance/student/${currentUser.uid}/timeline`)
+            .then(res => setRecentSessions((res.data || []).slice(0, 4)))
+            .catch(() => setRecentSessions([]));
     }, [currentUser]);
 
     const attData = attendance || [];
@@ -176,6 +181,24 @@ const StudentAcademic = () => {
                     <button className="sa-view-btn indigo" onClick={() => navigate('/student/attendance-analytics')}>
                         View Detailed Analytics <ArrowRight size={15} />
                     </button>
+
+                    {recentSessions.length > 0 && (
+                        <div className="sa-grade-strip" style={{ marginTop: 14, justifyContent: 'space-between', gap: 10 }}>
+                            {recentSessions.map((session) => (
+                                <div key={session.id} className="sa-grade-item" style={{ alignItems: 'flex-start', minWidth: 0 }}>
+                                    <span className="sa-grade-label" style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
+                                        {session.courseCode || session.courseName}
+                                    </span>
+                                    <span className="sa-grade-label">
+                                        {session.date || '—'} · {session.session || '—'}
+                                    </span>
+                                    <span className="sa-grade-label">
+                                        {session.startTime && session.endTime ? `${session.startTime} - ${session.endTime}` : 'Slot not mapped'}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* ── ACADEMIC PERFORMANCE CARD ── */}

@@ -3,6 +3,7 @@ import { Bell, Search, User, LogOut, Sun, Moon, Monitor, Settings, MessageCircle
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import api from '../utils/api';
 import './Navbar.css';
 
 const toRoman = (num) => {
@@ -41,14 +42,35 @@ const Navbar = ({ toggleSidebar }) => {
     const [recentNotifs, setRecentNotifs] = useState([]);
     const [unreadNotifCount, setUnreadNotifCount] = useState(0);
 
+    const getNotificationsInboxRoute = () => '/notifications';
+
+    const openNotification = async (notification) => {
+        if (!notification) return;
+
+        try {
+            if (!notification.isRead) {
+                await api.put(`/notifications/${notification.id}/read`);
+            }
+        } catch (_) {
+            // Ignore read errors and continue navigation.
+        }
+
+        setRecentNotifs((prev) =>
+            prev.map((item) => (item.id === notification.id ? { ...item, isRead: true } : item))
+        );
+        setUnreadNotifCount((prev) => Math.max(0, prev - (notification.isRead ? 0 : 1)));
+        setIsNotifMenuOpen(false);
+
+        navigate(notification.actionUrl || getNotificationsInboxRoute());
+    };
+
     // Fetch notifications for the top bar
     useEffect(() => {
         if (!userData || !userData.uid) return;
         const fetchNavNotifs = async () => {
             try {
-                const fetchPromise = await fetch(`http://localhost:8080/api/notifications/user/${userData.uid}`);
-                if (!fetchPromise.ok) return;
-                const data = await fetchPromise.json();
+                const response = await api.get(`/notifications/user/${userData.uid}`);
+                const data = response.data;
                 if (data && Array.isArray(data)) {
                     setRecentNotifs(data.slice(0, 5));
                     setUnreadNotifCount(data.filter(n => !n.isRead).length);
@@ -184,7 +206,7 @@ const Navbar = ({ toggleSidebar }) => {
                     
                     <div className="notif-nav-wrapper" ref={notifMenuRef} style={{ position: 'relative' }}>
                         <button 
-                            className="icon-btn nav-secondary-action" 
+                            className={`icon-btn nav-secondary-action ${unreadNotifCount > 0 ? 'has-unread' : ''}`}
                             onClick={() => setIsNotifMenuOpen(!isNotifMenuOpen)}
                             title="Notifications"
                         >
@@ -206,7 +228,11 @@ const Navbar = ({ toggleSidebar }) => {
                                         </div>
                                     ) : (
                                         recentNotifs.map(n => (
-                                            <div key={n.id} className={`nav-notif-item ${!n.isRead ? 'unread' : ''}`}>
+                                            <div
+                                                key={n.id}
+                                                className={`nav-notif-item ${!n.isRead ? 'unread' : ''} ${n.actionUrl ? 'has-link' : ''}`}
+                                                onClick={() => openNotification(n)}
+                                            >
                                                 <div className="nav-notif-content">
                                                     <h5>{n.title}</h5>
                                                     <p>{n.message}</p>
@@ -215,7 +241,13 @@ const Navbar = ({ toggleSidebar }) => {
                                         ))
                                     )}
                                 </div>
-                                <div className="nav-notif-footer" onClick={() => { setIsNotifMenuOpen(false); navigate(userData?.role === 'STUDENT' ? '/student/notifications' : '/dashboard'); }}>
+                                <div
+                                    className="nav-notif-footer"
+                                    onClick={() => {
+                                        setIsNotifMenuOpen(false);
+                                        navigate(getNotificationsInboxRoute());
+                                    }}
+                                >
                                     View full inbox
                                 </div>
                             </div>

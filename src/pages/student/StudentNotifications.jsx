@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
-import { Bell, CheckCheck, X, AlertTriangle, Clock, CreditCard, FileText, Star, Calendar, Award, GraduationCap } from 'lucide-react';
+import { Bell, CheckCheck, X, AlertTriangle, Clock, CreditCard, FileText, Star, Calendar, Award, GraduationCap, ArrowRight } from 'lucide-react';
 import { Hourglass } from 'ldrs/react';
 import 'ldrs/react/Hourglass.css';
 import './StudentNotifications.css';
@@ -31,6 +32,7 @@ const timeAgo = (dateStr) => {
 
 const StudentNotifications = () => {
     const { currentUser } = useAuth();
+    const navigate = useNavigate();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('ALL');
@@ -40,29 +42,8 @@ const StudentNotifications = () => {
 
         const fetchOrSeed = async () => {
             try {
-                let res = await api.get(`/notifications/user/${currentUser.uid}`);
-                let data = res.data || [];
-
-                if (data.length === 0) {
-                    // Seed some dummy notifications if the user has a fresh database
-                    const mockData = [
-                        { type: 'RESULT_PUBLISHED', title: 'Semester Results Available', message: 'The COE has published the final results for your previous semester. You may now view your SGPA and transcript.' },
-                        { type: 'MARK_UPDATE', title: 'Assignment Graded', message: 'Your instructor has graded your Machine Learning Phase 1 Project. You scored 95/100.' },
-                        { type: 'LEAVE_UPDATE', title: 'Leave Application Approved', message: 'Your medical leave request from March 15th to March 17th has been approved by your HOD.' },
-                        { type: 'FEE_PAID', title: 'Payment Successful', message: 'We have successfully received your semester fee payment. Receipt #80921 has been generated.' },
-                        { type: 'SCHEDULE_PUBLISHED', title: 'Timetable Published', message: 'The academic timetable for the upcoming semester has been finalized and uploaded to your portal.' },
-                        { type: 'ASSIGNMENT_DUE', title: 'Pending Assignment', message: 'Your Data Structures Assignment #4 is due in exactly 2 days.' },
-                        { type: 'EXAM_REMINDER', title: 'Examination Scheduled', message: 'The Machine Learning midterm starts tomorrow at 10:00 AM in Hall B.' },
-                        { type: 'LOW_ATTENDANCE', title: 'Attendance Warning', message: 'Your attendance in OS has dropped below the 80% threshold.' },
-                        { type: 'REGISTRATION_OPEN', title: 'Course Registration', message: 'Elective course registration is now open. Please register before the final deadline.' },
-                        { type: 'GENERAL', title: 'System Notice', message: 'We have successfully provisioned your platform access for the current semester.' },
-                    ];
-                    for (const m of mockData) {
-                        await api.post(`/notifications/user/${currentUser.uid}/create`, m);
-                    }
-                    res = await api.get(`/notifications/user/${currentUser.uid}`);
-                    data = res.data || [];
-                }
+                const res = await api.get(`/notifications/user/${currentUser.uid}`);
+                const data = res.data || [];
 
                 // Sort newest first
                 data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -83,6 +64,18 @@ const StudentNotifications = () => {
             await api.put(`/notifications/${id}/read`);
         } catch (_) { /* ignore */ }
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+    };
+
+    const openNotification = async (notification) => {
+        if (!notification) return;
+
+        if (!notification.isRead) {
+            await markRead(notification.id);
+        }
+
+        if (notification.actionUrl) {
+            navigate(notification.actionUrl);
+        }
     };
 
     const markAllRead = async () => {
@@ -141,7 +134,7 @@ const StudentNotifications = () => {
                         return (
                             <div key={n.id}
                                 className={`notif-item ${n.isRead ? 'read' : 'unread'}`}
-                                onClick={() => !n.isRead && markRead(n.id)}>
+                                onClick={() => openNotification(n)}>
                                 <div className="notif-icon-wrap" style={{ background: cfg.bg }}>
                                     <Icon size={18} color={cfg.color} />
                                 </div>
@@ -156,6 +149,11 @@ const StudentNotifications = () => {
                                             {cfg.label}
                                         </span>
                                         <span className="notif-time">{timeAgo(n.createdAt)}</span>
+                                        {n.actionUrl && (
+                                            <span className="notif-link-tag">
+                                                Open details <ArrowRight size={12} />
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                                 {!n.isRead && (

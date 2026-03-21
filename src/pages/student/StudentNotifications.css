@@ -160,6 +160,7 @@
     border-radius: 50%;
     background: #6366f1;
     flex-shrink: 0;
+    animation: notifPulse 1.4s ease-in-out infinite;
 }
 
 .notif-message {
@@ -173,6 +174,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .notif-type-tag {
@@ -187,6 +189,18 @@
 .notif-time {
     font-size: 0.75rem;
     color: var(--text-muted);
+}
+
+.notif-link-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.1);
+    padding: 3px 8px;
+    border-radius: 999px;
 }
 
 .notif-read-btn {
@@ -215,4 +229,18 @@
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes notifPulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.25);
+    }
+    50% {
+        opacity: 0.65;
+        transform: scale(1.08);
+        box-shadow: 0 0 0 6px rgba(99, 102, 241, 0);
+    }
 }
