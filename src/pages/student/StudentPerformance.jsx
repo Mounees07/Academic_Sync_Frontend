@@ -4,7 +4,7 @@ import api from '../../utils/api';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
-import { ChevronUp, ChevronDown, Minus } from 'lucide-react';
+import { ChevronUp, ChevronDown, Minus, BookOpen, ClipboardList } from 'lucide-react';
 import { Hourglass } from 'ldrs/react';
 import 'ldrs/react/Hourglass.css';
 import './StudentPerformance.css';
@@ -225,10 +225,36 @@ const StudentPerformance = () => {
         submissions,
         quizResults: quizAttempts.length > 0 ? quizAttempts : loadStoredQuizResults(currentUser?.uid),
     });
+    const assessmentResults = quizAttempts.length > 0 ? quizAttempts : loadStoredQuizResults(currentUser?.uid);
 
     const overallAvg = performanceRows.length > 0
         ? Number((performanceRows.reduce((sum, row) => sum + (toNumber(row.percentageScore) || 0), 0) / performanceRows.length).toFixed(1))
         : 0;
+    const internalSubjectsCount = marks.length;
+    const internalMarksAverage = marks.length > 0
+        ? Number((marks.reduce((sum, mark) => sum + (toNumber(mark.percentageScore) || 0), 0) / marks.length).toFixed(1))
+        : 0;
+    const internalMarksTotal = marks.reduce((sum, mark) => sum + (toNumber(mark.totalScore) || 0), 0);
+    const internalMarksMax = marks.reduce((sum, mark) => sum + (toNumber(mark.maxTotal) || 0), 0);
+    const assessmentCount = assessmentResults.length;
+    const assessmentAverage = assessmentResults.length > 0
+        ? Number((assessmentResults.reduce((sum, result) => {
+            const score = toNumber(result.score);
+            const total = toNumber(result.total);
+            if (!total || score === null) return sum;
+            return sum + ((score / total) * 100);
+        }, 0) / assessmentResults.length).toFixed(1))
+        : 0;
+    const bestAssessment = assessmentResults.reduce((best, result) => {
+        const score = toNumber(result.score);
+        const total = toNumber(result.total);
+        if (!total || score === null) return best;
+        const pct = (score / total) * 100;
+        if (!best || pct > best.pct) {
+            return { pct, score, total };
+        }
+        return best;
+    }, null);
 
     const excellentCount = performanceRows.filter(m => m.percentageScore >= 75).length;
     const averageCount = performanceRows.filter(m => m.percentageScore >= 50 && m.percentageScore < 75).length;
@@ -291,6 +317,42 @@ const StudentPerformance = () => {
                     <div className="perf-stat-label">Needs Focus</div>
                     <div className="perf-stat-value" style={{ color: lowCount > 0 ? '#ef4444' : '#10b981' }}>{lowCount}</div>
                     <div className="perf-stat-sub">below 50%</div>
+                </div>
+            </div>
+
+            <div className="perf-highlight-grid">
+                <div className="perf-highlight-card perf-highlight-card--internal">
+                    <div className="perf-highlight-head">
+                        <div className="perf-highlight-icon">
+                            <BookOpen size={18} />
+                        </div>
+                        <div>
+                            <div className="perf-highlight-title">Internal Marks</div>
+                            <div className="perf-highlight-sub">Displays the internal marks of the student</div>
+                        </div>
+                    </div>
+                    <div className="perf-highlight-main">{internalMarksAverage}%</div>
+                    <div className="perf-highlight-meta">
+                        <span>{internalSubjectsCount} subjects recorded</span>
+                        <span>{internalMarksTotal} / {internalMarksMax || '-'}</span>
+                    </div>
+                </div>
+
+                <div className="perf-highlight-card perf-highlight-card--assessment">
+                    <div className="perf-highlight-head">
+                        <div className="perf-highlight-icon">
+                            <ClipboardList size={18} />
+                        </div>
+                        <div>
+                            <div className="perf-highlight-title">Assessment Marks</div>
+                            <div className="perf-highlight-sub">Displays the assessment marks of the student</div>
+                        </div>
+                    </div>
+                    <div className="perf-highlight-main">{assessmentAverage}%</div>
+                    <div className="perf-highlight-meta">
+                        <span>{assessmentCount} assessments attempted</span>
+                        <span>{bestAssessment ? `Best ${bestAssessment.score}/${bestAssessment.total}` : 'No attempts yet'}</span>
+                    </div>
                 </div>
             </div>
 

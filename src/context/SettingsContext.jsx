@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import api from '../utils/api';
 
 const SettingsContext = createContext({});
@@ -16,27 +16,27 @@ export const SettingsProvider = ({ children }) => {
     });
     const [settingsLoaded, setSettingsLoaded] = useState(false);
 
-    useEffect(() => {
-        const fetchPublicSettings = async () => {
-            try {
-                const res = await api.get('/admin/settings/public/features');
-                if (res.data) {
-                    const coerced = {};
-                    for (const [key, value] of Object.entries(res.data)) {
-                        // Convert "true"/"false" strings to actual booleans
-                        if (value === 'true') coerced[key] = true;
-                        else if (value === 'false') coerced[key] = false;
-                        else coerced[key] = value;
-                    }
-                    setSettings(prev => ({ ...prev, ...coerced }));
+    const refreshSettings = useCallback(async () => {
+        try {
+            const res = await api.get('/admin/settings/public/features');
+            if (res.data) {
+                const coerced = {};
+                for (const [key, value] of Object.entries(res.data)) {
+                    if (value === 'true') coerced[key] = true;
+                    else if (value === 'false') coerced[key] = false;
+                    else coerced[key] = value;
                 }
-            } catch (err) {
-                console.warn('Could not load public settings, using defaults:', err.message);
-            } finally {
-                setSettingsLoaded(true);
+                setSettings(prev => ({ ...prev, ...coerced }));
             }
-        };
-        fetchPublicSettings();
+        } catch (err) {
+            console.warn('Could not load public settings, using defaults:', err.message);
+        } finally {
+            setSettingsLoaded(true);
+        }
+    }, []);
+
+    useEffect(() => {
+        refreshSettings();
     }, []);
 
     const getBool = (key, fallback = true) => {
@@ -46,7 +46,7 @@ export const SettingsProvider = ({ children }) => {
     };
 
     return (
-        <SettingsContext.Provider value={{ settings, settingsLoaded, getBool }}>
+        <SettingsContext.Provider value={{ settings, settingsLoaded, getBool, refreshSettings }}>
             {children}
         </SettingsContext.Provider>
     );

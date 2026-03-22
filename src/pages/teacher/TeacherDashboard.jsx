@@ -25,6 +25,7 @@ import {
     Cell
 } from 'recharts';
 import '../../pages/DashboardOverview.css';
+import CollegeCalendarWidget from '../../components/college-calendar/CollegeCalendarWidget';
 
 
 const TeacherDashboard = () => {
@@ -141,6 +142,14 @@ const TeacherDashboard = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div style={{ marginTop: '24px' }}>
+                <CollegeCalendarWidget
+                    title="College Calendar"
+                    subtitle="Shared leave days, government holidays, and vacation windows"
+                    compact
+                />
             </div>
 
 

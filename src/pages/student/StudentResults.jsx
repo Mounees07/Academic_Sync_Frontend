@@ -1,11 +1,59 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
-import { Award, BookOpen, Calendar, TrendingUp, Download, Loader } from 'lucide-react';
+import { Award, BookOpen, TrendingUp } from 'lucide-react';
 import FeatureGate from '../../components/FeatureGate';
 import './StudentResults.css';
 import { Hourglass } from 'ldrs/react';
 import 'ldrs/react/Hourglass.css';
+
+const round2 = (value) => Math.round((Number(value) || 0) * 100) / 100;
+
+const convertSemesterMarksToSixty = (semesterMarks) => {
+    if (semesterMarks === null || semesterMarks === undefined || semesterMarks === '') return 0;
+    return round2((Number(semesterMarks) / 100) * 60);
+};
+
+const getGradePoints = (grade) => {
+    switch (grade) {
+        case 'O': return 10;
+        case 'A+': return 9;
+        case 'A': return 8;
+        case 'B+': return 7;
+        case 'B': return 6;
+        default: return 0;
+    }
+};
+
+const getGrade = (totalMarks, semesterMarks) => {
+    if (semesterMarks === null || semesterMarks === undefined || semesterMarks === '') return 'AB';
+    if (totalMarks >= 91) return 'O';
+    if (totalMarks >= 81) return 'A+';
+    if (totalMarks >= 71) return 'A';
+    if (totalMarks >= 61) return 'B+';
+    if (totalMarks >= 50) return 'B';
+    return 'RA';
+};
+
+const normalizeResult = (result) => {
+    const internalMarks = round2(result.internalMarks);
+    const semesterMarks = result.semesterMarks === null || result.semesterMarks === undefined || result.semesterMarks === ''
+        ? null
+        : round2(result.semesterMarks);
+    const totalMarks = round2(internalMarks + convertSemesterMarksToSixty(semesterMarks));
+    const grade = getGrade(totalMarks, semesterMarks);
+    const resultStatus = grade === 'AB' ? 'Absent' : grade === 'RA' ? 'RA' : 'Pass';
+
+    return {
+        ...result,
+        internalMarks,
+        semesterMarks,
+        totalMarks,
+        grade,
+        gradePoints: getGradePoints(grade),
+        resultStatus
+    };
+};
 
 const StudentResults = () => {
     const { currentUser } = useAuth();
@@ -21,54 +69,46 @@ const StudentResults = () => {
         if (!currentUser) return;
         try {
             const res = await api.get(`/results/student/${currentUser.uid}`);
-            setResults(res.data);
-            calculateStats(res.data);
+            const normalizedResults = (res.data || []).map(normalizeResult);
+            setResults(normalizedResults);
+            calculateStats(normalizedResults);
         } catch (err) {
-            console.error("Failed to fetch results", err);
+            console.error('Failed to fetch results', err);
         } finally {
             setLoading(false);
         }
     };
 
     const calculateStats = (data) => {
-        // Group by semester
-        const semGroups = {};
-        data.forEach(r => {
-            const sem = r.semester;
-            if (!semGroups[sem]) semGroups[sem] = [];
-            semGroups[sem].push(r);
-        });
+        const semesterGroups = data.reduce((acc, result) => {
+            const sem = result.semester || 'Unknown';
+            if (!acc[sem]) acc[sem] = [];
+            acc[sem].push(result);
+            return acc;
+        }, {});
 
-        // Calculate SGPA for latest sem (simple approx if not stored)
-        // Actually, let's just use the GPA stored in User profile for CGPA.
-        // But here we can compute statistics from the Results data.
         let totalPoints = 0;
         let totalCredits = 0;
 
-        data.forEach(r => {
-            if (r.credits > 0 && r.grade !== 'RA' && r.grade !== 'AB') {
-                const points = getGradePoints(r.grade);
-                totalPoints += (points * r.credits);
-                totalCredits += r.credits;
+        Object.values(semesterGroups).forEach((semesterResults) => {
+            const hasArrear = semesterResults.some((result) => result.grade === 'RA');
+            if (hasArrear) {
+                return;
             }
+
+            semesterResults.forEach((result) => {
+                if (result.credits > 0 && result.grade !== 'AB') {
+                    totalPoints += result.gradePoints * result.credits;
+                    totalCredits += result.credits;
+                }
+            });
         });
 
         setStats({
             totalCredits,
-            cgpa: totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : "0.00",
+            cgpa: totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : 'N/A',
             totalSubjects: data.length
         });
-    };
-
-    const getGradePoints = (grade) => {
-        switch (grade) {
-            case "O": return 10;
-            case "A+": return 9;
-            case "A": return 8;
-            case "B+": return 7;
-            case "B": return 6;
-            default: return 0;
-        }
     };
 
     const getGradeColor = (grade) => {
@@ -78,9 +118,10 @@ const StudentResults = () => {
         return 'text-red-500';
     };
 
-    if (loading) return <div className="loading-screen"><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>;
+    if (loading) {
+        return <div className="loading-screen"><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>;
+    }
 
-    // Group results by Semester
     const groupedResults = results.reduce((acc, curr) => {
         const sem = curr.semester || 'Unknown';
         if (!acc[sem]) acc[sem] = [];
@@ -96,12 +137,8 @@ const StudentResults = () => {
                         <h1>My Results</h1>
                         <p>Academic performance and grade history</p>
                     </div>
-                    {/* <button className="btn btn-secondary">
-                    <Download size={18} /> Download Transcript
-                </button> */}
                 </header>
 
-                {/* Stats Overview */}
                 <div className="stats-grid">
                     <div className="stat-card">
                         <div className="stat-icon bg-purple-100 text-purple-600">
@@ -127,14 +164,13 @@ const StudentResults = () => {
                         </div>
                         <div>
                             <h3>Subjects Cleared</h3>
-                            <p className="stat-value">{results.filter(r => r.grade !== 'RA' && r.grade !== 'AB').length}</p>
+                            <p className="stat-value">{results.filter((result) => result.grade !== 'RA' && result.grade !== 'AB').length}</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Semester Wise Results */}
                 <div className="semesters-container">
-                    {Object.keys(groupedResults).sort().reverse().map(sem => (
+                    {Object.keys(groupedResults).sort().reverse().map((sem) => (
                         <div key={sem} className="semester-section glass-card">
                             <div className="sem-header">
                                 <h2>Semester {sem}</h2>
@@ -159,14 +195,14 @@ const StudentResults = () => {
                                             <tr key={idx}>
                                                 <td className="font-mono">{result.subjectCode}</td>
                                                 <td>{result.subjectName}</td>
-                                                <td>{result.internalMarks ?? '—'}</td>
-                                                <td>{result.semesterMarks ?? '—'}</td>
-                                                <td>{result.totalMarks ?? '—'}</td>
+                                                <td>{result.internalMarks ?? '-'}</td>
+                                                <td>{result.semesterMarks ?? 'AB'}</td>
+                                                <td>{result.totalMarks ?? '-'}</td>
                                                 <td>{result.credits}</td>
                                                 <td className={`font-bold ${getGradeColor(result.grade)}`}>{result.grade}</td>
                                                 <td>
                                                     <span className={`status-pill ${result.grade === 'RA' || result.grade === 'AB' ? 'fail' : 'pass'}`}>
-                                                        {result.grade === 'RA' || result.grade === 'AB' ? 'Re-Appear' : 'Pass'}
+                                                        {result.resultStatus}
                                                     </span>
                                                 </td>
                                             </tr>

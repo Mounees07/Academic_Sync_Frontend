@@ -12,6 +12,7 @@ import PlacementOverviewPage from './views/PlacementOverviewPage';
 import PlacementStudentsPage from './views/PlacementStudentsPage';
 import PlacementDrivesPage from './views/PlacementDrivesPage';
 import PlacementAnalyticsPage from './views/PlacementAnalyticsPage';
+import CollegeCalendarWidget from '../../components/college-calendar/CollegeCalendarWidget';
 import './PlacementCoordinatorDashboard.css';
 
 const READINESS_OPTIONS = [
@@ -934,6 +935,13 @@ const PlacementCoordinatorDashboard = () => {
                 dashboard={dashboard}
                 formatScore={formatScore}
                 onOpenStudents={() => navigate('/placement-coordinator/students')}
+            />
+
+            <CollegeCalendarWidget
+                title="Placement Office Calendar"
+                subtitle="Keep drives aligned with campus leave days, holidays, and vacation periods"
+                compact
+                className="pc-calendar-widget"
             />
 
             {renderActivePage()}

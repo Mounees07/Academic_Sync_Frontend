@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import '../../pages/DashboardOverview.css';
 import './COEDashboard.css';
+import CollegeCalendarWidget from '../../components/college-calendar/CollegeCalendarWidget';
 
 const COEDashboard = () => {
     const { currentUser, userData } = useAuth();
@@ -284,6 +285,12 @@ const COEDashboard = () => {
                         )}
                     </div>
                 </div>
+
+                <CollegeCalendarWidget
+                    title="Exam-Aware Calendar"
+                    subtitle="Campus holidays and vacation days visible while planning examinations"
+                    compact
+                />
 
             </div>
         </div>

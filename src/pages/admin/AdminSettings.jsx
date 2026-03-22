@@ -21,7 +21,7 @@ import api from '../../utils/api';
 import { useSettings } from '../../context/SettingsContext';
 
 const AdminSettings = () => {
-    const { settings: liveSettings } = useSettings();
+    const { refreshSettings } = useSettings();
     const [settings, setSettings] = useState({
         siteName: 'AcaSync Platform',
         adminEmail: 'admin@acasync.edu',
@@ -45,6 +45,7 @@ const AdminSettings = () => {
         // Policies
         'policy.attendance.threshold': 75,
         'policy.attendance.detain': 65,
+        'policy.attendance.semesterStartDate': '',
         'policy.leave.maxDays': 10,
         'policy.dataRetention': 365,
         'policy.password.minLength': 8,
@@ -105,6 +106,7 @@ const AdminSettings = () => {
                         // Number / mixed fields
                         'policy.attendance.threshold': num('policy.attendance.threshold', 75),
                         'policy.attendance.detain': num('policy.attendance.detain', 65),
+                        'policy.attendance.semesterStartDate': d['policy.attendance.semesterStartDate'] ?? prev['policy.attendance.semesterStartDate'],
                         'policy.leave.maxDays': num('policy.leave.maxDays', 10),
                         'policy.dataRetention': num('policy.dataRetention', 365),
                         'policy.password.minLength': num('policy.password.minLength', 8),
@@ -150,6 +152,7 @@ const AdminSettings = () => {
                 // coerce numbers → string (backend stores everything as String)
                 'policy.attendance.threshold': String(settings['policy.attendance.threshold']),
                 'policy.attendance.detain': String(settings['policy.attendance.detain']),
+                'policy.attendance.semesterStartDate': String(settings['policy.attendance.semesterStartDate']),
                 'policy.leave.maxDays': String(settings['policy.leave.maxDays']),
                 'policy.dataRetention': String(settings['policy.dataRetention']),
                 'policy.password.minLength': String(settings['policy.password.minLength']),
@@ -159,8 +162,7 @@ const AdminSettings = () => {
             const response = await api.post('/admin/settings', payload);
 
             if (response.status === 200) {
-                // Refresh public settings cache in the browser
-                try { await api.get('/admin/settings/public/features'); } catch (_) { }
+                await refreshSettings();
                 alert('Settings saved successfully! Changes are now enforced across the platform.');
             }
         } catch (error) {
@@ -477,6 +479,15 @@ const AdminSettings = () => {
                                     onChange={handleChange}
                                     placeholder="65"
                                     icon={Shield}
+                                />
+                                <InputField
+                                    label="Attendance Start Date"
+                                    name="policy.attendance.semesterStartDate"
+                                    type="date"
+                                    value={settings['policy.attendance.semesterStartDate'] || ''}
+                                    onChange={handleChange}
+                                    placeholder="YYYY-MM-DD"
+                                    icon={Clock}
                                 />
                                 <InputField
                                     label="Max Leave Days Per Semester"

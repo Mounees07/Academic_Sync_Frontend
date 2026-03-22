@@ -96,7 +96,7 @@
 /* ── Stats Cards ── */
 .attendance-stats {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 16px;
     margin-bottom: 40px;
 }
@@ -114,13 +114,69 @@
 .stat-card-left-align {
     background: var(--bg-card, #ffffff);
     padding: 20px 24px;
-    border-radius: 4px;
+    border-radius: 18px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
     border: 1px solid var(--glass-border, #e2e8f0);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.06);
+    min-height: 150px;
+}
+
+.attendance-metric-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.attendance-metric-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: linear-gradient(180deg, rgba(59, 130, 246, 0.95), rgba(14, 165, 233, 0.45));
+}
+
+.attendance-metric-card--present::before {
+    background: linear-gradient(180deg, #10b981, rgba(16, 185, 129, 0.35));
+}
+
+.attendance-metric-card--absent::before {
+    background: linear-gradient(180deg, #ef4444, rgba(239, 68, 68, 0.35));
+}
+
+.attendance-metric-card--working::before {
+    background: linear-gradient(180deg, #3b82f6, rgba(59, 130, 246, 0.35));
+}
+
+.attendance-metric-card--leave::before {
+    background: linear-gradient(180deg, #8b5cf6, rgba(139, 92, 246, 0.35));
+}
+
+.attendance-metric-card--rate::before {
+    background: linear-gradient(180deg, #f59e0b, rgba(245, 158, 11, 0.35));
+}
+
+.attendance-metric-topline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.attendance-metric-topline h3 {
+    margin: 0;
+}
+
+.attendance-metric-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary, #0f172a);
+    background: color-mix(in srgb, var(--bg-card, #ffffff) 82%, var(--text-secondary, #94a3b8) 18%);
 }
 
 .stat-card-left-align h3 {

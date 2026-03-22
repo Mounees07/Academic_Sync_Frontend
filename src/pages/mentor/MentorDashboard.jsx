@@ -7,6 +7,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import { Hourglass } from 'ldrs/react';
 import 'ldrs/react/Hourglass.css';
+import CollegeCalendarWidget from '../../components/college-calendar/CollegeCalendarWidget';
 
 const isPresentStatus = (status) => ['P', 'PRESENT', 'L', 'LATE'].includes(String(status || '').toUpperCase());
 
@@ -2059,6 +2060,12 @@ const MentorDashboard = () => {
                         )}
                     </div>
                 </div>
+
+                <CollegeCalendarWidget
+                    title="Mentor Calendar"
+                    subtitle="Shared leave days and vacation periods to plan mentee check-ins better"
+                    compact
+                />
             </div>
         </div>
     );
@@ -2310,6 +2317,12 @@ const MentorDashboard = () => {
                         
                     </div>
                 </div>
+
+                <CollegeCalendarWidget
+                    title="Faculty Calendar"
+                    subtitle="Campus holidays and vacations visible while planning classes and grading"
+                    compact
+                />
             </div>
         </div>
     );

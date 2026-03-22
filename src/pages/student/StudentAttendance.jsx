@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useSettings } from '../../context/SettingsContext';
 import api from '../../utils/api';
-import { BookOpen, CheckCircle, XCircle, AlertTriangle, Fingerprint, CalendarDays } from 'lucide-react';
+import { BookOpen, CheckCircle, XCircle, AlertTriangle, Fingerprint, CalendarDays, Briefcase, Ban, TimerReset } from 'lucide-react';
+import { calculateAttendance, resolveSemesterStartDate } from '../../utils/attendanceUtils';
 import './StudentAttendance.css';
 import { Hourglass } from 'ldrs/react';
 import 'ldrs/react/Hourglass.css';
@@ -14,10 +16,41 @@ const paginateRows = (rows, page, pageSize) => {
     return rows.slice(startIndex, startIndex + pageSize);
 };
 
+const countWeekdaysInRange = (fromDate, toDate, minDate, maxDate) => {
+    if (!fromDate || !toDate) return 0;
+
+    const start = new Date(fromDate);
+    const end = new Date(toDate);
+    const lowerBound = new Date(minDate);
+    const upperBound = new Date(maxDate);
+
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+    lowerBound.setHours(0, 0, 0, 0);
+    upperBound.setHours(0, 0, 0, 0);
+
+    const effectiveStart = start < lowerBound ? lowerBound : start;
+    const effectiveEnd = end > upperBound ? upperBound : end;
+
+    if (effectiveStart > effectiveEnd) return 0;
+
+    let days = 0;
+    const cursor = new Date(effectiveStart);
+    while (cursor <= effectiveEnd) {
+        if (cursor.getDay() !== 0 && cursor.getDay() !== 6) {
+            days++;
+        }
+        cursor.setDate(cursor.getDate() + 1);
+    }
+    return days;
+};
+
 const StudentAttendance = () => {
     const { currentUser } = useAuth();
+    const { settings, settingsLoaded, refreshSettings } = useSettings();
     const [courseHistory, setCourseHistory] = useState([]);
     const [biometricHistory, setBiometricHistory] = useState([]);
+    const [leaveHistory, setLeaveHistory] = useState([]);
     const [alreadyMarked, setAlreadyMarked] = useState(false);
     const [loading, setLoading] = useState(true);
     const [markingBiometric, setMarkingBiometric] = useState(false);
@@ -34,6 +67,24 @@ const StudentAttendance = () => {
     }, [currentUser]);
 
     useEffect(() => {
+        refreshSettings();
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                refreshSettings();
+            }
+        };
+
+        window.addEventListener('focus', refreshSettings);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            window.removeEventListener('focus', refreshSettings);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [refreshSettings]);
+
+    useEffect(() => {
         setCoursePage(1);
     }, [filterCourse]);
 
@@ -45,7 +96,8 @@ const StudentAttendance = () => {
             const results = await Promise.allSettled([
                 api.get(`/course-attendance/student/${currentUser.uid}/timeline`),
                 api.get(`/attendance/student/${currentUser.uid}`),
-                api.get(`/attendance/check-today/${currentUser.uid}`)
+                api.get(`/attendance/check-today/${currentUser.uid}`),
+                api.get(`/leaves/student/${currentUser.uid}`).catch(() => ({ data: [] }))
             ]);
             const nextErrors = [];
 
@@ -71,6 +123,13 @@ const StudentAttendance = () => {
                 console.error('Failed to check biometric attendance status', results[2].reason);
                 setAlreadyMarked(false);
                 nextErrors.push('Today biometric status could not be confirmed.');
+            }
+
+            if (results[3].status === 'fulfilled') {
+                setLeaveHistory(Array.isArray(results[3].value.data) ? results[3].value.data : []);
+            } else {
+                console.error('Failed to fetch leave history', results[3].reason);
+                setLeaveHistory([]);
             }
 
             setLoadErrors(nextErrors);
@@ -129,11 +188,30 @@ const StudentAttendance = () => {
     const courseAbsentCount = filteredCourseHistory.length - courseAttendedCount;
     const coursePercentage = filteredCourseHistory.length ? Math.round((courseAttendedCount * 100) / filteredCourseHistory.length) : 0;
 
-    const biometricPresentDays = biometricHistory.filter((item) => ['PRESENT', 'LATE'].includes((item.status || '').toUpperCase())).length;
-    const biometricLateDays = biometricHistory.filter((item) => (item.status || '').toUpperCase() === 'LATE').length;
-    const biometricPercentage = biometricHistory.length ? Math.round((biometricPresentDays * 100) / biometricHistory.length) : 0;
+    const semesterStartDate = useMemo(() => resolveSemesterStartDate(settings), [settings]);
+    const semesterStartDateLabel = useMemo(
+        () => semesterStartDate
+            ? semesterStartDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
+            : 'Not configured by admin',
+        [semesterStartDate]
+    );
+    const {
+        percentage: biometricPercentage,
+        presentDays: biometricPresentDays,
+        absentDays: biometricAbsentDays,
+        totalWorkingDays,
+    } = useMemo(() => calculateAttendance(biometricHistory, semesterStartDate), [biometricHistory, semesterStartDate]);
+    const approvedLeaveDays = useMemo(() => {
+        if (!semesterStartDate) {
+            return 0;
+        }
+        const today = new Date();
+        return leaveHistory
+            .filter((leave) => leave?.mentorStatus === 'APPROVED')
+            .reduce((sum, leave) => sum + countWeekdaysInRange(leave.fromDate, leave.toDate, semesterStartDate, today), 0);
+    }, [leaveHistory, semesterStartDate]);
 
-    if (loading) {
+    if (loading || !settingsLoaded) {
         return <div className="loading-screen"><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>;
     }
 
@@ -142,7 +220,12 @@ const StudentAttendance = () => {
             <div className="attendance-header">
                 <div>
                     <h1>Attendance</h1>
-                    <p className="att-subtext">Biometric daily presence and course session attendance in one page.</p>
+                    <p className="att-subtext">
+                        Biometric daily presence and course session attendance in one page.
+                        {semesterStartDate
+                            ? ` Attendance is currently calculated from ${semesterStartDateLabel}.`
+                            : ' Attendance start date is not configured yet. Ask the admin to set the semester start date.'}
+                    </p>
                 </div>
                 <div className="attendance-header-actions">
                     <select
@@ -192,11 +275,11 @@ const StudentAttendance = () => {
                 <section className="attendance-block">
                     <div className="history-header">
                         <h2><Fingerprint size={18} style={{ verticalAlign: 'text-bottom', marginRight: 8 }} />Biometric Attendance</h2>
-                        <span className="history-subtext">Daily college entry attendance fetched from the biometric attendance records.</span>
+                        <span className="history-subtext">Daily college entry attendance fetched from the biometric attendance records and calculated from {semesterStartDateLabel}.</span>
                     </div>
 
                     <div className="attendance-stats">
-                        <div className="stat-card-left-align">
+                        <div className="stat-card-left-align attendance-metric-card attendance-metric-card--rate">
                             <h3>BIOMETRIC RATE</h3>
                             <p className="stat-value-text">{biometricPercentage}%</p>
                             <span className="att-status-pill" style={{
@@ -206,20 +289,37 @@ const StudentAttendance = () => {
                                 {biometricPercentage >= 75 ? 'Regular' : 'Needs Attention'}
                             </span>
                         </div>
-                        <div className="stat-card-left-align">
-                            <h3>PRESENT DAYS</h3>
+                        <div className="stat-card-left-align attendance-metric-card attendance-metric-card--present">
+                            <div className="attendance-metric-topline">
+                                <span className="attendance-metric-icon"><CheckCircle size={16} /></span>
+                                <h3>PRESENT DAYS</h3>
+                            </div>
                             <p className="stat-value">{biometricPresentDays}</p>
-                            <span className="stat-sub">including late check-ins</span>
+                            <span className="stat-sub">working days with valid biometric presence</span>
                         </div>
-                        <div className="stat-card-left-align">
-                            <h3>LATE DAYS</h3>
-                            <p className="stat-value">{biometricLateDays}</p>
-                            <span className="stat-sub">late biometric entries</span>
+                        <div className="stat-card-left-align attendance-metric-card attendance-metric-card--absent">
+                            <div className="attendance-metric-topline">
+                                <span className="attendance-metric-icon"><Ban size={16} /></span>
+                                <h3>ABSENT DAYS</h3>
+                            </div>
+                            <p className="stat-value">{biometricAbsentDays}</p>
+                            <span className="stat-sub">working days without a biometric entry</span>
                         </div>
-                        <div className="stat-card-left-align">
-                            <h3>TOTAL RECORDS</h3>
-                            <p className="stat-value">{biometricHistory.length}</p>
-                            <span className="stat-sub">daily biometric logs</span>
+                        <div className="stat-card-left-align attendance-metric-card attendance-metric-card--working">
+                            <div className="attendance-metric-topline">
+                                <span className="attendance-metric-icon"><Briefcase size={16} /></span>
+                                <h3>WORKING DAYS</h3>
+                            </div>
+                            <p className="stat-value">{totalWorkingDays}</p>
+                            <span className="stat-sub">counted from {semesterStartDateLabel}</span>
+                        </div>
+                        <div className="stat-card-left-align attendance-metric-card attendance-metric-card--leave">
+                            <div className="attendance-metric-topline">
+                                <span className="attendance-metric-icon"><TimerReset size={16} /></span>
+                                <h3>APPROVED LEAVE DAYS</h3>
+                            </div>
+                            <p className="stat-value">{approvedLeaveDays}</p>
+                            <span className="stat-sub">approved weekdays within the active period</span>
                         </div>
                     </div>
 

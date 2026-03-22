@@ -1,13 +1,13 @@
 .coe-result-page {
-    --coe-ink: #eef2ff;
-    --coe-muted: #94a3b8;
-    --coe-line: rgba(148, 163, 184, 0.16);
+    --coe-ink: var(--text-primary, #0f172a);
+    --coe-muted: var(--text-secondary, #64748b);
+    --coe-line: color-mix(in srgb, var(--glass-border, rgba(0, 0, 0, 0.08)) 85%, rgba(99, 102, 241, 0.12));
     --coe-primary: #6366f1;
     --coe-primary-strong: #7c3aed;
     --coe-accent: #10b981;
-    --coe-surface: rgba(17, 17, 21, 0.92);
-    --coe-surface-strong: rgba(23, 23, 28, 0.98);
-    --coe-soft: linear-gradient(180deg, rgba(21, 21, 27, 0.98), rgba(17, 17, 23, 0.96));
+    --coe-surface: var(--bg-card, #ffffff);
+    --coe-surface-strong: var(--bg-card, #ffffff);
+    --coe-soft: var(--bg-card, #ffffff);
     width: 100%;
     max-width: none;
     margin: 0;
@@ -56,15 +56,15 @@
 .coe-result-shell,
 .coe-log-panel {
     background: var(--coe-surface);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
+    border: 1px solid var(--coe-line);
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
     backdrop-filter: blur(16px);
 }
 
 .coe-result-hero-panel {
     border-radius: 26px;
     padding: 24px;
-    background: linear-gradient(145deg, rgba(26, 26, 34, 0.98), rgba(18, 18, 24, 0.95));
+    background: var(--coe-surface);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -94,8 +94,8 @@
     align-items: center;
     padding: 10px 12px;
     border-radius: 14px;
-    background: rgba(12, 12, 18, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: color-mix(in srgb, var(--bg-card, #ffffff) 84%, var(--bg-subtle, #f8fafc) 16%);
+    border: 1px solid var(--coe-line);
     color: var(--coe-ink);
     font-weight: 600;
 }
@@ -112,8 +112,8 @@
     gap: 10px;
     padding: 8px;
     border-radius: 20px;
-    background: var(--bg-subtle, #111318);
-    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+    background: color-mix(in srgb, var(--bg-card, #ffffff) 84%, var(--bg-subtle, #f1f5f9) 16%);
+    border: 1px solid var(--coe-line);
     margin-bottom: 22px;
 }
 
@@ -171,8 +171,8 @@
 .coe-score-input {
     width: 100%;
     border-radius: 14px;
-    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
-    background: var(--bg-subtle, #111318);
+    border: 1px solid var(--coe-line);
+    background: color-mix(in srgb, var(--bg-card, #ffffff) 82%, var(--bg-subtle, #f8fafc) 18%);
     color: var(--coe-ink);
     outline: none;
 }
@@ -199,8 +199,20 @@
 .coe-summary-banner {
     padding: 22px 24px;
     border-radius: 24px;
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(79, 70, 229, 0.08));
-    border: 1px solid rgba(124, 58, 237, 0.18);
+    background: var(--coe-surface);
+    border: 1px solid var(--coe-line);
+}
+
+[data-theme='light'] .coe-mode-btn {
+    color: var(--text-secondary, #475569);
+}
+
+[data-theme='light'] .coe-panel,
+[data-theme='light'] .coe-stat-card,
+[data-theme='light'] .coe-student-card,
+[data-theme='light'] .coe-log-panel,
+[data-theme='light'] .coe-summary-banner {
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
 }
 
 .coe-summary-banner h2 {
@@ -225,7 +237,7 @@
     padding: 18px;
     border-radius: 22px;
     background: var(--coe-surface-strong);
-    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+    border: 1px solid var(--coe-line);
 }
 
 .coe-stat-card strong {

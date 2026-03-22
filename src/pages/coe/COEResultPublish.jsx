@@ -17,13 +17,20 @@ import './COEResultPublish.css';
 const departments = ['CSE', 'ECE', 'EEE', 'MECH'];
 const semesters = ['1', '2', '3', '4', '5', '6', '7', '8'];
 
-const getGrade = (score) => {
+const getGrade = (score, semesterMarks) => {
+    if (semesterMarks === null || semesterMarks === undefined || semesterMarks === '') return 'AB';
     if (score >= 91) return 'O';
     if (score >= 81) return 'A+';
     if (score >= 71) return 'A';
     if (score >= 61) return 'B+';
     if (score >= 50) return 'B';
     return 'RA';
+};
+
+const getResultStatus = (grade) => {
+    if (grade === 'AB') return 'ABSENT';
+    if (grade === 'RA') return 'RA';
+    return 'PASS';
 };
 
 const getGradePoints = (grade) => {
@@ -38,21 +45,31 @@ const getGradePoints = (grade) => {
 };
 
 const round2 = (value) => Math.round((Number(value) || 0) * 100) / 100;
+const convertSemesterMarksToSixty = (semesterMarks) => {
+    if (semesterMarks === null || semesterMarks === undefined || semesterMarks === '') return 0;
+    return round2((Number(semesterMarks) / 100) * 60);
+};
 
 const recalculateStudent = (student) => {
     const subjects = (student.subjects || []).map((subject) => {
         const internalMarks = round2(subject.internalMarks);
-        const semesterMarks = round2(subject.semesterMarks);
-        const totalMarks = round2(internalMarks + semesterMarks);
-        const finalPercentage = round2((internalMarks + semesterMarks) / 2);
-        const grade = getGrade(finalPercentage);
+        const semesterMarks = subject.semesterMarks === null || subject.semesterMarks === undefined || subject.semesterMarks === ''
+            ? null
+            : round2(subject.semesterMarks);
+        const convertedSemesterMarks = convertSemesterMarksToSixty(semesterMarks);
+        const totalMarks = round2(internalMarks + convertedSemesterMarks);
+        const finalPercentage = totalMarks;
+        const grade = getGrade(totalMarks, semesterMarks);
+        const resultStatus = getResultStatus(grade);
         return {
             ...subject,
             internalMarks,
             semesterMarks,
+            convertedSemesterMarks,
             totalMarks,
             finalPercentage,
-            grade
+            grade,
+            resultStatus
         };
     });
 
@@ -186,7 +203,7 @@ const COEResultPublish = () => {
                 ...student,
                 subjects: student.subjects.map((subject, subIdx) => (
                     subIdx === subjectIndex
-                        ? { ...subject, semesterMarks: value === '' ? 0 : Number(value) }
+                        ? { ...subject, semesterMarks: value === '' ? null : Number(value) }
                         : subject
                 ))
             };
@@ -210,7 +227,7 @@ const COEResultPublish = () => {
                     subjects: student.subjects.map((subject) => ({
                         subjectCode: subject.subjectCode,
                         internalMarks: round2(subject.internalMarks),
-                        semesterMarks: round2(subject.semesterMarks)
+                        semesterMarks: subject.semesterMarks === null ? null : round2(subject.semesterMarks)
                     }))
                 }))
             };
@@ -345,7 +362,7 @@ const COEResultPublish = () => {
 
                         <div className="coe-callout">
                             <strong>Template format</strong>
-                            <p>Each scheduled subject includes an `_Internal` and `_Semester` column. Keep student identifiers unchanged and update only the semester marks where required.</p>
+                            <p>Each scheduled subject includes an `_Internal` and `_Semester` column. Semester marks are entered out of 100 and converted to 60 during calculation. Use `AB` in semester columns for absent students.</p>
                         </div>
 
                         <div className="coe-upload-box">
@@ -439,10 +456,11 @@ const COEResultPublish = () => {
                                                             <th>Code</th>
                                                             <th>Credits</th>
                                                             <th>Internal</th>
-                                                            <th>Semester</th>
+                                                            <th>Semester /100</th>
+                                                            <th>Semester /60</th>
                                                             <th>Total</th>
-                                                            <th>Final %</th>
                                                             <th>Grade</th>
+                                                            <th>Result</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -459,18 +477,19 @@ const COEResultPublish = () => {
                                                                         type="number"
                                                                         min="0"
                                                                         max="100"
-                                                                        value={subject.semesterMarks}
+                                                                        value={subject.semesterMarks ?? ''}
                                                                         onChange={(e) => updateSemesterMark(studentIndex, subjectIndex, e.target.value)}
                                                                         className="coe-score-input"
                                                                     />
                                                                 </td>
+                                                                <td>{subject.convertedSemesterMarks}</td>
                                                                 <td>{subject.totalMarks}</td>
-                                                                <td>{subject.finalPercentage}</td>
                                                                 <td>
                                                                     <span className={`coe-grade-pill grade-${String(subject.grade).toLowerCase().replace('+', 'plus')}`}>
                                                                         {subject.grade}
                                                                     </span>
                                                                 </td>
+                                                                <td>{subject.resultStatus}</td>
                                                             </tr>
                                                         ))}
                                                     </tbody>

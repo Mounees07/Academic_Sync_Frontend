@@ -5,6 +5,7 @@ import {
     LineChart, Line, PieChart, Pie, Cell, Legend
 } from 'recharts';
 import api from '../../utils/api';
+import CollegeCalendarWidget from '../../components/college-calendar/CollegeCalendarWidget';
 import './Admin.css';
 
 const AdminDashboard = () => {
@@ -263,68 +264,12 @@ const AdminDashboard = () => {
                 </div>
 
                 <div className="widgets-column">
-                    {/* Calendar Widget */}
-                    <div className="admin-card">
-                        <div className="card-header">
-                            <h3 className="card-title">{currentMonth} {currentYear}</h3>
-                            <div className="calendar-header-nav">
-                                <ChevronLeft size={20} className="calendar-nav-icon" onClick={prevMonth} />
-                                <ChevronRight size={20} className="calendar-nav-icon" onClick={nextMonth} />
-                            </div>
-                        </div>
-                        <div className="calendar-grid-header">
-                            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                                <div key={day} className="calendar-day-label">{day}</div>
-                            ))}
-                        </div>
-                        <div className="calendar-grid-body">
-                            {calendarDays.map((day, i) => {
-                                // Check if this day is selected
-                                const isSelected =
-                                    selectedDate.getDate() === day &&
-                                    selectedDate.getMonth() === currentMonthIndex &&
-                                    selectedDate.getFullYear() === currentYear;
-
-                                return (
-                                    <div
-                                        key={i}
-                                        className={`calendar-day ${day !== '' && isSelected ? 'active' : ''}`}
-                                        onClick={() => handleDayClick(day)}
-                                    >
-                                        {day}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* Agenda Widget */}
-                    <div className="admin-card">
-                        <div className="card-header">
-                            <h3 className="card-title">Agenda</h3>
-                            <button className="add-btn" onClick={() => setIsAgendaModalOpen(true)}>+</button>
-                        </div>
-                        <div className="agenda-list">
-                            {agendaItems.length === 0 ? (
-                                <p className="text-muted text-sm text-center">No agenda for this day.</p>
-                            ) : (
-                                agendaItems.map((item, index) => (
-                                    <div key={index} className="agenda-item">
-                                        <div className="agenda-timeline">
-                                            <div className={`timeline-dot border-${item.colorClass || 'purple'}`}></div>
-                                            {index !== agendaItems.length - 1 && <div className="timeline-line"></div>}
-                                        </div>
-                                        <div className="agenda-content">
-                                            <p className="agenda-time">{item.time}</p>
-                                            <h4 className="agenda-title">{item.title}</h4>
-                                            <span className={`agenda-tag bg-light-${item.colorClass || 'purple'} text-${item.colorClass || 'purple'}`}>
-                                                {item.type}
-                                            </span>
-                                        </div>
-                                    </div>
-                                )))}
-                        </div>
-                    </div>
+                    <CollegeCalendarWidget
+                        title="College Day Planner"
+                        subtitle="Admin can publish leave days, government holidays, and vacations for the whole campus"
+                        editable
+                        allowedViews={['day']}
+                    />
 
                     {/* Messages Widget */}
                     <div className="admin-card">

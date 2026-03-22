@@ -1,10 +1,12 @@
 .coe-exam-page {
-    --coe-exam-ink: #eef2ff;
-    --coe-exam-muted: #94a3b8;
-    --coe-exam-line: rgba(148, 163, 184, 0.16);
+    --coe-exam-ink: var(--text-primary, #0f172a);
+    --coe-exam-muted: var(--text-secondary, #64748b);
+    --coe-exam-line: color-mix(in srgb, var(--glass-border, rgba(0, 0, 0, 0.08)) 85%, rgba(99, 102, 241, 0.12));
     --coe-exam-primary: #6366f1;
     --coe-exam-primary-strong: #7c3aed;
     --coe-exam-accent: #10b981;
+    --coe-exam-surface: var(--bg-card, #ffffff);
+    --coe-exam-soft: var(--bg-card, #ffffff);
     width: 100%;
     max-width: none;
     margin: 0;
@@ -51,16 +53,16 @@
 .coe-exam-hero-panel,
 .coe-exam-shell,
 .coe-exam-block {
-    background: rgba(17, 17, 21, 0.92);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
+    background: var(--coe-exam-surface);
+    border: 1px solid var(--coe-exam-line);
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
     backdrop-filter: blur(16px);
 }
 
 .coe-exam-hero-panel {
     border-radius: 28px;
     padding: 24px;
-    background: linear-gradient(145deg, rgba(26, 26, 34, 0.98), rgba(18, 18, 24, 0.95));
+    background: var(--coe-exam-surface);
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -90,8 +92,8 @@
     gap: 10px;
     padding: 12px 14px;
     border-radius: 16px;
-    background: rgba(12, 12, 18, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: color-mix(in srgb, var(--bg-card, #ffffff) 84%, var(--bg-subtle, #f8fafc) 16%);
+    border: 1px solid var(--coe-exam-line);
     color: var(--coe-exam-ink);
     font-weight: 600;
 }
@@ -111,8 +113,8 @@
 .coe-exam-block {
     border-radius: 26px;
     padding: 24px;
-    background: linear-gradient(180deg, rgba(23, 23, 29, 0.98), rgba(18, 18, 24, 0.96));
-    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+    background: var(--coe-exam-surface);
+    border: 1px solid var(--coe-exam-line);
 }
 
 .coe-exam-block h3 {
@@ -131,8 +133,8 @@
     margin-top: 18px;
     padding: 18px;
     border-radius: 20px;
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(79, 70, 229, 0.08));
-    border: 1px solid rgba(124, 58, 237, 0.18);
+    background: color-mix(in srgb, var(--bg-card, #ffffff) 88%, var(--bg-subtle, #f8fafc) 12%);
+    border: 1px solid var(--coe-exam-line);
 }
 
 .coe-exam-callout strong {
@@ -160,7 +162,7 @@
     gap: 10px;
     padding: 14px 18px;
     border-radius: 14px;
-    background: var(--bg-subtle, #111318);
+    background: color-mix(in srgb, var(--bg-card, #ffffff) 84%, var(--bg-subtle, #f8fafc) 16%);
     border: 1px solid var(--coe-exam-line);
     color: var(--coe-exam-ink);
     font-weight: 700;
@@ -174,7 +176,7 @@
     margin-top: 18px;
     border: 1.5px dashed rgba(99, 102, 241, 0.24);
     border-radius: 24px;
-    background: linear-gradient(180deg, rgba(19, 19, 25, 0.98), rgba(14, 14, 19, 0.95));
+    background: var(--coe-exam-soft);
     transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -302,8 +304,14 @@
 .coe-exam-mini-item {
     padding: 14px 16px;
     border-radius: 18px;
-    background: rgba(17, 17, 21, 0.9);
-    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+    background: color-mix(in srgb, var(--bg-card, #ffffff) 84%, var(--bg-subtle, #f8fafc) 16%);
+    border: 1px solid var(--coe-exam-line);
+}
+
+[data-theme='light'] .coe-exam-shell,
+[data-theme='light'] .coe-exam-block,
+[data-theme='light'] .coe-exam-hero-panel {
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
 }
 
 .coe-exam-mini-item strong {

@@ -47,6 +47,99 @@
     margin-bottom: 24px;
 }
 
+.perf-highlight-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.perf-highlight-card {
+    border-radius: 18px;
+    padding: 20px;
+    border: 1px solid var(--glass-border);
+    background: var(--bg-card);
+    display: grid;
+    gap: 14px;
+    box-shadow: var(--shadow-subtle);
+}
+
+.perf-highlight-card--internal {
+    border-top: 3px solid #10b981;
+}
+
+.perf-highlight-card--assessment {
+    border-top: 3px solid #6366f1;
+}
+
+.perf-highlight-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.perf-highlight-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(99, 102, 241, 0.08);
+    color: #6366f1;
+    flex-shrink: 0;
+}
+
+.perf-highlight-card--internal .perf-highlight-icon {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.perf-highlight-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.perf-highlight-sub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+    line-height: 1.45;
+}
+
+.perf-highlight-main {
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--text-primary);
+}
+
+.perf-highlight-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+[data-theme='dark'] .perf-highlight-card {
+    border-color: var(--glass-border);
+    background: var(--bg-card);
+    box-shadow: var(--shadow-subtle);
+}
+
+[data-theme='dark'] .perf-highlight-icon {
+    background: rgba(99, 102, 241, 0.16);
+    color: #a5b4fc;
+}
+
+[data-theme='dark'] .perf-highlight-card--internal .perf-highlight-icon {
+    background: rgba(16, 185, 129, 0.18);
+    color: #6ee7b7;
+}
+
 .perf-stat-box {
     background: var(--bg-card);
     border: 1px solid var(--glass-border);
@@ -235,6 +328,7 @@
     .perf-page { padding: 14px; }
     .perf-cards-grid { grid-template-columns: 1fr; }
     .perf-stats-strip { grid-template-columns: repeat(2, 1fr); }
+    .perf-highlight-grid { grid-template-columns: 1fr; }
     .perf-header h1 { font-size: 1.35rem; }
 }
 

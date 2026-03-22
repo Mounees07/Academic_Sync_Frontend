@@ -12,17 +12,19 @@ import {
 } from 'recharts';
 import './DashboardOverview.css';
 import { useAuth } from '../context/AuthContext';
+import { useSettings } from '../context/SettingsContext';
 import api from '../utils/api';
-import { calculateAttendance } from '../utils/attendanceUtils';
 import { Hourglass } from 'ldrs/react';
 import 'ldrs/react/Hourglass.css';
-import AcademicHealthCard from '../components/AcademicHealthCard';
+import CollegeCalendarWidget from '../components/college-calendar/CollegeCalendarWidget';
+import { resolveSemesterStartDate } from '../utils/attendanceUtils';
 
 
 
 
 const DashboardOverview = () => {
     const { currentUser, userData: authUserData } = useAuth();
+    const { settings } = useSettings();
     const [studentProfile, setStudentProfile] = useState(null);
     const [recentClipboardList, setRecentClipboardList] = useState([]);
     const [sgpaHistory, setSgpaHistory] = useState([]);
@@ -37,6 +39,10 @@ const DashboardOverview = () => {
     });
 
     const [selectedSem, setSelectedSem] = useState(1);
+    const semesterStartDate = resolveSemesterStartDate(settings);
+    const semesterStartDateLabel = semesterStartDate
+        ? semesterStartDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+        : 'admin configured date';
 
 
     useEffect(() => {
@@ -48,6 +54,7 @@ const DashboardOverview = () => {
                 const [
                     userRes,
                     attRes,
+                    attStatsRes,
                     enrollRes,
                     subsRes,
                     sgpaRes,
@@ -56,6 +63,7 @@ const DashboardOverview = () => {
                 ] = await Promise.all([
                     api.get(`/users/${currentUser.uid}`),
                     api.get(`/attendance/student/${currentUser.uid}`),
+                    api.get(`/attendance/stats/${currentUser.uid}`).catch(() => ({ data: { percentage: 0 } })),
                     api.get(`/courses/enrollments/student/${currentUser.uid}`),
                     api.get(`/assignments/student/${currentUser.uid}`).catch(() => ({ data: [] })),
                     api.get(`/results/student/${currentUser.uid}/sgpa-history`).catch(() => ({ data: [] })),
@@ -66,8 +74,7 @@ const DashboardOverview = () => {
                 setStudentProfile(userRes.data);
                 setSelectedSem(userRes.data.semester || 1);
 
-                // Real Attendance Calculation
-                const { percentage: realPercentage } = calculateAttendance(attRes.data);
+                const realPercentage = Number(attStatsRes?.data?.percentage ?? 0);
 
                 const enrollments = enrollRes.data || [];
 
@@ -77,7 +84,10 @@ const DashboardOverview = () => {
 
                 let currentSgpa = "N/A";
                 if (history.length > 0) {
-                    currentSgpa = Number(history[history.length - 1].sgpa).toFixed(2);
+                    const latestSgpa = history[history.length - 1].sgpa;
+                    currentSgpa = latestSgpa === null || latestSgpa === undefined
+                        ? "N/A"
+                        : Number(latestSgpa).toFixed(2);
                 } else if (userRes.data.sgpa) {
                     currentSgpa = Number(userRes.data.sgpa).toFixed(2);
                 }
@@ -367,7 +377,7 @@ const DashboardOverview = () => {
                                     </div>
                                 </div>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                    Total Classes Attended (Hover for log)
+                                    Calculated from {semesterStartDateLabel} (Hover for log)
                                 </div>
                             </div>
                             <div className="dashboard-flip-card-back">
@@ -489,10 +499,12 @@ const DashboardOverview = () => {
 
             {/* RIGHT COLUMN - Sidebar (Now Information Column) */}
             <div className="dashboard-sidebar-col">
-
-
-                {/* Academic Health Card */}
-                <AcademicHealthCard />
+                <CollegeCalendarWidget
+                    title="College Calendar"
+                    subtitle="Upcoming holidays, leave days, and vacations"
+                    compact
+                    className="dashboard-calendar-widget"
+                />
 
                 {/* 2. Recent ClipboardList & Biometric Log */}
                 <div className="dash-card ClipboardList-card" style={{ marginTop: '20px' }}>

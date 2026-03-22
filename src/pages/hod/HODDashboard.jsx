@@ -25,6 +25,7 @@ import {
     ResponsiveContainer
 } from 'recharts';
 import './HODDashboard.css';
+import CollegeCalendarWidget from '../../components/college-calendar/CollegeCalendarWidget';
 
 
 const HODDashboard = () => {
@@ -251,6 +252,14 @@ const HODDashboard = () => {
                         )}
                     </div>
                 </div>
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+                <CollegeCalendarWidget
+                    title="Institution Calendar"
+                    subtitle="Department can track campus leave days, holidays, and vacations from one shared source"
+                    compact
+                />
             </div>
 
             {/* Bottom Section: Courses Table */}

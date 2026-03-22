@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserCheck, ClipboardList } from 'lucide-react';
+import CollegeCalendarWidget from '../../components/college-calendar/CollegeCalendarWidget';
 import './GateDashboard.css';
 
 const GateDashboard = () => {
@@ -29,6 +30,14 @@ const GateDashboard = () => {
                         <p>Record and monitor visitor details and purpose of visit.</p>
                     </div>
                 </div>
+            </div>
+
+            <div style={{ marginTop: '24px' }}>
+                <CollegeCalendarWidget
+                    title="Gate Calendar Brief"
+                    subtitle="Campus holidays, vacation closures, and leave-sensitive days"
+                    compact
+                />
             </div>
         </div>
     );
