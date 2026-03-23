@@ -62,7 +62,7 @@ const StudentNotifications = () => {
     const markRead = async (id) => {
         try {
             await api.put(`/notifications/${id}/read`);
-        } catch (_) { /* ignore */ }
+        } catch (_err) { /* ignore */ }
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
     };
 
@@ -81,7 +81,7 @@ const StudentNotifications = () => {
     const markAllRead = async () => {
         try {
             await api.put(`/notifications/user/${currentUser.uid}/read-all`);
-        } catch (_) { /* ignore */ }
+        } catch (_err) { /* ignore */ }
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     };
 

@@ -18,11 +18,11 @@ const InputField = ({ label, name, type = "text", required = false, formData, on
     </div>
 );
 
-const Section = ({ title, icon: Icon, children }) => (
+const Section = ({ title, icon: IconComponent, children }) => (
     <div className="sdm-section">
         <div className="sdm-section-header">
             <div className="sdm-section-icon">
-                <Icon size={20} />
+                <IconComponent size={20} />
             </div>
             <h3 className="sdm-section-title">{title}</h3>
         </div>
@@ -37,6 +37,7 @@ const UserDetailsModal = ({ user, mode, onClose, onSave }) => {
     const [formData, setFormData] = useState({});
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (user && mode === 'edit') {
             setFormData(user);
         } else {

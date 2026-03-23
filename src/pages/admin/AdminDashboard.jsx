@@ -8,6 +8,11 @@ import api from '../../utils/api';
 import CollegeCalendarWidget from '../../components/college-calendar/CollegeCalendarWidget';
 import './Admin.css';
 
+const normalizeChartNumber = (value) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+};
+
 const AdminDashboard = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -44,6 +49,12 @@ const AdminDashboard = () => {
         { name: 'Boys', value: 0, color: '#4D44B5' },
         { name: 'Girls', value: 0, color: '#FCC43E' },
     ];
+    const normalizedStudentGenderData = studentGenderData.map((entry) => ({
+        ...entry,
+        value: normalizeChartNumber(entry?.value),
+        color: entry?.color || '#94a3b8',
+    }));
+    const hasStudentGenderData = normalizedStudentGenderData.some((entry) => entry.value > 0);
 
     const attendanceData = stats?.attendanceData || [];
 
@@ -57,12 +68,6 @@ const AdminDashboard = () => {
         type: 'All Grade',
         colorClass: 'purple'
     });
-
-    const messages = [
-        { name: 'Dr. Lila Ramirez', time: '9:00 AM', message: 'Please ensure the monthly attendance...' },
-        { name: 'Ms. Heather Morris', time: '10:15 AM', message: 'Don\'t forget the staff training on...' },
-        { name: 'Mr. Carl Jenkins', time: '2:00 PM', message: 'Budget review meeting for the next...' },
-    ];
 
     // --- Calendar Logic (Dynamic) ---
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -197,25 +202,54 @@ const AdminDashboard = () => {
                                 <MoreHorizontal size={20} className="more-icon" />
                             </div>
                             <div style={{ height: '250px', position: 'relative' }}>
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie
-                                            data={studentGenderData}
-                                            innerRadius={60}
-                                            outerRadius={80}
-                                            paddingAngle={5}
-                                            dataKey="value"
-                                        >
-                                            {studentGenderData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.color} />
-                                            ))}
-                                        </Pie>
-                                        <Legend verticalAlign="bottom" height={36} />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', paddingBottom: '32px' }}>
-                                    <Users size={32} color="#94a3b8" />
-                                </div>
+                                {hasStudentGenderData ? (
+                                    <>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <PieChart>
+                                                <Pie
+                                                    data={normalizedStudentGenderData}
+                                                    dataKey="value"
+                                                    nameKey="name"
+                                                    cx="50%"
+                                                    cy="42%"
+                                                    innerRadius={58}
+                                                    outerRadius={84}
+                                                    paddingAngle={3}
+                                                    minAngle={8}
+                                                    stroke="none"
+                                                    isAnimationActive={false}
+                                                >
+                                                    {normalizedStudentGenderData.map((entry, index) => (
+                                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                                    ))}
+                                                </Pie>
+                                                <Tooltip
+                                                    formatter={(value) => [normalizeChartNumber(value), 'Students']}
+                                                    contentStyle={{
+                                                        backgroundColor: 'var(--bg-card)',
+                                                        borderRadius: '8px',
+                                                        border: '1px solid var(--glass-border)',
+                                                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                                    }}
+                                                    itemStyle={{ color: 'var(--text-primary)' }}
+                                                />
+                                                <Legend verticalAlign="bottom" height={36} />
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', paddingBottom: '32px' }}>
+                                            <Users size={32} color="#94a3b8" />
+                                            <div style={{ marginTop: '8px', fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                                                {totalStudents}
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'var(--text-muted)' }}>
+                                        <Users size={32} color="#94a3b8" />
+                                        <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{totalStudents} Students</div>
+                                        <div style={{ fontSize: '0.85rem' }}>Gender data is not available yet</div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -270,31 +304,6 @@ const AdminDashboard = () => {
                         editable
                         allowedViews={['day']}
                     />
-
-                    {/* Messages Widget */}
-                    <div className="admin-card">
-                        <div className="card-header">
-                            <h3 className="card-title">Messages</h3>
-                            <span className="view-all-link">View All</span>
-                        </div>
-                        <div className="messages-list">
-                            {messages.map((msg, index) => (
-                                <div key={index} className="message-item">
-                                    <div className="message-avatar-wrapper">
-                                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.name}`} alt="avatar" />
-                                    </div>
-                                    <div className="message-content">
-                                        <div className="message-header">
-                                            <h4 className="message-sender">{msg.name}</h4>
-                                            <span className="message-time">{msg.time}</span>
-                                        </div>
-                                        <p className="message-preview">{msg.message}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
                 </div>
             </div>
 

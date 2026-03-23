@@ -51,7 +51,7 @@ const Navbar = ({ toggleSidebar }) => {
             if (!notification.isRead) {
                 await api.put(`/notifications/${notification.id}/read`);
             }
-        } catch (_) {
+        } catch (_err) {
             // Ignore read errors and continue navigation.
         }
 
@@ -75,7 +75,7 @@ const Navbar = ({ toggleSidebar }) => {
                     setRecentNotifs(data.slice(0, 5));
                     setUnreadNotifCount(data.filter(n => !n.isRead).length);
                 }
-            } catch (e) {
+            } catch (_e) {
                 // Ignore API connection errors for the badge
             }
         };

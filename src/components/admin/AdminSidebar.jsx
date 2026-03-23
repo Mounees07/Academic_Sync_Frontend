@@ -47,7 +47,7 @@ const AdminSidebar = () => {
         { to: '/admin/settings', icon: Settings, label: 'Setting' },
     ];
 
-    const NavItem = ({ to, icon: Icon, label, onClick }) => (
+    const NavItem = ({ to, icon: IconComponent, label, onClick }) => (
         <NavLink
             to={to}
             onClick={onClick}
@@ -58,7 +58,7 @@ const AdminSidebar = () => {
                 }`
             }
         >
-            <Icon size={22} strokeWidth={2} />
+            <IconComponent size={22} strokeWidth={2} />
             <span className="tracking-wide">{label}</span>
         </NavLink>
     );

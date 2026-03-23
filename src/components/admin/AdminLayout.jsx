@@ -3,11 +3,9 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
 import { Search, Bell, MessageCircle } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
 import '../../pages/admin/Admin.css';
 
 const AdminLayout = () => {
-    const { userData } = useAuth();
 
     return (
         <div className="flex h-screen bg-[#F3F4F6] font-[Outfit]">

@@ -50,7 +50,7 @@ const FloatingSidebar = ({ isOpen, setIsOpen }) => {
         { to: '/mentees', icon: <Users size={22} />, label: 'Mentees' },
         { to: '/mentor/leaves', icon: <ClipboardList size={22} />, label: 'Student Leaves' },
         { to: '/faculty-leaves', icon: <FileText size={22} />, label: 'My Leave' },
-        { to: '/meetings', icon: <Calendar size={22} />, label: 'Meetings' },
+        { to: '/meetings', icon: <Bell size={22} />, label: 'Meetings' },
         { to: '/schedule', icon: <Calendar size={22} />, label: 'Schedule' },
     ];
 

@@ -8,10 +8,6 @@ const ScheduleView = ({ compact = false }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        fetchSchedules();
-    }, []);
-
     const fetchSchedules = async () => {
         try {
             const response = await api.get('/schedules');
@@ -23,6 +19,11 @@ const ScheduleView = ({ compact = false }) => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchSchedules();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Group schedules by date
     const groupedSchedules = schedules.reduce((groups, schedule) => {

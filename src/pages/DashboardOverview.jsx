@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Loader
-} from 'lucide-react';
-import {
     BarChart,
     Bar,
     YAxis,
@@ -17,7 +14,7 @@ import api from '../utils/api';
 import { Hourglass } from 'ldrs/react';
 import 'ldrs/react/Hourglass.css';
 import CollegeCalendarWidget from '../components/college-calendar/CollegeCalendarWidget';
-import { resolveSemesterStartDate } from '../utils/attendanceUtils';
+import { calculateAttendance, resolveSemesterStartDate } from '../utils/attendanceUtils';
 
 
 
@@ -54,7 +51,6 @@ const DashboardOverview = () => {
                 const [
                     userRes,
                     attRes,
-                    attStatsRes,
                     enrollRes,
                     subsRes,
                     sgpaRes,
@@ -63,7 +59,6 @@ const DashboardOverview = () => {
                 ] = await Promise.all([
                     api.get(`/users/${currentUser.uid}`),
                     api.get(`/attendance/student/${currentUser.uid}`),
-                    api.get(`/attendance/stats/${currentUser.uid}`).catch(() => ({ data: { percentage: 0 } })),
                     api.get(`/courses/enrollments/student/${currentUser.uid}`),
                     api.get(`/assignments/student/${currentUser.uid}`).catch(() => ({ data: [] })),
                     api.get(`/results/student/${currentUser.uid}/sgpa-history`).catch(() => ({ data: [] })),
@@ -74,9 +69,9 @@ const DashboardOverview = () => {
                 setStudentProfile(userRes.data);
                 setSelectedSem(userRes.data.semester || 1);
 
-                const realPercentage = Number(attStatsRes?.data?.percentage ?? 0);
-
                 const enrollments = enrollRes.data || [];
+                const biometricHistory = attRes.data || [];
+                const biometricAttendance = calculateAttendance(biometricHistory, semesterStartDate);
 
                 // SGPA History
                 const history = sgpaRes.data || [];
@@ -95,7 +90,7 @@ const DashboardOverview = () => {
                 // --- Process Recent ClipboardList ---
                 const activities = [];
 
-                attRes.data.forEach(att => {
+                biometricHistory.forEach(att => {
                     activities.push({
                         type: 'attendance',
                         title: 'Biometric Check-in',
@@ -131,7 +126,7 @@ const DashboardOverview = () => {
                 // Leave balance
                 const approvedLeaves = leaveRes.data ? leaveRes.data.filter(l => l.status === 'APPROVED').length : 0;
                 const totalLeaves = 10;
-                const leaveBalance = totalLeaves - approvedLeaves;
+                const _leaveBalance = totalLeaves - approvedLeaves;
 
                 let placement = "Not Evaluated";
                 if (userRes.data.placementStatus) {
@@ -152,7 +147,7 @@ const DashboardOverview = () => {
                 setDashboardStats({
                     cgpa: userRes.data.cgpa ? Number(userRes.data.cgpa).toFixed(2) : (userRes.data.gpa ? Number(userRes.data.gpa).toFixed(2) : "N/A"),
                     sgpa: currentSgpa,
-                    attendance: realPercentage.toString(),
+                    attendance: biometricAttendance.percentage.toString(),
                     activeCourses: enrollments.length.toString(),
                     pendingAssignments: pendingCount.toString(),
                     arrearCount: userRes.data.arrearCount || 0,
@@ -168,7 +163,7 @@ const DashboardOverview = () => {
         };
 
         fetchData();
-    }, [currentUser]);
+    }, [currentUser, semesterStartDate]);
 
     const navigate = useNavigate();
 

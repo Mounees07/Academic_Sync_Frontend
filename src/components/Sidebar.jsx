@@ -139,12 +139,15 @@ const Sidebar = () => {
     };
 
     const links = getLinksByRole(userData?.role);
+    const handleLogoRefresh = () => {
+        window.location.assign(homeRoute);
+    };
 
     return (
         <aside className="fixed left-6 top-6 bottom-6 w-20 bg-white dark:bg-[#1e1e1e] rounded-[32px] shadow-2xl flex flex-col items-center py-8 z-50 transition-all duration-300 border border-white/20 dark:border-gray-800">
             {/* Logo Icon */}
             <div className="mb-10">
-                <div className="w-12 h-12 bg-[#6366F1] rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 text-white transform hover:scale-105 transition-transform duration-200 cursor-pointer" onClick={() => window.location.href = '/'}>
+                <div className="w-12 h-12 bg-[#6366F1] rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 text-white transform hover:scale-105 transition-transform duration-200 cursor-pointer" onClick={handleLogoRefresh}>
                     <GraduationCap size={28} />
                 </div>
             </div>

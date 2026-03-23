@@ -53,6 +53,11 @@ const normalizeRecordDate = (value) => {
     return parsed;
 };
 
+const isWeekday = (date) => {
+    const day = date.getDay();
+    return day !== 0 && day !== 6;
+};
+
 const isPresentStatus = (status) => ['PRESENT', 'LATE'].includes((status || '').toUpperCase());
 
 export const calculateAttendance = (attendanceRecords = [], semesterStartDate = null) => {
@@ -75,7 +80,10 @@ export const calculateAttendance = (attendanceRecords = [], semesterStartDate = 
             .filter((record) => isPresentStatus(record?.status))
             .map((record) => normalizeRecordDate(record?.date))
             .filter((recordDate) => {
-                return recordDate && recordDate >= startDate && recordDate <= today;
+                return recordDate
+                    && recordDate >= startDate
+                    && recordDate <= today
+                    && isWeekday(recordDate);
             })
             .map((recordDate) => recordDate.toISOString().slice(0, 10))
     ).size;

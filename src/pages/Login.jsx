@@ -32,7 +32,7 @@ const Login = () => {
         e.preventDefault();
         setFormError("");
         try {
-            const result = await loginWithEmail(email, password);
+            await loginWithEmail(email, password);
             // Navigate to /dashboard — RoleBasedRedirect will wait for
             // userData from the backend and route accordingly (admin -> /admin/dashboard)
             navigate('/dashboard');
