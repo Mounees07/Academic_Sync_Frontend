@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { GraduationCap } from 'lucide-react';
 import FloatingSidebar from './FloatingSidebar';
 import Navbar from './Navbar';
 import { useAuth } from '../context/AuthContext';
+import BrandLogo from './BrandLogo';
 import './DashboardLayout.css';
 
 const DashboardLayout = ({ children }) => {
@@ -26,10 +26,7 @@ const DashboardLayout = ({ children }) => {
                 onClick={() => window.location.assign(homeRoute)}
                 style={{ cursor: 'pointer' }}
             >
-                <div className="logo-icon-wrapper">
-                    <GraduationCap size={28} />
-                </div>
-                <span className="logo-text-main">AcaSync</span>
+                <BrandLogo />
             </div>
 
             {/* Mobile overlay — closes sidebar when tapping outside */}

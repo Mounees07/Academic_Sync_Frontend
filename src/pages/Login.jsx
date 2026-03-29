@@ -1,178 +1,207 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AlertCircle, ArrowLeft, ChevronDown, Eye, EyeOff, Home, Mail, X } from 'lucide-react';
+import BrandLogo from '../components/BrandLogo';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
-import { GraduationCap, Mail, Lock, AlertCircle, Eye, EyeOff, Home, ChevronDown, X, UserPlus } from 'lucide-react';
-import { useSettings } from '../context/SettingsContext';
 import './Login.css';
 
+const LOGIN_VIEW = {
+    LANDING: 'landing',
+    EMAIL: 'email'
+};
+
 const Login = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [activeView, setActiveView] = useState(LOGIN_VIEW.LANDING);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [formError, setFormError] = useState("");
+    const [formError, setFormError] = useState('');
     const [showContact, setShowContact] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
     const { loginWithGoogle, loginWithEmail, error } = useAuth();
-    const { getBool } = useSettings();
-    const allowRegistration = getBool('allowRegistration', true);
     const navigate = useNavigate();
 
+    const greeting = useMemo(() => {
+        const hour = new Date().getHours();
+        if (hour < 12) return 'GOOD MORNING..!';
+        if (hour < 17) return 'GOOD AFTERNOON..!';
+        return 'GOOD EVENING..!';
+    }, []);
+
+    const authError = formError || error;
+
     const handleGoogleLogin = async () => {
+        setFormError('');
         try {
             await loginWithGoogle();
-            // Navigate to /dashboard — RoleBasedRedirect will wait for userData
-            // and then route to /admin/dashboard, /hod/dashboard, etc.
             navigate('/dashboard');
         } catch (err) {
-            console.error("Google login failed:", err);
+            console.error('Google login failed:', err);
             setFormError(err.message || 'Google login failed. Check your network connection.');
         }
     };
 
-    const handleEmailLogin = async (e) => {
-        e.preventDefault();
-        setFormError("");
+    const handleEmailLogin = async (event) => {
+        event.preventDefault();
+        setFormError('');
         try {
             await loginWithEmail(email, password);
-            // Navigate to /dashboard — RoleBasedRedirect will wait for
-            // userData from the backend and route accordingly (admin -> /admin/dashboard)
             navigate('/dashboard');
         } catch (err) {
-            setFormError(err.message);
+            setFormError(err.message || 'Unable to sign in with email and password.');
         }
     };
 
-    return (
-        <div className="login-container">
-            {/* Top Navigation Overlay */}
-            <nav className="page-nav">
-                <a href="#" onClick={(e) => { e.preventDefault(); setShowContact(true); }}>Contact us</a>
-                <a href="#">English <ChevronDown size={14} /></a>
+    const openEmailView = () => {
+        setFormError('');
+        setActiveView(LOGIN_VIEW.EMAIL);
+    };
 
-                <Link to="/" className="home-icon"><Home size={20} /></Link>
+    const goBackToLanding = () => {
+        setFormError('');
+        setActiveView(LOGIN_VIEW.LANDING);
+    };
+
+    return (
+        <div className="login-shell">
+            <nav className="page-nav">
+                <button type="button" className="nav-link-button" onClick={() => setShowContact(true)}>Contact us</button>
+                <button type="button" className="nav-link-button nav-link-with-icon">
+                    English <ChevronDown size={14} />
+                </button>
+                <Link to="/" className="home-icon" aria-label="Go to home">
+                    <Home size={20} />
+                </Link>
             </nav>
 
-            {/* Left Side: Form */}
-            <div className="login-form-side">
-                <div className="login-header">
-                    <h2>WELCOME BACK!</h2>
-                    <p>Enter your credentials to access your account.</p>
-                </div>
+            <div className={`login-container ${activeView === LOGIN_VIEW.EMAIL ? 'login-container-email' : ''}`}>
+                {activeView === LOGIN_VIEW.LANDING ? (
+                    <section className="welcome-card">
+                        <header className="welcome-banner">
+                            <h1>WELCOME BACK!</h1>
+                            <p>{greeting}</p>
+                        </header>
 
-                {(formError || error) && (
-                    <div className="error-message">
-                        <AlertCircle size={18} />
-                        <span>{formError || error}</span>
-                    </div>
-                )}
-
-                <form onSubmit={handleEmailLogin} className="auth-form">
-                    <div className="input-label-group">
-                        <label>Username</label>
-                        <div className="input-wrapper">
-                            <input
-                                type="email"
-                                placeholder="deniel123@gmail.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    <div className="input-label-group">
-                        <label>Password</label>
-                        <div className="input-wrapper">
-                            <input
-                                type={showPassword ? "text" : "password"}
-                                placeholder="●●●●●●●●"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                            <div className="password-toggle" onClick={() => setShowPassword(!showPassword)}>
-                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        <div className="brand-panel">
+                            <div className="brand-mark">
+                                <BrandLogo alt="Academic Sync" className="login-brand-logo" />
+                            </div>
+                            <div className="brand-copy">
+                                <h2>ACADEMIC SYNC</h2>
+                                <span>BRIGHT ⭐ BRAVE ⭐ PATRIOTIC</span>
                             </div>
                         </div>
-                    </div>
 
-                    <div className="form-options">
-                        <label className="remember-me">
-                            <input type="checkbox" />
-                            Remember me
-                        </label>
-                        <Link to="/forgot-password" className="forgot-password">Forget password?</Link>
-                    </div>
+                        {authError && (
+                            <div className="error-message landing-error">
+                                <AlertCircle size={18} />
+                                <span>{authError}</span>
+                            </div>
+                        )}
 
-                    <button type="submit" className="btn btn-primary btn-block">
-                        Sign In
-                    </button>
+                        <div className="welcome-actions">
+                            <button type="button" onClick={handleGoogleLogin} className="welcome-google-btn">
+                                <span className="google-icon" aria-hidden="true">G</span>
+                                <span>SIGN IN WITH GOOGLE</span>
+                            </button>
 
-                    {/* Registration banner controlled by admin setting */}
-                    {allowRegistration ? (
-                        <div style={{ marginTop: '12px', textAlign: 'center', fontSize: '0.875rem', color: 'var(--text-muted, #6b7280)' }}>
-                            New user?{' '}
-                            <Link to="/register" style={{ color: '#8b5cf6', fontWeight: 600, textDecoration: 'none' }}>
-                                <UserPlus size={14} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
-                                Request Access
-                            </Link>
+                            <button type="button" onClick={openEmailView} className="welcome-email-link">
+                                Sign in with Email and Password
+                            </button>
                         </div>
-                    ) : (
-                        <div style={{
-                            marginTop: '12px',
-                            padding: '10px 14px',
-                            borderRadius: '8px',
-                            background: 'rgba(239,68,68,0.08)',
-                            border: '1px solid rgba(239,68,68,0.2)',
-                            color: '#ef4444',
-                            fontSize: '0.8rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px'
-                        }}>
-                            <AlertCircle size={15} />
-                            <span>Registration is currently <strong>disabled</strong> by the administrator.</span>
-                        </div>
-                    )}
-                </form>
-
-                <div className="social-login-section">
-                    <div className="social-divider">
-                        <span>or</span>
-                    </div>
-                    <div className="social-buttons">
-                        <button type="button" onClick={handleGoogleLogin} className="social-btn google">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQN1HgAOQZBf48TI55AvzbnfV0IFrCCrX6ldg&s" alt="google" width="24" />
-                            <span>Continue with Google</span>
+                    </section>
+                ) : (
+                    <section className="email-login-card">
+                        <button type="button" className="back-button" onClick={goBackToLanding}>
+                            <ArrowLeft size={18} />
+                            <span>Back</span>
                         </button>
-                    </div>
-                </div>
+
+                        <div className="login-header">
+                            <h2>WELCOME BACK!</h2>
+                            <p>Enter your credentials to access your account.</p>
+                        </div>
+
+                        {authError && (
+                            <div className="error-message">
+                                <AlertCircle size={18} />
+                                <span>{authError}</span>
+                            </div>
+                        )}
+
+                        <form onSubmit={handleEmailLogin} className="auth-form">
+                            <div className="input-label-group">
+                                <label htmlFor="login-email">Username</label>
+                                <div className="input-wrapper">
+                                    <input
+                                        id="login-email"
+                                        type="email"
+                                        placeholder="kumarmounees@gmail.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        autoComplete="email"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="input-label-group">
+                                <label htmlFor="login-password">Password</label>
+                                <div className="input-wrapper">
+                                    <input
+                                        id="login-password"
+                                        type={showPassword ? 'text' : 'password'}
+                                        placeholder="Enter your password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        autoComplete="current-password"
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        className="password-toggle"
+                                        onClick={() => setShowPassword((current) => !current)}
+                                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                    >
+                                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="form-options">
+                                <label className="remember-me">
+                                    <input
+                                        type="checkbox"
+                                        checked={rememberMe}
+                                        onChange={(e) => setRememberMe(e.target.checked)}
+                                    />
+                                    Remember me
+                                </label>
+                                <Link to="/forgot-password" className="forgot-password">Forget password?</Link>
+                            </div>
+
+                            <button type="submit" className="btn btn-primary btn-block">
+                                SIGN IN
+                            </button>
+                        </form>
+                    </section>
+                )}
             </div>
 
-            {/* Right Side: Visual */}
-            <div className="login-visual">
-                <div className="illustration-container">
-                    <div className="blob-bg"></div>
-                    <img
-                        src="https://img.freepik.com/free-vector/creative-team-concept-illustration_114360-3942.jpg?t=st=1738096000~exp=1738099600~hmac=98a3b839352636136d3969"
-                        alt="Creative Learning"
-                        className="hero-image"
-                    />
-                </div>
-            </div>
-
-            {/* Contact Modal */}
             {showContact && (
                 <div className="modal-overlay" onClick={() => setShowContact(false)}>
-                    <div className="contact-card" onClick={e => e.stopPropagation()}>
+                    <div className="contact-card" onClick={(e) => e.stopPropagation()}>
                         <div className="contact-header">
                             <h3>Contact Support</h3>
-                            <button onClick={() => setShowContact(false)} className="close-btn"><X size={24} /></button>
+                            <button onClick={() => setShowContact(false)} className="close-btn" type="button">
+                                <X size={24} />
+                            </button>
                         </div>
                         <div className="contact-body">
-                            <p style={{ marginBottom: '15px', color: '#6b7280' }}>For any queries or assistance, please contact:</p>
+                            <p>For any queries or assistance, please contact:</p>
                             <div className="contact-detail">
-                                <Mail size={20} className="text-primary" style={{ color: '#8b5cf6' }} />
-                                <a href="mailto:sankavi881@gmail.com">sankavi8881@gmail.com</a>
+                                <Mail size={20} className="contact-icon" />
+                                <a href="mailto:sankavi8881@gmail.com">sankavi8881@gmail.com</a>
                             </div>
                         </div>
                     </div>

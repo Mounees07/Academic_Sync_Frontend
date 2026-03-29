@@ -29,39 +29,46 @@
 
 .page-logo-container {
     position: fixed;
-    top: 24px;
-    left: 36px;
-    /* Centered over the 72px sidebar (24px + 12px offset = 36px). Wait. 72/2=36. Left 24. Center 60. Logo 48. Center 24. Logo left = 60-24=36. Perfect. */
-    /* Centered over the 80px sidebar (24px + 16px offset) */
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    z-index: 1200;
-}
-
-.logo-icon-wrapper {
+    top: 0;
+    left: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 48px;
-    height: 48px;
-    background: #6366f1;
-    border-radius: 14px;
-    color: white;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    z-index: 1200;
+    width: 124px;
+    height: 80px;
+    padding: 8px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
 }
 
-.logo-text-main {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: -0.5px;
+[data-theme='dark'] .page-logo-container,
+[data-theme='light'] .page-logo-container {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.brand-logo-image {
+    display: block;
+    width: 88px;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+    filter: none;
+    opacity: 1;
+    mix-blend-mode: normal;
+    transform: translateZ(0);
 }
 
 @media (max-width: 768px) {
     .main-content {
         margin-left: 0;
-        padding-top: 80px; /* 64px navbar + 16px gap */
+        padding-top: 80px;
     }
 
     .page-content {
