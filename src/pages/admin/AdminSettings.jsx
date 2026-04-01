@@ -14,7 +14,10 @@ import {
     Clock,
     User,
     FileText,
-    AlertCircle
+    AlertCircle,
+    Users,
+    LogOut,
+    RefreshCw
 } from 'lucide-react';
 import './AdminSettings.css';
 import api from '../../utils/api';
@@ -42,6 +45,7 @@ const AdminSettings = () => {
         // Security
         'security.captcha.enabled': false,
         'security.login.maxAttempts': 5,
+        'security.singleSession.enabled': false,
         // Policies
         'policy.attendance.threshold': 75,
         'policy.attendance.detain': 65,
@@ -103,6 +107,10 @@ const AdminSettings = () => {
                         'feature.finance.enabled': bool('feature.finance.enabled', true),
                         'feature.examSeating.enabled': bool('feature.examSeating.enabled', true),
 
+                        // Security booleans
+                        'security.captcha.enabled': bool('security.captcha.enabled', false),
+                        'security.singleSession.enabled': bool('security.singleSession.enabled', false),
+
                         // Number / mixed fields
                         'policy.attendance.threshold': num('policy.attendance.threshold', 75),
                         'policy.attendance.detain': num('policy.attendance.detain', 65),
@@ -140,6 +148,7 @@ const AdminSettings = () => {
                 emailNotifications: String(settings.emailNotifications),
                 'report.export.enabled': String(settings['report.export.enabled']),
                 'security.captcha.enabled': String(settings['security.captcha.enabled']),
+                'security.singleSession.enabled': String(settings['security.singleSession.enabled']),
                 'env.debugMode': String(settings['env.debugMode']),
                 'feature.leave.enabled': String(settings['feature.leave.enabled']),
                 'feature.result.enabled': String(settings['feature.result.enabled']),
@@ -191,6 +200,7 @@ const AdminSettings = () => {
         { id: 'security', label: 'Security', icon: <Shield size={20} /> },
         { id: 'features', label: 'Features', icon: <Database size={20} /> },
         { id: 'env', label: 'Environment', icon: <Server size={20} /> },
+        { id: 'sessions', label: 'Active Sessions', icon: <Users size={20} /> },
         { id: 'logs', label: 'Audit Logs', icon: <ClipboardList size={20} /> }
     ];
 
@@ -417,6 +427,17 @@ const AdminSettings = () => {
                                         </div>
                                         <ToggleSwitch name="security.captcha.enabled" checked={settings['security.captcha.enabled']} onChange={handleChange} />
                                     </div>
+                                    <div className="toggle-row" style={{ marginTop: '24px' }}>
+                                        <div className="toggle-info">
+                                            <label>Restrict to Single Session
+                                                {settings['security.singleSession.enabled'] && (
+                                                    <span style={{ marginLeft: 8, fontSize: '0.7rem', padding: '2px 8px', borderRadius: 8, background: 'rgba(239,68,68,0.15)', color: '#ef4444', fontWeight: 700 }}>ACTIVE</span>
+                                                )}
+                                            </label>
+                                            <p>Allow only one active login per user at a time. Logging in on a new device instantly logs out the previous session.</p>
+                                        </div>
+                                        <ToggleSwitch name="security.singleSession.enabled" checked={settings['security.singleSession.enabled']} onChange={handleChange} />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -535,6 +556,13 @@ const AdminSettings = () => {
                         </div>
                     )}
 
+                    {/* ACTIVE SESSIONS TAB */}
+                    {activeTab === 'sessions' && (
+                        <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }} className="animate-fade-in">
+                            <ActiveSessionsViewer singleSessionEnabled={settings['security.singleSession.enabled']} />
+                        </div>
+                    )}
+
                     {/* ENV TAB */}
                     {activeTab === 'env' && (
                         <div style={{ maxWidth: '800px', margin: '0 auto' }} className="animate-fade-in">
@@ -588,6 +616,140 @@ const AdminSettings = () => {
                     )}
                 </div>
             </div>
+        </div>
+    );
+};
+
+// ── Active Sessions Viewer ─────────────────────────────────────────────────────
+const ActiveSessionsViewer = ({ singleSessionEnabled }) => {
+    const [sessions, setSessions] = useState([]);
+    const [loadingSessions, setLoadingSessions] = useState(true);
+    const [kicking, setKicking] = useState({});
+    const [kickMsg, setKickMsg] = useState('');
+
+    const fetchSessions = async () => {
+        setLoadingSessions(true);
+        try {
+            const res = await api.get('/users/session/active');
+            setSessions(res.data || []);
+        } catch (err) {
+            console.error('Failed to fetch active sessions', err);
+            setSessions([]);
+        } finally {
+            setLoadingSessions(false);
+        }
+    };
+
+    React.useEffect(() => { fetchSessions(); }, []);
+
+    const handleForceLogout = async (uid, email) => {
+        if (!window.confirm(`Force-logout ${email}? Their current session will be immediately terminated.`)) return;
+        setKicking(prev => ({ ...prev, [uid]: true }));
+        try {
+            await api.delete(`/users/session/${uid}`);
+            setKickMsg(`✔ Session terminated for ${email}`);
+            setSessions(prev => prev.filter(s => s.uid !== uid));
+        } catch (err) {
+            setKickMsg(`✗ Failed: ${err.response?.data?.error || err.message}`);
+        } finally {
+            setKicking(prev => ({ ...prev, [uid]: false }));
+            setTimeout(() => setKickMsg(''), 4000);
+        }
+    };
+
+    const roleBadgeColor = (role) => ({
+        ADMIN: '#7c3aed',
+        TEACHER: '#0891b2',
+        STUDENT: '#059669',
+        HOD: '#d97706',
+        MENTOR: '#2563eb',
+    }[role] || '#6b7280');
+
+    return (
+        <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, borderBottom: '1px solid var(--glass-border)', paddingBottom: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <Users size={24} color="#7c6bdc" />
+                    <div>
+                        <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Active Sessions</h3>
+                        <p style={{ color: '#A098AE', fontSize: '0.82rem', margin: '4px 0 0' }}>
+                            {sessions.length} user{sessions.length !== 1 ? 's' : ''} currently logged in
+                        </p>
+                    </div>
+                </div>
+                <button
+                    onClick={fetchSessions}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, border: '1px solid var(--glass-border)', background: 'var(--card-bg)', color: '#7c6bdc', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
+                >
+                    <RefreshCw size={15} /> Refresh
+                </button>
+            </div>
+
+            {!singleSessionEnabled && (
+                <div style={{ background: 'rgba(251,125,91,0.1)', border: '1px solid rgba(251,125,91,0.35)', borderRadius: 10, padding: '12px 16px', marginBottom: 20, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                    <AlertCircle size={18} color="#FB7D5B" style={{ flexShrink: 0, marginTop: 1 }} />
+                    <p style={{ margin: 0, color: '#FB7D5B', fontSize: '0.88rem', lineHeight: 1.5 }}>
+                        <strong>Single Session Restriction is OFF.</strong> Users may be logged in on multiple devices simultaneously.
+                        Enable "Restrict to Single Session" in the Security tab to enforce one session per user.
+                    </p>
+                </div>
+            )}
+
+            {kickMsg && (
+                <div style={{ background: kickMsg.startsWith('✔') ? 'rgba(5,150,105,0.1)' : 'rgba(239,68,68,0.1)', border: `1px solid ${kickMsg.startsWith('✔') ? 'rgba(5,150,105,0.4)' : 'rgba(239,68,68,0.4)'}`, borderRadius: 8, padding: '10px 16px', marginBottom: 16, color: kickMsg.startsWith('✔') ? '#059669' : '#ef4444', fontWeight: 600, fontSize: '0.88rem' }}>
+                    {kickMsg}
+                </div>
+            )}
+
+            {loadingSessions ? (
+                <div style={{ padding: '40px', textAlign: 'center', color: '#A098AE' }}>Loading active sessions...</div>
+            ) : sessions.length === 0 ? (
+                <div style={{ padding: '40px', textAlign: 'center', color: '#A098AE' }}>
+                    <Users size={40} style={{ opacity: 0.3, marginBottom: 12 }} />
+                    <p style={{ margin: 0 }}>No active sessions found. Users must log in with single-session support enabled.</p>
+                </div>
+            ) : (
+                <div className="audit-table-wrapper">
+                    <table className="audit-table">
+                        <thead>
+                            <tr>
+                                <th width="25%">User</th>
+                                <th width="30%">Email</th>
+                                <th width="15%">Role</th>
+                                <th width="20%">Login Time</th>
+                                <th width="10%">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sessions.map(s => (
+                                <tr key={s.uid}>
+                                    <td style={{ fontWeight: 600 }}>{s.fullName || '—'}</td>
+                                    <td style={{ color: '#A098AE', fontSize: '0.88rem' }}>{s.email}</td>
+                                    <td>
+                                        <span style={{ fontSize: '0.72rem', padding: '3px 8px', borderRadius: 6, background: `${roleBadgeColor(s.role)}22`, color: roleBadgeColor(s.role), fontWeight: 700 }}>
+                                            {s.role}
+                                        </span>
+                                    </td>
+                                    <td style={{ color: '#A098AE', fontSize: '0.82rem' }}>
+                                        {s.sessionLoginAt ? new Date(s.sessionLoginAt).toLocaleString() : '—'}
+                                    </td>
+                                    <td>
+                                        <button
+                                            onClick={() => handleForceLogout(s.uid, s.email)}
+                                            disabled={kicking[s.uid]}
+                                            title="Force Logout"
+                                            style={{ display: 'flex', alignItems: 'center', gap: 5, border: '1px solid rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.08)', color: '#ef4444', borderRadius: 7, padding: '6px 12px', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+                                        >
+                                            <LogOut size={13} />
+                                            {kicking[s.uid] ? '...' : 'Kick'}
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 };

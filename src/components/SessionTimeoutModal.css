@@ -1,0 +1,203 @@
+/* ===================================================
+   Session Timeout Modal
+   =================================================== */
+
+.sto-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: sto-fade-in 0.25s ease;
+}
+
+@keyframes sto-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ---- Modal card ---- */
+.sto-modal {
+    background: linear-gradient(145deg, #1e2235, #252b44);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 2.5rem 2rem 2rem;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.04);
+    animation: sto-slide-up 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    color: #e2e8f0;
+}
+
+@keyframes sto-slide-up {
+    from { transform: translateY(40px) scale(0.95); opacity: 0; }
+    to   { transform: translateY(0)    scale(1);    opacity: 1; }
+}
+
+/* Urgent state — red accent */
+.sto-modal.sto-urgent {
+    border-color: rgba(239, 68, 68, 0.4);
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(239, 68, 68, 0.3),
+        0 0 40px rgba(239, 68, 68, 0.12);
+    animation: sto-slide-up 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+               sto-pulse 1s ease-in-out infinite;
+}
+
+@keyframes sto-pulse {
+    0%, 100% { box-shadow: 0 30px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(239,68,68,.3), 0 0 40px rgba(239,68,68,.12); }
+    50%       { box-shadow: 0 30px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(239,68,68,.6), 0 0 60px rgba(239,68,68,.25); }
+}
+
+/* ---- SVG ring countdown ---- */
+.sto-ring-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 0.75rem;
+}
+
+.sto-ring {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.sto-ring-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.07);
+    stroke-width: 8;
+}
+
+.sto-ring-fg {
+    fill: none;
+    stroke: #6366f1;           /* indigo */
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s linear, stroke 0.3s;
+}
+
+.sto-modal.sto-urgent .sto-ring-fg {
+    stroke: #ef4444;            /* red when urgent */
+}
+
+.sto-count {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    letter-spacing: -1px;
+}
+
+/* ---- Icon ---- */
+.sto-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    animation: sto-bob 2s ease-in-out infinite;
+}
+
+@keyframes sto-bob {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-5px); }
+}
+
+/* ---- Text ---- */
+.sto-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 0.75rem;
+    color: #f1f5f9;
+    letter-spacing: -0.3px;
+}
+
+.sto-body {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin: 0 0 1.75rem;
+}
+
+.sto-body strong {
+    color: #e2e8f0;
+}
+
+/* ---- Buttons ---- */
+.sto-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.sto-btn {
+    padding: 0.65rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    letter-spacing: 0.2px;
+}
+
+.sto-btn-stay {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+}
+
+.sto-btn-stay:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+}
+
+.sto-btn-logout {
+    background: rgba(255, 255, 255, 0.06);
+    color: #94a3b8;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sto-btn-logout:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+    transform: translateY(-2px);
+}
+
+/* ---- Light theme overrides ---- */
+@media (prefers-color-scheme: light) {
+    .sto-modal {
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        border-color: rgba(0, 0, 0, 0.08);
+        color: #1e293b;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+    }
+
+    .sto-title  { color: #0f172a; }
+    .sto-body   { color: #64748b; }
+    .sto-body strong { color: #1e293b; }
+    .sto-count  { color: #1e293b; }
+
+    .sto-ring-bg { stroke: rgba(0, 0, 0, 0.07); }
+
+    .sto-btn-logout {
+        background: rgba(0, 0, 0, 0.04);
+        color: #64748b;
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .sto-modal.sto-urgent {
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+}

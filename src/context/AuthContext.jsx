@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import {
     onAuthStateChanged,
     signInWithPopup,
@@ -19,12 +19,30 @@ export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+    const [error, setError] = useState('');
+    const [sessionConflict, setSessionConflict] = useState(false);
+
+    // ── Session registration helper ───────────────────────────────────────────
+    // Called immediately after any successful login (email or Google).
+    // Contacts the backend, which stores a UUID in the user row and returns it.
+    // We persist it in sessionStorage (tab-local; clears on browser close).
+    const registerSession = useCallback(async () => {
+        try {
+            const res = await api.post('/users/session/register');
+            if (res.data?.sessionToken) {
+                sessionStorage.setItem('sessionToken', res.data.sessionToken);
+            }
+        } catch (err) {
+            console.warn('Session registration failed (non-critical):', err.message);
+        }
+    }, []);
 
     const loginWithGoogle = async () => {
-        setError("");
+        setError('');
         try {
             const result = await signInWithPopup(auth, googleProvider);
+            // registerSession is called inside onAuthStateChanged after
+            // Firebase confirms auth state and we have a valid token
             return result;
         } catch (err) {
             setError(err.message);
@@ -33,11 +51,10 @@ export const AuthProvider = ({ children }) => {
     };
 
     const loginWithEmail = async (email, password) => {
-        setError("");
+        setError('');
         try {
             const result = await signInWithEmailAndPassword(auth, email, password);
-            // Don't fetch userData here — onAuthStateChanged will fire automatically
-            // and fetch the user from backend (including UID-mismatch fallback for admin)
+            // registerSession is called inside onAuthStateChanged
             return result;
         } catch (err) {
             setError(err.message);
@@ -46,14 +63,13 @@ export const AuthProvider = ({ children }) => {
     };
 
     const signupWithEmail = async (email, password, fullName, role = 'STUDENT') => {
-        setError("");
+        setError('');
         try {
             let userCredential;
             try {
                 userCredential = await createUserWithEmailAndPassword(auth, email, password);
             } catch (createError) {
                 if (createError.code === 'auth/email-already-in-use') {
-                    // If user exists in Firebase, try logging in to get the token and update DB
                     userCredential = await signInWithEmailAndPassword(auth, email, password);
                 } else {
                     throw createError;
@@ -68,7 +84,6 @@ export const AuthProvider = ({ children }) => {
                 role: role
             };
 
-            // Send registration data to backend (which now handles updates)
             const response = await api.post('/users/register', regData, {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -76,34 +91,42 @@ export const AuthProvider = ({ children }) => {
             });
 
             setUserData(response.data);
+            await registerSession();
             return userCredential;
         } catch (err) {
-            console.error("Signup Error:", err);
+            console.error('Signup Error:', err);
             setError(err.message);
             throw err;
         }
     };
 
-    const logout = () => {
-        setError("");
+    const logout = useCallback(() => {
+        setError('');
+        setSessionConflict(false);
+        sessionStorage.removeItem('sessionToken');
         return signOut(auth);
-    };
+    }, []);
 
+    // ── onAuthStateChanged ────────────────────────────────────────────────────
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setCurrentUser(user);
             if (user) {
                 try {
-                    // Fetch user details from backend using our interceptor-enabled api
+                    // 1. Register (or re-register) session FIRST.
+                    //    This stores X-Session-Token in sessionStorage so every
+                    //    subsequent API call includes it and won't get a 409.
+                    await registerSession();
+
+                    // 2. Now fetch user profile — token is already in sessionStorage
                     const response = await api.get(`/users/${user.uid}`);
                     setUserData(response.data);
                 } catch (err) {
-                    console.error("User not found in database, might need registration", err);
-                    // Auto-registration for Google users if not in DB
-                    if (user.providerData[0].providerId === 'google.com') {
+                    console.error('Auth state user load error:', err);
+
+                    // UID-mismatch: try to fix via email lookup
+                    if (user.providerData[0]?.providerId === 'google.com') {
                         try {
-                            // NOTE: Google login defaults to STUDENT. 
-                            // If a different role is needed, the user must use the specific Role Sign-up form first.
                             const regRes = await api.post('/users/register', {
                                 firebaseUid: user.uid,
                                 email: user.email,
@@ -113,17 +136,31 @@ export const AuthProvider = ({ children }) => {
                             });
                             setUserData(regRes.data);
                         } catch (regErr) {
-                            console.error("Google auto-registration failed", regErr);
+                            console.error('Google auto-registration failed', regErr);
                         }
                     }
                 }
             } else {
                 setUserData(null);
+                sessionStorage.removeItem('sessionToken');
             }
             setLoading(false);
         });
 
         return unsubscribe;
+    }, [registerSession]);
+
+    // ── Session-conflict listener ─────────────────────────────────────────────
+    // api.js fires this event when it receives a 409 SESSION_CONFLICT response.
+    // We force-logout and show a notice to the user.
+    useEffect(() => {
+        const handleConflict = () => {
+            setSessionConflict(true);
+            sessionStorage.removeItem('sessionToken');
+            signOut(auth);
+        };
+        window.addEventListener('session-conflict', handleConflict);
+        return () => window.removeEventListener('session-conflict', handleConflict);
     }, []);
 
     const resetPassword = (email) => {
@@ -135,16 +172,10 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                // Fetch public features without auth first, or use a public endpoint
                 const res = await api.get('/admin/settings/public/features');
-                // Wait, I created it at /api/admin/settings/public/features ??
-                // Controller mapping is @RequestMapping("/api/admin/settings")
-                // Method mapping is @GetMapping("/public/features")
-                // So URL is /api/admin/settings/public/features
                 setSystemSettings(res.data);
             } catch (err) {
-                console.error("Failed to fetch system settings", err);
-                // Fallback to defaults if fetch fails
+                console.error('Failed to fetch system settings', err);
                 setSystemSettings({
                     'feature.leave.enabled': 'true',
                     'feature.result.enabled': 'true',
@@ -161,7 +192,8 @@ export const AuthProvider = ({ children }) => {
         userData,
         loading,
         error,
-        systemSettings, // Expose settings
+        sessionConflict,
+        systemSettings,
         loginWithGoogle,
         loginWithEmail,
         signupWithEmail,
@@ -172,6 +204,44 @@ export const AuthProvider = ({ children }) => {
     return (
         <AuthContext.Provider value={value}>
             {!loading && children}
+            {/* Session-conflict full-screen notice */}
+            {sessionConflict && (
+                <div style={{
+                    position: 'fixed', inset: 0, zIndex: 99999,
+                    background: 'rgba(0,0,0,0.85)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                    <div style={{
+                        background: '#1e1b2e',
+                        border: '1px solid rgba(239,68,68,0.5)',
+                        borderRadius: 16,
+                        padding: '40px 48px',
+                        maxWidth: 460,
+                        textAlign: 'center',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.6)'
+                    }}>
+                        <div style={{ fontSize: 48, marginBottom: 16 }}>🔒</div>
+                        <h2 style={{ color: '#ef4444', marginBottom: 12, fontSize: '1.4rem' }}>
+                            Session Ended
+                        </h2>
+                        <p style={{ color: '#c4b5d0', marginBottom: 24, lineHeight: 1.6 }}>
+                            Your account was logged in on another device or browser.
+                            For security, this session has been terminated.
+                        </p>
+                        <button
+                            onClick={() => { setSessionConflict(false); window.location.href = '/login'; }}
+                            style={{
+                                background: 'linear-gradient(135deg,#ef4444,#b91c1c)',
+                                color: '#fff', border: 'none', borderRadius: 8,
+                                padding: '12px 32px', fontSize: '1rem',
+                                fontWeight: 700, cursor: 'pointer'
+                            }}
+                        >
+                            Back to Login
+                        </button>
+                    </div>
+                </div>
+            )}
         </AuthContext.Provider>
     );
 };

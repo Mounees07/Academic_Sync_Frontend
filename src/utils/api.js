@@ -44,10 +44,12 @@ api.interceptors.request.use(async (config) => {
         const token = await getAuthToken(user);
         config.headers.Authorization = `Bearer ${token}`;
     }
-    // NOTE: Removed aggressive cache-busting headers (no-cache, no-store) that were
-    // previously sent on every request — those prevented the browser and CDN from
-    // using any response caching. Specific pages that need fresh data should
-    // explicitly set cache-control on those individual requests instead.
+    // Attach active session token so the backend can enforce single-session mode.
+    // Stored in sessionStorage (tab-local, cleared when browser tab closes).
+    const sessionToken = sessionStorage.getItem('sessionToken');
+    if (sessionToken) {
+        config.headers['X-Session-Token'] = sessionToken;
+    }
     return config;
 }, (error) => {
     return Promise.reject(error);
@@ -60,6 +62,16 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
+
+        // 409 SESSION_CONFLICT — another login has replaced this session.
+        // Fire a custom DOM event; AuthContext listens for it to force-logout.
+        if (error.response?.status === 409 &&
+            error.response?.data?.error === 'SESSION_CONFLICT') {
+            window.dispatchEvent(new CustomEvent('session-conflict', {
+                detail: { message: error.response.data.message }
+            }));
+            return Promise.reject(error);
+        }
 
         // If 401 and we haven't retried yet, force-refresh the token and retry once
         if (error.response?.status === 401 && !originalRequest._retried) {
