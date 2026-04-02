@@ -326,6 +326,101 @@
     border: 1px solid var(--glass-border);
 }
 
+.placement-attended-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--glass-border);
+}
+
+.placement-attended-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.placement-attended-table-wrap {
+    overflow-x: auto;
+}
+
+.placement-attended-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 620px;
+}
+
+.placement-attended-table th,
+.placement-attended-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.placement-attended-table th {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    background: color-mix(in srgb, var(--bg-card) 70%, var(--bg-subtle) 30%);
+}
+
+.placement-attended-table td {
+    color: var(--text-primary);
+    font-size: 0.92rem;
+}
+
+.placement-attended-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.placement-yesno-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 42px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+}
+
+.placement-yesno-pill.yes {
+    color: #22c55e;
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(34, 197, 94, 0.25);
+}
+
+.placement-yesno-pill.no {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.25);
+}
+
+.placement-attended-empty {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 26px 16px;
+}
+
+.placement-table-next {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.placement-table-next:hover {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.35);
+}
+
 .placement-drive-stack {
     display: grid;
     gap: 14px;
@@ -402,6 +497,17 @@
     width: 40px;
     text-align: right;
     flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+    .placement-attended-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .placement-table-next {
+        width: 100%;
+    }
 }
 
 @keyframes fadeInUp {

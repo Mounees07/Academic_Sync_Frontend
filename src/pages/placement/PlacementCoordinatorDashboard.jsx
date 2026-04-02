@@ -749,6 +749,23 @@ const PlacementCoordinatorDashboard = () => {
         }
     };
 
+    const handleMarkDriveAttendance = async (driveId, uid, attended) => {
+        setReviewingApplication(`${driveId}:${uid}:attendance:${attended}`);
+        try {
+            await api.put(`/placement/coordinator/drives/${driveId}/applications/${uid}/attendance`, {
+                attended
+            });
+            await fetchPlacementData(true);
+            setSelectedDriveId(driveId);
+            setMessage('success', attended ? 'Attendance marked successfully.' : 'Attendance cleared successfully.');
+        } catch (error) {
+            console.error('Failed to update attendance', error);
+            setMessage('error', 'Failed to update placement attendance.');
+        } finally {
+            setReviewingApplication(null);
+        }
+    };
+
     const handleExportDriveApplicants = (drive, format = 'xlsx') => {
         const rows = (drive?.applications || [])
             .filter((application) => ['APPLIED', 'SHORTLISTED', 'REJECTED'].includes(application.applicationStatus));
@@ -857,6 +874,7 @@ const PlacementCoordinatorDashboard = () => {
                     handleSaveDrive={handleSaveDrive}
                     handleExportDriveApplicants={handleExportDriveApplicants}
                     handleReviewDriveApplication={handleReviewDriveApplication}
+                    handleMarkDriveAttendance={handleMarkDriveAttendance}
                     handleViewApplicants={handleViewApplicants}
                     onRefresh={fetchPlacementData}
                     openDriveEditor={openDriveEditor}

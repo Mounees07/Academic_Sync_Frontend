@@ -81,6 +81,24 @@ const StudentPlacement = () => {
 
     const canManagePlacement = userData?.role === 'PLACEMENT_COORDINATOR' || userData?.role === 'ADMIN';
 
+    const formatDriveDate = (dateValue) => {
+        if (!dateValue) return 'To be announced';
+        return new Date(dateValue).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+        });
+    };
+
+    const getRegistrationStatus = (drive) => {
+        const status = String(drive?.applicationStatus || '').toUpperCase();
+        return Boolean(drive?.appliedAt) || ['APPLIED', 'SHORTLISTED', 'REJECTED'].includes(status);
+    };
+
+    const getAttendanceStatus = (drive) => {
+        return Boolean(drive?.attended);
+    };
+
     useEffect(() => {
         if (!currentUser) return;
 
@@ -227,6 +245,7 @@ const StudentPlacement = () => {
         : score >= 50
             ? 'Getting There'
             : 'Needs Improvement';
+    const attendedDrives = profile.availableDrives || [];
 
     return (
         <div className="placement-page">
@@ -445,6 +464,63 @@ const StudentPlacement = () => {
                             )}
                         </div>
                     ) : null}
+
+                    <div className="placement-attended-card">
+                        <div className="placement-attended-header">
+                            <div className="pc-title" style={{ marginBottom: 0 }}>Placement Attended Details</div>
+                            <button
+                                type="button"
+                                className="placement-table-next"
+                                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                            >
+                                Next
+                            </button>
+                        </div>
+
+                        <div className="placement-attended-table-wrap">
+                            <table className="placement-attended-table">
+                                <thead>
+                                    <tr>
+                                        <th>Company Name</th>
+                                        <th>Date</th>
+                                        <th>Registered Status</th>
+                                        <th>Attendance Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {attendedDrives.length > 0 ? (
+                                        attendedDrives.map((drive) => {
+                                            const registered = getRegistrationStatus(drive);
+                                            const attended = getAttendanceStatus(drive);
+
+                                            return (
+                                                <tr key={drive.id}>
+                                                    <td>{drive.companyName || 'Unknown'}</td>
+                                                    <td>{formatDriveDate(drive.driveDate)}</td>
+                                                    <td>
+                                                        <span className={`placement-yesno-pill ${registered ? 'yes' : 'no'}`}>
+                                                            {registered ? 'Yes' : 'No'}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span className={`placement-yesno-pill ${attended ? 'yes' : 'no'}`}>
+                                                            {attended ? 'Yes' : 'No'}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="4" className="placement-attended-empty">
+                                                No placement applications or attended drives yet.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AlertCircle, ArrowLeft, ChevronDown, Eye, EyeOff, Home, Mail, X } from 'lucide-react';
 import BrandLogo from '../components/BrandLogo';
 import { useAuth } from '../context/AuthContext';
+import { consumeSessionMessage } from '../utils/session';
 import './Login.css';
 
 const LOGIN_VIEW = {
@@ -20,6 +21,7 @@ const Login = () => {
     const [rememberMe, setRememberMe] = useState(false);
     const { loginWithGoogle, loginWithEmail, error } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const greeting = useMemo(() => {
         const hour = new Date().getHours();
@@ -29,6 +31,15 @@ const Login = () => {
     }, []);
 
     const authError = formError || error;
+
+    useEffect(() => {
+        const messageFromRedirect = location.state?.message;
+        const storedSessionMessage = consumeSessionMessage();
+
+        if (messageFromRedirect || storedSessionMessage) {
+            setFormError(messageFromRedirect || storedSessionMessage);
+        }
+    }, [location.state]);
 
     const handleGoogleLogin = async () => {
         setFormError('');

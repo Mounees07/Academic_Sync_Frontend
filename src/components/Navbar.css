@@ -285,7 +285,7 @@
     font-family: var(--font-main);
     font-weight: 500;
     transition: all 0.2s;
-}c
+}
 
 .theme-option:hover {
     background: var(--bg-subtle);
@@ -783,4 +783,3 @@
         padding: 5px;
     }
 }
-

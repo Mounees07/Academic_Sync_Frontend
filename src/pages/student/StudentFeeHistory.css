@@ -29,8 +29,8 @@
     border-radius: 24px;
     padding: 28px 30px;
     background:
-        radial-gradient(circle at top right, rgba(59, 130, 246, 0.13), transparent 32%),
-        linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+        radial-gradient(circle at top right, rgba(59, 130, 246, 0.16), transparent 34%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
 }
 
 .fh-eyebrow {
@@ -327,7 +327,7 @@
     padding: 16px 18px;
     border: 1px solid var(--glass-border, #e2e8f0);
     border-radius: 16px;
-    background: rgba(248, 250, 252, 0.88);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
 }
 
 .fh-proof-item span {
@@ -474,7 +474,7 @@
 
 .fh-amount-cell {
     font-weight: 800;
-    color: #0f172a;
+    color: var(--text-primary, #0f172a);
     white-space: nowrap;
 }
 
@@ -567,6 +567,42 @@
     color: var(--text-secondary, #64748b);
     font-size: 0.84rem;
     line-height: 1.55;
+}
+
+[data-theme='light'] .fh-hero-copy {
+    background:
+        radial-gradient(circle at top right, rgba(59, 130, 246, 0.13), transparent 32%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+}
+
+[data-theme='light'] .fh-proof-item {
+    background: rgba(248, 250, 252, 0.88);
+}
+
+[data-theme='dark'] .fh-hero-copy,
+[data-theme='dark'] .fh-stat-card,
+[data-theme='dark'] .fh-card {
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+}
+
+[data-theme='dark'] .fh-proof-item {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .fh-card-header {
+    border-bottom-color: rgba(255, 255, 255, 0.07);
+}
+
+[data-theme='dark'] .fh-table th {
+    background: rgba(255, 255, 255, 0.045);
+}
+
+[data-theme='dark'] .fh-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.06);
+}
+
+[data-theme='dark'] .fh-fee-note {
+    background: rgba(255, 255, 255, 0.04);
 }
 
 @media (max-width: 1100px) {

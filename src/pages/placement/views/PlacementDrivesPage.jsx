@@ -44,6 +44,7 @@ const PlacementDrivesPage = ({
     handleExportDriveApplicants,
     handleDriveFieldChange,
     handleEditCompany,
+    handleMarkDriveAttendance,
     handleReviewDriveApplication,
     handleSaveCompany,
     handleSaveDrive,
@@ -200,6 +201,7 @@ const PlacementDrivesPage = ({
                                 <th>Readiness</th>
                                 <th>Resume</th>
                                 <th>Status</th>
+                                <th>Attendance</th>
                                 <th>Remarks</th>
                                 <th>Action</th>
                             </tr>
@@ -209,7 +211,7 @@ const PlacementDrivesPage = ({
                                 ['APPLIED', 'SHORTLISTED', 'REJECTED'].includes(application.applicationStatus)
                             ).length === 0 ? (
                                 <tr>
-                                    <td colSpan="8" className="pc-empty-table">No students have applied for this drive yet.</td>
+                                    <td colSpan="9" className="pc-empty-table">No students have applied for this drive yet.</td>
                                 </tr>
                             ) : (selectedDrive.applications || [])
                                 .filter((application) => ['APPLIED', 'SHORTLISTED', 'REJECTED'].includes(application.applicationStatus))
@@ -240,6 +242,11 @@ const PlacementDrivesPage = ({
                                                 {application.applicationStatus}
                                             </span>
                                         </td>
+                                        <td>
+                                            <span className={`pc-badge ${application.attended ? 'shortlisted' : 'planned'}`}>
+                                                {application.attended ? 'ATTENDED' : 'NOT MARKED'}
+                                            </span>
+                                        </td>
                                         <td>{application.coordinatorRemarks || '-'}</td>
                                         <td>
                                             <div className="pc-panel-actions">
@@ -264,6 +271,20 @@ const PlacementDrivesPage = ({
                                                     disabled={reviewingApplication === `${selectedDrive.id}:${application.uid}:APPLIED`}
                                                 >
                                                     Keep Applied
+                                                </button>
+                                                <button
+                                                    className="pc-button pc-button-secondary"
+                                                    onClick={() => handleMarkDriveAttendance(selectedDrive.id, application.uid, true)}
+                                                    disabled={reviewingApplication === `${selectedDrive.id}:${application.uid}:attendance:true` || application.attended}
+                                                >
+                                                    Mark Attended
+                                                </button>
+                                                <button
+                                                    className="pc-button pc-button-secondary"
+                                                    onClick={() => handleMarkDriveAttendance(selectedDrive.id, application.uid, false)}
+                                                    disabled={reviewingApplication === `${selectedDrive.id}:${application.uid}:attendance:false` || !application.attended}
+                                                >
+                                                    Clear Attendance
                                                 </button>
                                             </div>
                                         </td>

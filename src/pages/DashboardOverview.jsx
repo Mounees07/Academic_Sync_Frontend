@@ -25,6 +25,8 @@ const DashboardOverview = () => {
     const [studentProfile, setStudentProfile] = useState(null);
     const [recentClipboardList, setRecentClipboardList] = useState([]);
     const [sgpaHistory, setSgpaHistory] = useState([]);
+    const [studentLeaves, setStudentLeaves] = useState([]);
+    const [placementOffers, setPlacementOffers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [dashboardStats, setDashboardStats] = useState({
         cgpa: "0.00",
@@ -56,6 +58,7 @@ const DashboardOverview = () => {
                     sgpaRes,
                     leaveRes,
                     feesRes,
+                    placementRes,
                 ] = await Promise.all([
                     api.get(`/users/${currentUser.uid}`),
                     api.get(`/attendance/student/${currentUser.uid}`),
@@ -64,6 +67,7 @@ const DashboardOverview = () => {
                     api.get(`/results/student/${currentUser.uid}/sgpa-history`).catch(() => ({ data: [] })),
                     api.get(`/leaves/student/${currentUser.uid}`).catch(() => ({ data: [] })),
                     api.get(`/finance/fees/student/${currentUser.uid}`).catch(() => ({ data: [] })),
+                    api.get(`/placement/student/${currentUser.uid}`).catch(() => ({ data: null })),
                 ]);
 
                 setStudentProfile(userRes.data);
@@ -127,6 +131,20 @@ const DashboardOverview = () => {
                 const approvedLeaves = leaveRes.data ? leaveRes.data.filter(l => l.status === 'APPROVED').length : 0;
                 const totalLeaves = 10;
                 const _leaveBalance = totalLeaves - approvedLeaves;
+                setStudentLeaves(Array.isArray(leaveRes.data) ? leaveRes.data.filter(Boolean) : []);
+
+                const placementDrives = placementRes.data?.availableDrives || [];
+                setPlacementOffers(
+                    placementDrives
+                        .filter(Boolean)
+                        .map((drive) => ({
+                            id: drive.id,
+                            companyName: drive.companyName || 'Unknown Company',
+                            salaryPackageLakh: drive.salaryPackageLakh,
+                            roleTitle: drive.roleTitle || 'Campus Drive',
+                            applicationStatus: drive.applicationStatus || 'APPLIED',
+                        }))
+                );
 
                 let placement = "Not Evaluated";
                 if (userRes.data.placementStatus) {
@@ -177,6 +195,22 @@ const DashboardOverview = () => {
     const toRoman = (num) => {
         const map = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V', 6: 'VI', 7: 'VII', 8: 'VIII' };
         return map[num] || num;
+    };
+
+    const formatLeaveDateTime = (dateValue, timeValue) => {
+        if (!dateValue) return '--';
+        const formattedDate = new Date(dateValue).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        });
+        return timeValue ? `${formattedDate} ${timeValue}` : formattedDate;
+    };
+
+    const formatSalaryPackage = (value) => {
+        if (value === null || value === undefined || value === '') return '--';
+        const numericValue = Number(value);
+        return Number.isNaN(numericValue) ? value : numericValue.toFixed(numericValue % 1 === 0 ? 0 : 1);
     };
 
     if (loading) return <div className="loading-screen"><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>;
@@ -489,6 +523,110 @@ const DashboardOverview = () => {
 
 
 
+                </div>
+
+                <div className="dashboard-data-grid">
+                    <section className="dash-card dashboard-data-card">
+                        <div className="dashboard-data-card-header">
+                            <div>
+                                <h3>Placement Offers</h3>
+                                <p>Companies where your placement profile is already active.</p>
+                            </div>
+                            <button
+                                type="button"
+                                className="dashboard-data-action"
+                                onClick={() => navigate('/student/placement')}
+                            >
+                                View placement
+                            </button>
+                        </div>
+
+                        <div className="dashboard-table-wrap">
+                            <table className="dashboard-data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Company Name</th>
+                                        <th>Salary Package (in Lakh)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {placementOffers.length > 0 ? (
+                                        placementOffers.slice(0, 5).map((offer) => (
+                                            <tr key={offer.id}>
+                                                <td>
+                                                    <div className="dashboard-table-primary">{offer.companyName}</div>
+                                                    <div className="dashboard-table-secondary">{offer.roleTitle}</div>
+                                                </td>
+                                                <td>
+                                                    <div className="dashboard-table-primary">{formatSalaryPackage(offer.salaryPackageLakh)}</div>
+                                                    <div className="dashboard-table-secondary">{offer.applicationStatus}</div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="2" className="dashboard-table-empty">
+                                                No placement offers or assigned drives yet.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section className="dash-card dashboard-data-card">
+                        <div className="dashboard-data-card-header">
+                            <div>
+                                <h3>Student Leave Details</h3>
+                                <p>Your latest leave requests and travel details.</p>
+                            </div>
+                            <button
+                                type="button"
+                                className="dashboard-data-action"
+                                onClick={() => navigate('/student/leaves')}
+                            >
+                                View all
+                            </button>
+                        </div>
+
+                        <div className="dashboard-table-wrap">
+                            <table className="dashboard-data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Leave Type</th>
+                                        <th>From Date</th>
+                                        <th>To Date</th>
+                                        <th>Reason</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {studentLeaves.length > 0 ? (
+                                        studentLeaves.slice(0, 4).map((leave) => (
+                                            <tr key={leave.id}>
+                                                <td>
+                                                    <div className="dashboard-table-primary">{leave.leaveType || 'Leave'}</div>
+                                                </td>
+                                                <td>{formatLeaveDateTime(leave.fromDate, leave.fromTime)}</td>
+                                                <td>{formatLeaveDateTime(leave.toDate, leave.toTime)}</td>
+                                                <td>
+                                                    <div className="dashboard-table-primary dashboard-table-truncate">
+                                                        {leave.reason || 'No reason provided'}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="4" className="dashboard-table-empty">
+                                                No leave requests found.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
                 </div>
             </div>
 

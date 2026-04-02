@@ -1,5 +1,10 @@
 import axios from 'axios';
 import { auth } from '../firebase/firebase';
+import {
+    SESSION_EXPIRED_MESSAGE,
+    getSessionToken,
+    setSessionMessage,
+} from './session';
 
 // ─── Token Cache ─────────────────────────────────────────────────────────────
 // Scalability fix: Previously, every request called getIdToken(true) which forces
@@ -44,9 +49,8 @@ api.interceptors.request.use(async (config) => {
         const token = await getAuthToken(user);
         config.headers.Authorization = `Bearer ${token}`;
     }
-    // Attach active session token so the backend can enforce single-session mode.
-    // Stored in sessionStorage (tab-local, cleared when browser tab closes).
-    const sessionToken = sessionStorage.getItem('sessionToken');
+
+    const sessionToken = getSessionToken();
     if (sessionToken) {
         config.headers['X-Session-Token'] = sessionToken;
     }
@@ -69,6 +73,17 @@ api.interceptors.response.use(
             error.response?.data?.error === 'SESSION_CONFLICT') {
             window.dispatchEvent(new CustomEvent('session-conflict', {
                 detail: { message: error.response.data.message }
+            }));
+            return Promise.reject(error);
+        }
+
+        if (
+            (error.response?.status === 401 || error.response?.status === 440) &&
+            error.response?.data?.error === 'SESSION_EXPIRED'
+        ) {
+            setSessionMessage(SESSION_EXPIRED_MESSAGE);
+            window.dispatchEvent(new CustomEvent('session-expired', {
+                detail: { message: error.response.data.message || SESSION_EXPIRED_MESSAGE },
             }));
             return Promise.reject(error);
         }
