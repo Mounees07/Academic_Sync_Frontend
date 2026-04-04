@@ -7,7 +7,6 @@ import {
     UserCheck,
     DollarSign,
     FileText,
-    Calendar,
     BookOpen,
     MessageCircle,
     UserCircle,
@@ -37,7 +36,6 @@ const AdminSidebar = () => {
         { to: '/admin/attendance', icon: UserCheck, label: 'Attendance' },
         { to: '/admin/finance', icon: DollarSign, label: 'Finance' },
         { to: '/admin/notice', icon: FileText, label: 'Notice' },
-        { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
         { to: '/admin/library', icon: BookOpen, label: 'Library' },
         { to: '/admin/message', icon: MessageCircle, label: 'Message' },
     ];

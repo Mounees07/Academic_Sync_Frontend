@@ -46,7 +46,6 @@ const Sidebar = () => {
         { to: '/student/performance', icon: <ClipboardList size={22} />, label: 'Performance' },
         { to: '/student/notifications', icon: <Bell size={22} />, label: 'Notifications' },
         { to: '/student/placement', icon: <GraduationCap size={22} />, label: 'Placement' },
-        { to: '/academic-calendar', icon: <CalendarIcon size={22} />, label: 'Academic Calendar' },
     ];
 
     const teacherLinks = [
@@ -97,7 +96,6 @@ const Sidebar = () => {
         { to: '/admin/students', icon: <GraduationCap size={22} />, label: 'Students' },
         { to: '/admin/teachers', icon: <Users size={22} />, label: 'Faculty' },
         { to: '/admin/users', icon: <Users size={22} />, label: 'User Management' },
-        { to: '/calendar', icon: <CalendarIcon size={22} />, label: 'Calendar' },
         { to: '/admin/courses', icon: <BookOpen size={22} />, label: 'Course Management' },
         { to: '/admin/reports', icon: <FileText size={22} />, label: 'Reports' },
         { to: '/admin/settings', icon: <Settings size={22} />, label: 'System Settings' },
@@ -106,6 +104,7 @@ const Sidebar = () => {
     const placementCoordinatorLinks = [
         { to: '/placement-coordinator/dashboard', icon: <LayoutDashboard size={22} />, label: 'Overview' },
         { to: '/placement-coordinator/students', icon: <GraduationCap size={22} />, label: 'Students' },
+        { to: '/placement-coordinator/assessments', icon: <ClipboardList size={22} />, label: 'Assessments' },
         { to: '/placement-coordinator/drives', icon: <Briefcase size={22} />, label: 'Drives' },
         { to: '/placement-coordinator/analytics', icon: <TrendingUp size={22} />, label: 'Analytics' },
     ];

@@ -28,6 +28,11 @@ const HERO_CONTENT = {
         eyebrow: 'Analytics Hub',
         title: 'Analytics & Insights',
         description: 'Detailed overview of placement statistics, department performance, and hiring trends.'
+    },
+    assessments: {
+        eyebrow: 'Assessment Studio',
+        title: 'Placement Assessment Records',
+        description: 'Capture activity-wise marks, vendor training results, attendance, and semester-wise placement rounds for each student.'
     }
 };
 
@@ -88,6 +93,17 @@ const PlacementPageHero = ({
                         <button className="pc-button" onClick={() => onExportDrives('pdf')}>
                             <Download size={16} />
                             Export PDF
+                        </button>
+                    </>
+                ) : activeSection === 'assessments' ? (
+                    <>
+                        <button className="pc-button pc-button-secondary" onClick={() => onRefresh(true)} disabled={refreshing}>
+                            {refreshing ? <Loader2 size={16} className="pc-spin" /> : <BarChart3 size={16} />}
+                            Refresh
+                        </button>
+                        <button className="pc-button" onClick={() => onExportStudents('xlsx')}>
+                            <Download size={16} />
+                            Export Students
                         </button>
                     </>
                 ) : (

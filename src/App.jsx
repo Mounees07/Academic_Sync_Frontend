@@ -23,7 +23,6 @@ const MentorMeetings = React.lazy(() => import('./pages/mentor/MentorMeetings'))
 const StudentAttendance = React.lazy(() => import('./pages/student/StudentAttendance'));
 const MentorAttendance = React.lazy(() => import('./pages/mentor/MentorAttendance'));
 const HODScheduleUpload = React.lazy(() => import('./pages/hod/HODScheduleUpload'));
-const AcademicCalendar = React.lazy(() => import('./pages/AcademicCalendar'));
 const ScheduleView = React.lazy(() => import('./components/ScheduleView'));
 const StudentCourses = React.lazy(() => import('./pages/student/StudentCourses'));
 const StudentCourseDetails = React.lazy(() => import('./pages/student/StudentCourseDetails'));
@@ -67,7 +66,6 @@ const AdminTeacherList = React.lazy(() => import('./pages/admin/AdminTeacherList
 const AdminDataReports = React.lazy(() => import('./pages/admin/AdminDataReports'));
 const AdminSettings = React.lazy(() => import('./pages/admin/AdminSettings'));
 const AdminFinance = React.lazy(() => import('./pages/admin/AdminFinance'));
-const Calendar = React.lazy(() => import('./pages/Calendar'));
 const GateStudentEntry = React.lazy(() => import('./pages/gate/GateStudentEntry'));
 const GateDashboard = React.lazy(() => import('./pages/gate/GateDashboard'));
 const VisitorLog = React.lazy(() => import('./pages/gate/VisitorLog'));
@@ -94,6 +92,21 @@ const PrivateRoute = ({ children, allowedRoles }) => {
   return children;
 };
 
+const getDashboardRouteByRole = (role) => {
+  switch (role) {
+    case 'STUDENT': return '/student/dashboard';
+    case 'TEACHER': return '/teacher/dashboard';
+    case 'MENTOR': return '/mentor/dashboard';
+    case 'HOD': return '/hod/dashboard';
+    case 'PRINCIPAL': return '/principal/dashboard';
+    case 'ADMIN': return '/admin/dashboard';
+    case 'PLACEMENT_COORDINATOR': return '/placement-coordinator/dashboard';
+    case 'COE': return '/coe/dashboard';
+    case 'GATE_SECURITY': return '/gate/dashboard';
+    default: return '/dashboard';
+  }
+};
+
 // Helper to determine the dashboard internal route based on role
 const RoleBasedRedirect = () => {
   const { currentUser, userData, loading } = useAuth();
@@ -115,18 +128,19 @@ const RoleBasedRedirect = () => {
   }
 
   // Redirect logic
-  switch (userData?.role) {
-    case 'STUDENT': return <Navigate to="/student/dashboard" replace />;
-    case 'TEACHER': return <Navigate to="/teacher/dashboard" replace />;
-    case 'MENTOR': return <Navigate to="/mentor/dashboard" replace />;
-    case 'HOD': return <Navigate to="/hod/dashboard" replace />;
-    case 'PRINCIPAL': return <Navigate to="/principal/dashboard" replace />;
-    case 'ADMIN': return <Navigate to="/admin/dashboard" replace />;
-    case 'PLACEMENT_COORDINATOR': return <Navigate to="/placement-coordinator/dashboard" replace />;
-    case 'COE': return <Navigate to="/coe/dashboard" replace />;
-    case 'GATE_SECURITY': return <Navigate to="/gate/dashboard" replace />;
-    default: return <DashboardOverview />;
+  if (!userData?.role) {
+    return <DashboardOverview />;
   }
+
+  return <Navigate to={getDashboardRouteByRole(userData.role)} replace />;
+};
+
+const DashboardOnlyCalendarRedirect = () => {
+  const { loading, userData } = useAuth();
+
+  if (loading) return <div className="loading-screen">Loading...</div>;
+
+  return <Navigate to={getDashboardRouteByRole(userData?.role)} replace />;
 };
 
 import Loader from './components/Loader';
@@ -229,8 +243,9 @@ function App() {
                     {/* Shared Routes */}
                     <Route path="my-profile" element={<MyProfile />} />
                     <Route path="schedule" element={<ScheduleView />} />
-                    <Route path="academic-calendar" element={<AcademicCalendar />} />
-                    <Route path="calendar" element={<Calendar />} />
+                    <Route path="academic-calendar" element={<DashboardOnlyCalendarRedirect />} />
+                    <Route path="calendar" element={<DashboardOnlyCalendarRedirect />} />
+                    <Route path="admin/calendar" element={<DashboardOnlyCalendarRedirect />} />
                     <Route path="announcements" element={<div>Announcements Page</div>} />
 
                     {/* Principal Routes */}
@@ -250,6 +265,7 @@ function App() {
                     {/* Placement Coordinator Routes */}
                     <Route path="placement-coordinator/dashboard" element={<PlacementCoordinatorDashboard />} />
                     <Route path="placement-coordinator/students" element={<PlacementCoordinatorDashboard />} />
+                    <Route path="placement-coordinator/assessments" element={<PlacementCoordinatorDashboard />} />
                     <Route path="placement-coordinator/drives" element={<PlacementCoordinatorDashboard />} />
                     <Route path="placement-coordinator/analytics" element={<PlacementCoordinatorDashboard />} />
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Briefcase, GraduationCap, PieChart as PieChartIcon, TrendingUp } from 'lucide-react';
+import { ArrowRight, Briefcase, ClipboardCheck, GraduationCap, PieChart as PieChartIcon, TrendingUp } from 'lucide-react';
 import {
     Bar,
     BarChart,
@@ -95,6 +95,34 @@ const PlacementOverviewPage = ({
                 </div>
                 <button className="pc-inline-link" onClick={() => navigate('/placement-coordinator/students')}>
                     Open Student Management
+                    <ArrowRight size={16} />
+                </button>
+            </section>
+
+            <section className="pc-panel">
+                <div className="pc-panel-header">
+                    <div>
+                        <h2>Assessment Studio</h2>
+                        <p>Track mock interviews, training attendance, vendor assessments, and custom placement rounds.</p>
+                    </div>
+                    <ClipboardCheck size={18} />
+                </div>
+                <div className="pc-overview-card-list">
+                    <article className="pc-overview-mini-card">
+                        <span>Mock interview focus</span>
+                        <strong>{studentManagementMetrics.mockInterviewAttentionCount}</strong>
+                    </article>
+                    <article className="pc-overview-mini-card">
+                        <span>Average aptitude</span>
+                        <strong>{Math.round(studentManagementMetrics.averageAptitude)}%</strong>
+                    </article>
+                    <article className="pc-overview-mini-card">
+                        <span>Ready for review</span>
+                        <strong>{studentManagementMetrics.visibleCount}</strong>
+                    </article>
+                </div>
+                <button className="pc-inline-link" onClick={() => navigate('/placement-coordinator/assessments')}>
+                    Open Assessments
                     <ArrowRight size={16} />
                 </button>
             </section>

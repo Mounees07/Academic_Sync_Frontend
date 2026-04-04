@@ -4,6 +4,7 @@ import {
     LayoutDashboard,
     BookOpen,
     Calendar,
+    ClipboardCheck,
     ClipboardList,
     UserCheck,
     Bell,
@@ -13,7 +14,6 @@ import {
     FileText,
     ShieldCheck,
     TrendingUp,
-    ClipboardCheck,
     Briefcase,
     User,
     LogOut,
@@ -32,7 +32,6 @@ const FloatingSidebar = ({ isOpen, setIsOpen }) => {
         { to: '/attendance', icon: <UserCheck size={22} />, label: 'Attendance' },
         { to: '/student/fees', icon: <DollarSign size={22} />, label: 'Payments' },
         { to: '/student/leaves', icon: <FileText size={22} />, label: 'Leave Status' },
-        { to: '/academic-calendar', icon: <Calendar size={22} />, label: 'Academic Calendar' },
     ];
 
     const teacherLinks = [
@@ -69,7 +68,6 @@ const FloatingSidebar = ({ isOpen, setIsOpen }) => {
         { to: '/admin/users', icon: <Users size={22} />, label: 'User Management' },
         { to: '/admin/finance', icon: <DollarSign size={22} />, label: 'Finance' },
         { to: '/admin/faculty-leaves', icon: <ClipboardList size={22} />, label: 'Faculty Leaves' },
-        { to: '/calendar', icon: <Calendar size={22} />, label: 'Calendar' },
         { to: '/admin/courses', icon: <BookOpen size={22} />, label: 'Courses' },
         { to: '/admin/reports', icon: <FileText size={22} />, label: 'Reports' },
         { to: '/admin/settings', icon: <Settings size={22} />, label: 'Settings' },
@@ -78,6 +76,7 @@ const FloatingSidebar = ({ isOpen, setIsOpen }) => {
     const placementCoordinatorLinks = [
         { to: '/placement-coordinator/dashboard', icon: <LayoutDashboard size={22} />, label: 'Overview' },
         { to: '/placement-coordinator/students', icon: <GraduationCap size={22} />, label: 'Students' },
+        { to: '/placement-coordinator/assessments', icon: <ClipboardCheck size={22} />, label: 'Assessments' },
         { to: '/placement-coordinator/drives', icon: <Briefcase size={22} />, label: 'Drives' },
         { to: '/placement-coordinator/analytics', icon: <TrendingUp size={22} />, label: 'Analytics' },
     ];

@@ -13,7 +13,8 @@ import {
     Search,
     SlidersHorizontal,
     Trash2,
-    Users
+    Users,
+    UserCheck
 } from 'lucide-react';
 
 const DRIVE_ASSIGNMENT_GROUPS = [
@@ -21,6 +22,13 @@ const DRIVE_ASSIGNMENT_GROUPS = [
     { key: 'appliedStudentUids', title: 'Applied Students' },
     { key: 'selectedStudentUids', title: 'Selected Students' }
 ];
+
+const getStudentMeta = (student) => ({
+    id: student.uid,
+    title: student.name,
+    subtitle: student.rollNumber || student.uid,
+    detail: student.department || 'Department not set'
+});
 
 const PlacementDrivesPage = ({
     companies,
@@ -63,7 +71,29 @@ const PlacementDrivesPage = ({
     setDriveTypeFilter,
     students,
     toggleDriveStudent
-}) => (
+}) => {
+    const [assignmentSearch, setAssignmentSearch] = React.useState({
+        eligibleStudentUids: '',
+        appliedStudentUids: '',
+        selectedStudentUids: ''
+    });
+
+    const selectedStudentsPreview = students.filter((student) => driveForm.selectedStudentUids.includes(student.uid));
+
+    const getFilteredStudents = (groupKey) => {
+        const normalizedSearch = String(assignmentSearch[groupKey] || '').trim().toLowerCase();
+        if (!normalizedSearch) {
+            return students;
+        }
+        return students.filter((student) => [
+            student.name,
+            student.rollNumber,
+            student.department,
+            student.uid
+        ].some((value) => String(value || '').toLowerCase().includes(normalizedSearch)));
+    };
+
+    return (
     <div className="pc-drives-page">
         <div className="pc-drive-filter-bar">
             <label className="pc-search pc-search-wide">
@@ -148,16 +178,23 @@ const PlacementDrivesPage = ({
                                 </div>
                             </div>
 
-                            <div className="pc-drive-progress">
-                                <div className="pc-drive-progress-head">
-                                    <span>Applicants Processed</span>
-                                    <strong>{appliedCount} / {eligibleCount || 0}</strong>
-                                </div>
+                        <div className="pc-drive-progress">
+                            <div className="pc-drive-progress-head">
+                                <span>Applicants Processed</span>
+                                <strong>{appliedCount} / {eligibleCount || 0}</strong>
+                            </div>
                                 <div className="pc-mini-bar">
-                                    <div style={{ width: `${progress}%` }} />
-                                </div>
+                                <div style={{ width: `${progress}%` }} />
                             </div>
                         </div>
+
+                        <div className="pc-drive-progress">
+                            <div className="pc-drive-progress-head">
+                                <span>Students Placed</span>
+                                <strong>{Number(drive.selectedCount || 0)}</strong>
+                            </div>
+                        </div>
+                    </div>
 
                         <div className="pc-drive-card-actions">
                             <button className="pc-button pc-button-secondary" onClick={() => openDriveEditor(drive)}>
@@ -326,22 +363,75 @@ const PlacementDrivesPage = ({
                     </div>
                     <textarea name="description" value={driveForm.description} onChange={handleDriveFieldChange} placeholder="Drive description" rows="3" />
 
+                    <div className="pc-drive-selection-note">
+                        <div className="pc-drive-selection-note-head">
+                            <strong>Placed students selected: {driveForm.selectedStudentUids.length}</strong>
+                            <span>{driveForm.status === 'COMPLETED' ? 'Ready for completed drive review' : 'Choose placed students before marking this drive as completed'}</span>
+                        </div>
+                        <div className="pc-drive-selection-summary">
+                            <div className="pc-drive-selection-stat">
+                                <span>Eligible</span>
+                                <strong>{driveForm.eligibleStudentUids.length}</strong>
+                            </div>
+                            <div className="pc-drive-selection-stat">
+                                <span>Applied</span>
+                                <strong>{driveForm.appliedStudentUids.length}</strong>
+                            </div>
+                            <div className="pc-drive-selection-stat highlight">
+                                <span>Placed</span>
+                                <strong>{driveForm.selectedStudentUids.length}</strong>
+                            </div>
+                        </div>
+                        <div className="pc-drive-selection-chip-row">
+                            {selectedStudentsPreview.length === 0 ? (
+                                <span className="pc-drive-selection-empty">No placed students selected yet.</span>
+                            ) : selectedStudentsPreview.map((student) => (
+                                <span key={`selected-preview-${student.uid}`} className="pc-drive-selection-chip">
+                                    <UserCheck size={14} />
+                                    {student.name}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
                     <div className="pc-drive-assignments">
                         {DRIVE_ASSIGNMENT_GROUPS.map((group) => (
                             <div key={group.key} className="pc-assignment-box">
-                                <h3>{group.title}</h3>
+                                <div className="pc-assignment-box-head">
+                                    <div>
+                                        <h3>{group.title}</h3>
+                                        <small>{driveForm[group.key].length} selected</small>
+                                    </div>
+                                    <label className="pc-search pc-assignment-search">
+                                        <Search size={14} />
+                                        <input
+                                            type="text"
+                                            value={assignmentSearch[group.key]}
+                                            onChange={(event) => setAssignmentSearch((prev) => ({ ...prev, [group.key]: event.target.value }))}
+                                            placeholder="Search name or roll no"
+                                        />
+                                    </label>
+                                </div>
                                 <div className="pc-assignment-list">
-                                    {students.map((student) => (
-                                        <label key={`${group.key}-${student.uid}`} className="pc-check-row">
+                                    {getFilteredStudents(group.key).map((student) => {
+                                        const meta = getStudentMeta(student);
+                                        const isChecked = driveForm[group.key].includes(student.uid);
+
+                                        return (
+                                        <label key={`${group.key}-${student.uid}`} className={`pc-check-row card-style ${isChecked ? 'selected' : ''}`}>
                                             <input
                                                 type="checkbox"
-                                                checked={driveForm[group.key].includes(student.uid)}
+                                                checked={isChecked}
                                                 onChange={() => toggleDriveStudent(group.key, student.uid)}
                                             />
-                                            <span>{student.name}</span>
-                                            <small>{student.department}</small>
+                                            <div className="pc-check-row-body">
+                                                <strong>{meta.title}</strong>
+                                                <span>{meta.subtitle}</span>
+                                                <small>{meta.detail}</small>
+                                            </div>
                                         </label>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
                         ))}
@@ -418,6 +508,7 @@ const PlacementDrivesPage = ({
             </section>
         </div>
     </div>
-);
+    );
+};
 
 export default PlacementDrivesPage;

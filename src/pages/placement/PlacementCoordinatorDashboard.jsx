@@ -12,6 +12,7 @@ import PlacementOverviewPage from './views/PlacementOverviewPage';
 import PlacementStudentsPage from './views/PlacementStudentsPage';
 import PlacementDrivesPage from './views/PlacementDrivesPage';
 import PlacementAnalyticsPage from './views/PlacementAnalyticsPage';
+import PlacementAssessmentsPage from './views/PlacementAssessmentsPage';
 import CollegeCalendarWidget from '../../components/college-calendar/CollegeCalendarWidget';
 import './PlacementCoordinatorDashboard.css';
 
@@ -90,8 +91,44 @@ const getSectionFromPath = (pathname) => {
     if (pathname.includes('/students')) return 'students';
     if (pathname.includes('/drives')) return 'drives';
     if (pathname.includes('/analytics')) return 'analytics';
+    if (pathname.includes('/assessments')) return 'assessments';
     return 'overview';
 };
+
+const createEntryId = (prefix) => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+const createAttendanceEntry = (semester = 1) => ({
+    id: createEntryId('attendance'),
+    name: '',
+    category: 'TRAINING_ATTENDANCE',
+    semester,
+    conductorType: 'INTERNAL',
+    conductorName: '',
+    attendancePercent: 0,
+    remarks: ''
+});
+
+const createAssessmentScoreEntry = (semester = 1) => ({
+    id: createEntryId('assessment'),
+    name: '',
+    category: 'TRAINING_ASSESSMENT',
+    semester,
+    conductorType: 'INTERNAL',
+    conductorName: '',
+    score: 0,
+    maxScore: 100,
+    remarks: ''
+});
+
+const createRoundEntry = (semester = 1) => ({
+    id: createEntryId('round'),
+    name: '',
+    semester,
+    conductedBy: 'PLACEMENT_TEAM',
+    score: 0,
+    maxScore: 100,
+    remarks: ''
+});
 
 const getDriveType = (drive) => {
     const roleTitle = String(drive?.roleTitle || '').toLowerCase();
@@ -131,6 +168,7 @@ const PlacementCoordinatorDashboard = () => {
     const importInputRef = useRef(null);
     const driveFormRef = useRef(null);
     const activeSection = getSectionFromPath(location.pathname);
+    const isOverviewSection = activeSection === 'overview';
 
     const [dashboard, setDashboard] = useState(null);
     const [students, setStudents] = useState([]);
@@ -157,6 +195,15 @@ const PlacementCoordinatorDashboard = () => {
 
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [studentForm, setStudentForm] = useState(emptyStudentForm);
+    const [attendanceStudentUid, setAttendanceStudentUid] = useState('');
+    const [attendanceEntries, setAttendanceEntries] = useState([]);
+    const [savingAttendanceEntries, setSavingAttendanceEntries] = useState(false);
+    const [assessmentStudentUid, setAssessmentStudentUid] = useState('');
+    const [assessmentScores, setAssessmentScores] = useState([]);
+    const [savingAssessmentScores, setSavingAssessmentScores] = useState(false);
+    const [roundStudentUid, setRoundStudentUid] = useState('');
+    const [assessmentRounds, setAssessmentRounds] = useState([]);
+    const [savingRounds, setSavingRounds] = useState(false);
 
     const [companyForm, setCompanyForm] = useState(emptyCompanyForm);
     const [editingCompanyId, setEditingCompanyId] = useState(null);
@@ -292,6 +339,21 @@ const PlacementCoordinatorDashboard = () => {
         [drives, selectedDriveId]
     );
 
+    const selectedAttendanceStudent = useMemo(
+        () => students.find((student) => student.uid === attendanceStudentUid) || null,
+        [attendanceStudentUid, students]
+    );
+
+    const selectedAssessmentStudent = useMemo(
+        () => students.find((student) => student.uid === assessmentStudentUid) || null,
+        [assessmentStudentUid, students]
+    );
+
+    const selectedRoundStudent = useMemo(
+        () => students.find((student) => student.uid === roundStudentUid) || null,
+        [roundStudentUid, students]
+    );
+
     const monthlyHiringTrendData = useMemo(() => {
         const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
         const currentYear = new Date().getFullYear();
@@ -360,6 +422,37 @@ const PlacementCoordinatorDashboard = () => {
         });
     }, [drives]);
 
+    const assessmentSummary = useMemo(() => {
+        const totalActivities = students.reduce((sum, student) => sum + Number(student.assessmentScoreCount || 0), 0);
+        const totalAttendanceEntries = students.reduce((sum, student) => sum + Number(student.attendanceCount || 0), 0);
+        const totalRounds = students.reduce((sum, student) => sum + Number(student.placementRoundCount || 0), 0);
+        const studentsWithAssessments = students.filter((student) =>
+            Number(student.attendanceCount || 0) > 0
+            || Number(student.assessmentScoreCount || 0) > 0
+            || Number(student.placementRoundCount || 0) > 0
+        ).length;
+
+        const averageAssessmentScore = students.length
+            ? students.reduce((sum, student) => sum + Number(student.averageAssessmentScore || 0), 0) / students.length
+            : 0;
+        const averageAttendancePercent = students.length
+            ? students.reduce((sum, student) => sum + Number(student.averageAttendancePercent || 0), 0) / students.length
+            : 0;
+        const averagePlacementRoundScore = students.length
+            ? students.reduce((sum, student) => sum + Number(student.averagePlacementRoundScore || 0), 0) / students.length
+            : 0;
+
+        return {
+            totalActivities,
+            totalAttendanceEntries,
+            totalRounds,
+            studentsWithAssessments,
+            averageAssessmentScore,
+            averageAttendancePercent,
+            averagePlacementRoundScore
+        };
+    }, [students]);
+
     const fetchPlacementData = async (silent = false) => {
         if (silent) {
             setRefreshing(true);
@@ -416,6 +509,67 @@ const PlacementCoordinatorDashboard = () => {
             preferredCompanies: selectedStudent.preferredCompanies || ''
         });
     }, [selectedStudent]);
+
+    useEffect(() => {
+        if (!students.length) {
+            setAttendanceStudentUid('');
+            setAssessmentStudentUid('');
+            setRoundStudentUid('');
+            return;
+        }
+
+        setAttendanceStudentUid((current) => {
+            if (current && students.some((student) => student.uid === current)) {
+                return current;
+            }
+            return students[0].uid;
+        });
+        setAssessmentStudentUid((current) => {
+            if (current && students.some((student) => student.uid === current)) {
+                return current;
+            }
+            return students[0].uid;
+        });
+        setRoundStudentUid((current) => {
+            if (current && students.some((student) => student.uid === current)) {
+                return current;
+            }
+            return students[0].uid;
+        });
+    }, [students]);
+
+    useEffect(() => {
+        if (!selectedAttendanceStudent) {
+            setAttendanceEntries([]);
+            return;
+        }
+
+        setAttendanceEntries(Array.isArray(selectedAttendanceStudent.trainingAttendance)
+            ? selectedAttendanceStudent.trainingAttendance
+            : []);
+    }, [selectedAttendanceStudent]);
+
+    useEffect(() => {
+        if (!selectedAssessmentStudent) {
+            setAssessmentScores([]);
+            return;
+        }
+
+        setAssessmentScores(Array.isArray(selectedAssessmentStudent.assessmentScores)
+            ? selectedAssessmentStudent.assessmentScores
+            : []);
+    }, [selectedAssessmentStudent]);
+
+    useEffect(() => {
+        if (!selectedRoundStudent) {
+            setAssessmentRounds([]);
+            return;
+        }
+
+        setAssessmentRounds(Array.isArray(selectedRoundStudent.placementRounds)
+            ? selectedRoundStudent.placementRounds
+            : []);
+    }, [selectedRoundStudent]);
 
     const setMessage = (type, text) => {
         setStatusMessage({ type, text });
@@ -665,6 +819,12 @@ const PlacementCoordinatorDashboard = () => {
         setSavingDrive(true);
 
         try {
+            if (String(driveForm.status || '').toUpperCase() === 'COMPLETED' && driveForm.selectedStudentUids.length === 0) {
+                setMessage('error', 'Select the placed students before marking the drive as completed.');
+                setSavingDrive(false);
+                return;
+            }
+
             const payload = {
                 ...driveForm,
                 companyId: Number(driveForm.companyId)
@@ -678,11 +838,14 @@ const PlacementCoordinatorDashboard = () => {
 
             setSelectedDriveId(null);
             resetDriveForm();
+            if (String(payload.status || '').toUpperCase() === 'COMPLETED') {
+                setDriveStatusFilter('COMPLETED');
+            }
             await fetchPlacementData(true);
             setMessage('success', 'Placement drive saved successfully.');
         } catch (error) {
             console.error('Failed to save drive', error);
-            setMessage('error', 'Failed to save placement drive.');
+            setMessage('error', error?.response?.data || 'Failed to save placement drive.');
         } finally {
             setSavingDrive(false);
         }
@@ -746,6 +909,143 @@ const PlacementCoordinatorDashboard = () => {
             setMessage('error', 'Failed to update application review status.');
         } finally {
             setReviewingApplication(null);
+        }
+    };
+
+    const handleAttendanceStudentChange = (uid) => {
+        setAttendanceStudentUid(uid);
+    };
+
+    const handleAttendanceFieldChange = (entryId, field, value) => {
+        setAttendanceEntries((prev) => prev.map((entry) => (
+            entry.id === entryId
+                ? {
+                    ...entry,
+                    [field]: ['semester', 'attendancePercent'].includes(field) ? Number(value) : value
+                }
+                : entry
+        )));
+    };
+
+    const handleAssessmentStudentChange = (uid) => {
+        setAssessmentStudentUid(uid);
+    };
+
+    const handleAssessmentScoreFieldChange = (entryId, field, value) => {
+        setAssessmentScores((prev) => prev.map((entry) => (
+            entry.id === entryId
+                ? {
+                    ...entry,
+                    [field]: ['semester', 'score', 'maxScore'].includes(field) ? Number(value) : value
+                }
+                : entry
+        )));
+    };
+
+    const handleRoundStudentChange = (uid) => {
+        setRoundStudentUid(uid);
+    };
+
+    const handleAssessmentRoundFieldChange = (entryId, field, value) => {
+        setAssessmentRounds((prev) => prev.map((entry) => (
+            entry.id === entryId
+                ? {
+                    ...entry,
+                    [field]: ['semester', 'score', 'maxScore'].includes(field) ? Number(value) : value
+                }
+                : entry
+        )));
+    };
+
+    const handleAddAttendanceEntry = (semester = 1) => {
+        setAttendanceEntries((prev) => [...prev, createAttendanceEntry(semester)]);
+    };
+
+    const handleRemoveAttendanceEntry = (entryId) => {
+        setAttendanceEntries((prev) => prev.filter((entry) => entry.id !== entryId));
+    };
+
+    const handleAddAssessmentScore = (semester = 1) => {
+        setAssessmentScores((prev) => [...prev, createAssessmentScoreEntry(semester)]);
+    };
+
+    const handleRemoveAssessmentScore = (entryId) => {
+        setAssessmentScores((prev) => prev.filter((entry) => entry.id !== entryId));
+    };
+
+    const handleAddPlacementRound = (semester = 1) => {
+        setAssessmentRounds((prev) => [...prev, createRoundEntry(semester)]);
+    };
+
+    const handleRemovePlacementRound = (entryId) => {
+        setAssessmentRounds((prev) => prev.filter((entry) => entry.id !== entryId));
+    };
+
+    const handleSaveAttendanceEntries = async () => {
+        if (!selectedAttendanceStudent) return;
+        setSavingAttendanceEntries(true);
+
+        try {
+            const response = await api.put(`/placement/coordinator/students/${selectedAttendanceStudent.uid}`, {
+                trainingAttendance: attendanceEntries,
+                assessmentScores: selectedAttendanceStudent.assessmentScores || []
+            });
+            const updatedStudent = response.data;
+            setStudents((prev) => prev.map((student) => student.uid === updatedStudent.uid ? updatedStudent : student));
+            setAttendanceStudentUid(updatedStudent.uid);
+            setMessage('success', `Saved training attendance for ${updatedStudent.name}.`);
+            return true;
+        } catch (error) {
+            console.error('Failed to save placement attendance entries', error);
+            setMessage('error', 'Failed to save training attendance records.');
+            return false;
+        } finally {
+            setSavingAttendanceEntries(false);
+        }
+    };
+
+    const handleSaveAssessmentScores = async () => {
+        if (!selectedAssessmentStudent) return false;
+        setSavingAssessmentScores(true);
+
+        try {
+            const response = await api.put(`/placement/coordinator/students/${selectedAssessmentStudent.uid}`, {
+                trainingAttendance: selectedAssessmentStudent.trainingAttendance || [],
+                assessmentScores
+            });
+            const updatedStudent = response.data;
+            setStudents((prev) => prev.map((student) => student.uid === updatedStudent.uid ? updatedStudent : student));
+            setAssessmentStudentUid(updatedStudent.uid);
+            setMessage('success', `Saved assessment scores for ${updatedStudent.name}.`);
+            return true;
+        } catch (error) {
+            console.error('Failed to save placement assessment scores', error);
+            setMessage('error', 'Failed to save assessment score records.');
+            return false;
+        } finally {
+            setSavingAssessmentScores(false);
+        }
+    };
+
+    const handleSavePlacementRounds = async () => {
+        if (!selectedRoundStudent) return false;
+        setSavingRounds(true);
+
+        try {
+            const response = await api.put(`/placement/coordinator/students/${selectedRoundStudent.uid}`, {
+                placementRounds: assessmentRounds
+            });
+            const updatedStudent = response.data;
+            setStudents((prev) => prev.map((student) => student.uid === updatedStudent.uid ? updatedStudent : student));
+            setRoundStudentUid(updatedStudent.uid);
+            setMessage('success', `Saved placement rounds for ${updatedStudent.name}.`);
+            return true;
+        } catch (error) {
+            console.error('Failed to save placement rounds', error);
+            setMessage('error', 'Failed to save placement round records.');
+            return false;
+        } finally {
+            setSavingRounds(false);
         }
     };
 
@@ -906,6 +1206,43 @@ const PlacementCoordinatorDashboard = () => {
             );
         }
 
+        if (activeSection === 'assessments') {
+            return (
+                <PlacementAssessmentsPage
+                    attendanceEntries={attendanceEntries}
+                    attendanceStudentUid={attendanceStudentUid}
+                    assessmentRounds={assessmentRounds}
+                    assessmentStudentUid={assessmentStudentUid}
+                    assessmentScores={assessmentScores}
+                    assessmentSummary={assessmentSummary}
+                    departmentOptions={departmentOptions}
+                    handleAddAssessmentScore={handleAddAssessmentScore}
+                    handleAddAttendanceEntry={handleAddAttendanceEntry}
+                    handleAddPlacementRound={handleAddPlacementRound}
+                    handleAssessmentScoreFieldChange={handleAssessmentScoreFieldChange}
+                    handleAssessmentRoundFieldChange={handleAssessmentRoundFieldChange}
+                    handleAttendanceFieldChange={handleAttendanceFieldChange}
+                    handleAttendanceStudentChange={handleAttendanceStudentChange}
+                    handleAssessmentStudentChange={handleAssessmentStudentChange}
+                    handleRemoveAssessmentScore={handleRemoveAssessmentScore}
+                    handleRemoveAttendanceEntry={handleRemoveAttendanceEntry}
+                    handleRemovePlacementRound={handleRemovePlacementRound}
+                    handleRoundStudentChange={handleRoundStudentChange}
+                    handleSaveAssessmentScores={handleSaveAssessmentScores}
+                    handleSaveAttendanceEntries={handleSaveAttendanceEntries}
+                    handleSavePlacementRounds={handleSavePlacementRounds}
+                    roundStudentUid={roundStudentUid}
+                    savingAssessmentScores={savingAssessmentScores}
+                    savingAttendanceEntries={savingAttendanceEntries}
+                    savingRounds={savingRounds}
+                    selectedAttendanceStudent={selectedAttendanceStudent}
+                    selectedAssessmentStudent={selectedAssessmentStudent}
+                    selectedRoundStudent={selectedRoundStudent}
+                    students={students}
+                />
+            );
+        }
+
         return (
             <PlacementOverviewPage
                 analyticsSummary={analyticsSummary}
@@ -948,19 +1285,23 @@ const PlacementCoordinatorDashboard = () => {
                 </div>
             )}
 
-            <PlacementStatsGrid
-                activeSection={activeSection}
-                dashboard={dashboard}
-                formatScore={formatScore}
-                onOpenStudents={() => navigate('/placement-coordinator/students')}
-            />
+            {isOverviewSection && (
+                <>
+                    <PlacementStatsGrid
+                        activeSection={activeSection}
+                        dashboard={dashboard}
+                        formatScore={formatScore}
+                        onOpenStudents={() => navigate('/placement-coordinator/students')}
+                    />
 
-            <CollegeCalendarWidget
-                title="Placement Office Calendar"
-                subtitle="Keep drives aligned with campus leave days, holidays, and vacation periods"
-                compact
-                className="pc-calendar-widget"
-            />
+                    <CollegeCalendarWidget
+                        title="Placement Office Calendar"
+                        subtitle="Keep drives aligned with campus leave days, holidays, and vacation periods"
+                        compact
+                        className="pc-calendar-widget"
+                    />
+                </>
+            )}
 
             {renderActivePage()}
 
