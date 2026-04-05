@@ -79,7 +79,8 @@ const StudentAcademic = () => {
         { label: 'Assignments',   icon: <ClipboardList size={26} />, color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', to: '/student/assignments' },
         { label: 'Result',        icon: <Award     size={26} />, color: '#10b981', bg: 'rgba(16,185,129,0.12)', to: '/student/results' },
         { label: 'Exam Seating',  icon: <FileText  size={26} />, color: '#ef4444', bg: 'rgba(239,68,68,0.12)',  to: '/student/exam-seating' },
-        { label: 'Notifications', icon: <Bell      size={26} />, color: '#3b82f6', bg: 'rgba(59,130,246,0.12)', to: '/student/notifications' },
+        { label: 'Academic Timetable', icon: <Activity size={26} />, color: '#14b8a6', bg: 'rgba(20,184,166,0.12)', to: '/schedule' },
+       
     ];
 
     return (

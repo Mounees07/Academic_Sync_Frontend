@@ -47,6 +47,7 @@ const StudentFeeHistory = React.lazy(() => import('./pages/student/StudentFeeHis
 const StudentPerformance = React.lazy(() => import('./pages/student/StudentPerformance'));
 const StudentNotifications = React.lazy(() => import('./pages/student/StudentNotifications'));
 const StudentPlacement = React.lazy(() => import('./pages/student/StudentPlacement'));
+const AcademicCalendar = React.lazy(() => import('./pages/AcademicCalendar'));
 const PlacementCoordinatorDashboard = React.lazy(() => import('./pages/placement/PlacementCoordinatorDashboard'));
 
 const TeacherQuestionManager = React.lazy(() => import('./pages/teacher/TeacherQuestionManager'));
@@ -243,7 +244,7 @@ function App() {
                     {/* Shared Routes */}
                     <Route path="my-profile" element={<MyProfile />} />
                     <Route path="schedule" element={<ScheduleView />} />
-                    <Route path="academic-calendar" element={<DashboardOnlyCalendarRedirect />} />
+                    <Route path="academic-calendar" element={<AcademicCalendar />} />
                     <Route path="calendar" element={<DashboardOnlyCalendarRedirect />} />
                     <Route path="admin/calendar" element={<DashboardOnlyCalendarRedirect />} />
                     <Route path="announcements" element={<div>Announcements Page</div>} />

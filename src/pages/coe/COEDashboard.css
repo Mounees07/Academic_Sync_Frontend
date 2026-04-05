@@ -199,3 +199,11 @@
     background-color: #10b981;
     border-radius: 50%;
 }
+
+[data-theme='dark'][data-app-role='COE'] .coe-dot {
+    background-color: #52525b;
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-status-pill {
+    background: rgba(255, 255, 255, 0.08);
+}

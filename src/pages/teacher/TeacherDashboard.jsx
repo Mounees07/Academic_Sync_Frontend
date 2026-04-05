@@ -149,6 +149,7 @@ const TeacherDashboard = () => {
                     title="College Calendar"
                     subtitle="Shared leave days, government holidays, and vacation windows"
                     compact
+                    variant="workspace"
                 />
             </div>
 

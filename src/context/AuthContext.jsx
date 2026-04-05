@@ -295,7 +295,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={value}>
-            {!loading && children}
+            {children}
             {sessionConflict && (
                 <div style={{
                     position: 'fixed', inset: 0, zIndex: 99999,

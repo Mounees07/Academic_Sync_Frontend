@@ -39,6 +39,7 @@ const Sidebar = () => {
     const studentLinks = [
         { to: '/dashboard', icon: <LayoutDashboard size={22} />, label: 'Overview' },
         { to: '/student/academic', icon: <BookOpen size={22} />, label: 'Academic' },
+        { to: '/schedule', icon: <CalendarIcon size={22} />, label: 'Academic Timetable' },
         { to: '/attendance', icon: <UserCheck size={22} />, label: 'Attendance' },
         { to: '/student/attendance-analytics', icon: <TrendingUp size={22} />, label: 'Att. Analytics' },
         { to: '/student/leaves', icon: <FileText size={22} />, label: 'Leave Status' },

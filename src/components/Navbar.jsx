@@ -103,13 +103,10 @@ const Navbar = ({ toggleSidebar, sessionTotalMs = 300000, sessionDeadlineAt = nu
 
     const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-    const [isNotifMenuOpen, setIsNotifMenuOpen] = useState(false);
-    const [recentNotifs, setRecentNotifs] = useState([]);
     const [unreadNotifCount, setUnreadNotifCount] = useState(0);
 
     const themeMenuRef = useRef(null);
     const profileMenuRef = useRef(null);
-    const notifMenuRef = useRef(null);
 
     const handleLogout = async () => {
         try {
@@ -127,13 +124,10 @@ const Navbar = ({ toggleSidebar, sessionTotalMs = 300000, sessionDeadlineAt = nu
 
         const load = async () => {
             try {
-                const { data } = await api.get(`/notifications/user/${userData.uid}`, {
+                const { data } = await api.get(`/notifications/user/${userData.uid}/unread-count`, {
                     skipSessionActivity: true,
                 });
-                if (Array.isArray(data)) {
-                    setRecentNotifs(data.slice(0, 5));
-                    setUnreadNotifCount(data.filter((n) => !n.isRead).length);
-                }
+                setUnreadNotifCount(Number(data?.count) || 0);
             } catch {
                 // Ignore notification polling errors.
             }
@@ -141,7 +135,29 @@ const Navbar = ({ toggleSidebar, sessionTotalMs = 300000, sessionDeadlineAt = nu
 
         load();
         const intervalId = window.setInterval(load, 30000);
-        return () => window.clearInterval(intervalId);
+        const handleNotificationChange = (event) => {
+            if (typeof event?.detail?.unreadCount === 'number') {
+                setUnreadNotifCount(event.detail.unreadCount);
+                return;
+            }
+            load();
+        };
+        const handleVisibilityRefresh = () => {
+            if (document.visibilityState === 'visible') {
+                load();
+            }
+        };
+
+        window.addEventListener('notifications:changed', handleNotificationChange);
+        window.addEventListener('focus', load);
+        document.addEventListener('visibilitychange', handleVisibilityRefresh);
+
+        return () => {
+            window.clearInterval(intervalId);
+            window.removeEventListener('notifications:changed', handleNotificationChange);
+            window.removeEventListener('focus', load);
+            document.removeEventListener('visibilitychange', handleVisibilityRefresh);
+        };
     }, [userData]);
 
     useEffect(() => {
@@ -152,37 +168,11 @@ const Navbar = ({ toggleSidebar, sessionTotalMs = 300000, sessionDeadlineAt = nu
             if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) {
                 setIsProfileMenuOpen(false);
             }
-            if (notifMenuRef.current && !notifMenuRef.current.contains(e.target)) {
-                setIsNotifMenuOpen(false);
-            }
         };
 
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, []);
-
-    const openNotification = async (notification) => {
-        if (!notification) {
-            return;
-        }
-
-        try {
-            if (!notification.isRead) {
-                await api.put(`/notifications/${notification.id}/read`, null, {
-                    skipSessionActivity: true,
-                });
-            }
-        } catch {
-            // Ignore notification mark-as-read errors.
-        }
-
-        setRecentNotifs((prev) => prev.map((item) => (
-            item.id === notification.id ? { ...item, isRead: true } : item
-        )));
-        setUnreadNotifCount((prev) => Math.max(0, prev - (notification.isRead ? 0 : 1)));
-        setIsNotifMenuOpen(false);
-        navigate(notification.actionUrl || '/notifications');
-    };
 
     const getThemeIcon = () => {
         if (theme === 'light') {
@@ -260,43 +250,14 @@ const Navbar = ({ toggleSidebar, sessionTotalMs = 300000, sessionDeadlineAt = nu
                         )}
                     </div>
 
-                    <div className="notif-nav-wrapper" ref={notifMenuRef} style={{ position: 'relative' }}>
-                        <button
-                            className={`icon-btn nav-secondary-action ${unreadNotifCount > 0 ? 'has-unread' : ''}`}
-                            onClick={() => setIsNotifMenuOpen((p) => !p)}
-                            title="Notifications"
-                        >
-                            <Bell size={20} />
-                            {unreadNotifCount > 0 && <span className="notification-dot" />}
-                        </button>
-                        {isNotifMenuOpen && (
-                            <div className="nav-notif-dropdown animate-fade-in custom-scrollbar">
-                                <div className="nav-notif-header">
-                                    <h4>Notifications</h4>
-                                    {unreadNotifCount > 0 && <span>{unreadNotifCount} new</span>}
-                                </div>
-                                <div className="nav-notif-body">
-                                    {recentNotifs.length === 0 ? (
-                                        <div className="nav-notif-empty"><Bell size={32} opacity={0.2} /><p>No new notifications</p></div>
-                                    ) : recentNotifs.map((notification) => (
-                                        <div
-                                            key={notification.id}
-                                            className={`nav-notif-item ${!notification.isRead ? 'unread' : ''} ${notification.actionUrl ? 'has-link' : ''}`}
-                                            onClick={() => openNotification(notification)}
-                                        >
-                                            <div className="nav-notif-content">
-                                                <h5>{notification.title}</h5>
-                                                <p>{notification.message}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="nav-notif-footer" onClick={() => { setIsNotifMenuOpen(false); navigate('/notifications'); }}>
-                                    View full inbox
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                    <button
+                        className={`icon-btn nav-secondary-action ${unreadNotifCount > 0 ? 'has-unread' : ''}`}
+                        onClick={() => navigate('/student/notifications')}
+                        title="Notifications"
+                    >
+                        <Bell size={20} />
+                        {unreadNotifCount > 0 && <span className="notification-dot" />}
+                    </button>
 
                     <button className="icon-btn nav-logout-btn" onClick={handleLogout} title="Logout">
                         <LogOut size={20} />

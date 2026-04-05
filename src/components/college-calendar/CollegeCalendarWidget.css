@@ -674,6 +674,161 @@
     margin-top: 2px;
 }
 
+.college-calendar-widget--workspace {
+    --calendar-panel-bg: linear-gradient(180deg, color-mix(in srgb, var(--bg-card, #ffffff) 92%, rgba(14, 165, 233, 0.08)), var(--bg-card, #ffffff));
+    --calendar-panel-soft: color-mix(in srgb, var(--bg-card, #ffffff) 94%, rgba(148, 163, 184, 0.06));
+    --calendar-panel-strong: color-mix(in srgb, var(--bg-card, #ffffff) 96%, rgba(148, 163, 184, 0.04));
+    --calendar-control-bg: color-mix(in srgb, var(--bg-card, #ffffff) 76%, rgba(14, 165, 233, 0.12));
+    --calendar-pill-bg: color-mix(in srgb, var(--bg-card, #ffffff) 74%, rgba(14, 165, 233, 0.12));
+    border-radius: 30px;
+    border-color: color-mix(in srgb, var(--glass-border, #e2e8f0) 76%, rgba(14, 165, 233, 0.18));
+    box-shadow: 0 22px 44px rgba(15, 23, 42, 0.12);
+}
+
+.college-calendar-widget--workspace.compact {
+    padding: 22px;
+}
+
+.college-calendar-widget--workspace .college-calendar-header {
+    align-items: stretch;
+    margin-bottom: 16px;
+}
+
+.college-calendar-widget--workspace .college-calendar-heading {
+    gap: 12px;
+}
+
+.college-calendar-widget--workspace .college-calendar-header h3 {
+    font-size: 1.12rem;
+    letter-spacing: -0.02em;
+}
+
+.college-calendar-widget--workspace .college-calendar-header p {
+    max-width: 52ch;
+    line-height: 1.55;
+}
+
+.college-calendar-widget--workspace .college-calendar-header-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, max-content));
+    gap: 10px;
+}
+
+.college-calendar-widget--workspace .college-calendar-metric-pill {
+    min-width: 0;
+    padding: 10px 12px;
+    background: color-mix(in srgb, var(--bg-card, #ffffff) 72%, rgba(14, 165, 233, 0.12));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.college-calendar-widget--workspace .college-calendar-metric-pill strong {
+    font-size: 1.05rem;
+}
+
+.college-calendar-widget--workspace .college-calendar-shell {
+    gap: 16px;
+}
+
+.college-calendar-widget--workspace .college-calendar-month-panel,
+.college-calendar-widget--workspace .college-calendar-detail-card {
+    border-radius: 24px;
+    border-color: color-mix(in srgb, var(--glass-border, #e2e8f0) 78%, rgba(14, 165, 233, 0.16));
+}
+
+.college-calendar-widget--workspace .college-calendar-month-panel {
+    background:
+        radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 34%),
+        var(--calendar-panel-soft);
+}
+
+.college-calendar-widget--workspace .college-calendar-nav {
+    padding: 4px 0 2px;
+}
+
+.college-calendar-widget--workspace .college-calendar-nav strong {
+    font-size: 1.6rem;
+}
+
+.college-calendar-widget--workspace .college-calendar-nav button {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+}
+
+.college-calendar-widget--workspace .college-calendar-legend {
+    gap: 8px;
+    margin-bottom: 0;
+}
+
+.college-calendar-widget--workspace .college-calendar-legend-item {
+    padding: 8px 10px;
+    background: color-mix(in srgb, var(--bg-card, #ffffff) 74%, rgba(14, 165, 233, 0.1));
+}
+
+.college-calendar-widget--workspace .college-calendar-details {
+    gap: 14px;
+}
+
+.college-calendar-widget--workspace .college-calendar-detail-card {
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--bg-card, #ffffff) 96%, rgba(14, 165, 233, 0.06)), var(--calendar-panel-strong));
+}
+
+.college-calendar-widget--workspace .college-calendar-detail-heading {
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid color-mix(in srgb, var(--glass-border, #e2e8f0) 84%, rgba(14, 165, 233, 0.12));
+}
+
+.college-calendar-widget--workspace .college-calendar-day-total {
+    background: color-mix(in srgb, var(--bg-card, #ffffff) 66%, rgba(14, 165, 233, 0.16));
+    color: var(--text-primary, #0f172a);
+}
+
+.college-calendar-widget--workspace .college-calendar-empty {
+    border: 1px dashed color-mix(in srgb, var(--glass-border, #e2e8f0) 84%, rgba(14, 165, 233, 0.18));
+    background: color-mix(in srgb, var(--bg-card, #ffffff) 76%, rgba(14, 165, 233, 0.08));
+}
+
+.college-calendar-widget--workspace .college-calendar-list {
+    gap: 10px;
+}
+
+.college-calendar-widget--workspace .college-calendar-event-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    padding: 15px 16px 14px;
+    background: color-mix(in srgb, var(--bg-card, #ffffff) 88%, rgba(148, 163, 184, 0.05));
+}
+
+.college-calendar-widget--workspace .college-calendar-event-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--event-accent, #0ea5e9);
+    opacity: 0.9;
+}
+
+.college-calendar-widget--workspace .college-calendar-event-card h5 {
+    font-size: 1.02rem;
+    margin: 12px 0 8px;
+}
+
+.college-calendar-widget--workspace .college-calendar-event-card p {
+    line-height: 1.6;
+}
+
+.college-calendar-widget--workspace .college-calendar-meta {
+    padding-top: 10px;
+    border-top: 1px solid color-mix(in srgb, var(--glass-border, #e2e8f0) 88%, transparent);
+}
+
+.college-calendar-widget--workspace .college-calendar-event-badge {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
 .admin-calendar-fullwidth {
     width: 100%;
 }
@@ -738,6 +893,10 @@
     }
 
     .college-calendar-week-strip {
+        grid-template-columns: 1fr;
+    }
+
+    .college-calendar-widget--workspace .college-calendar-header-metrics {
         grid-template-columns: 1fr;
     }
 }

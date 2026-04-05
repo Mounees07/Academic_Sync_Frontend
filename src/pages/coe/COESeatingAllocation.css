@@ -943,6 +943,36 @@
 .sa-toast-error   { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3);  color: #ef4444; }
 .sa-toast-info    { background: rgba(79,70,229,0.12); border: 1px solid rgba(79,70,229,0.3);   color: #6366f1; }
 
+[data-theme='dark'][data-app-role='COE'] .sa-tab.active,
+[data-theme='dark'][data-app-role='COE'] .sa-btn-auto,
+[data-theme='dark'][data-app-role='COE'] .sa-action-btn.primary,
+[data-theme='dark'][data-app-role='COE'] .sa-save-btn,
+[data-theme='dark'][data-app-role='COE'] .sa-generate-btn {
+    background: linear-gradient(135deg, #141416, #303036);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'][data-app-role='COE'] .sa-select:focus,
+[data-theme='dark'][data-app-role='COE'] .sa-input:focus {
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'][data-app-role='COE'] .sa-venue-info-strip,
+[data-theme='dark'][data-app-role='COE'] .sa-auto-section,
+[data-theme='dark'][data-app-role='COE'] .sa-toast-info {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #d4d4d8;
+}
+
+[data-theme='dark'][data-app-role='COE'] .algo-a,
+[data-theme='dark'][data-app-role='COE'] .algo-it,
+[data-theme='dark'][data-app-role='COE'] .algo-ece {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e4e4e7;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    CRUD — TABLE, ACTIONS, FILTERS, EDIT MODAL
 ═══════════════════════════════════════════════════════════════ */

@@ -91,9 +91,24 @@
     box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
 }
 
+[data-theme='dark'][data-app-role='COE'] .f-nav-link.active {
+    background: linear-gradient(135deg, #121214 0%, #2a2a2f 100%);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
 [data-theme='light'] .f-nav-link.active {
     background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+[data-theme='dark'][data-app-role='COE'] .floating-sidebar {
+    background-color: rgba(10, 10, 12, 0.92);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.55);
+}
+
+[data-theme='dark'][data-app-role='COE'] .f-nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.06);
 }
 
 /* Tooltip behavior */

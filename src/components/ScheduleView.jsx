@@ -1,12 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import api from '../utils/api';
 import './ScheduleView.css';
-import { Calendar, Clock, MapPin, Info, BookOpen } from 'lucide-react';
+import { Calendar, Clock, MapPin, Info, BookOpen, Search, Filter } from 'lucide-react';
+
+const TYPE_FILTERS = [
+    { value: 'ALL', label: 'All' },
+    { value: 'ACADEMIC', label: 'Academic Class' },
+    { value: 'LAB_SLOT', label: 'Lab' },
+    { value: 'SKILL_TRAINING', label: 'Skill Training' },
+    { value: 'INTERNAL_EXAM', label: 'Internal' },
+    { value: 'SEMESTER_EXAM', label: 'Semester Exam' },
+    { value: 'LAB_PRACTICAL', label: 'Lab Practical' },
+    { value: 'FACULTY_MEETING', label: 'Faculty Meeting' },
+];
 
 const ScheduleView = ({ compact = false }) => {
     const [schedules, setSchedules] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [activeType, setActiveType] = useState('ALL');
+    const [sessionFilter, setSessionFilter] = useState('ALL');
+    const [searchTerm, setSearchTerm] = useState('');
 
     const fetchSchedules = async () => {
         try {
@@ -25,8 +39,43 @@ const ScheduleView = ({ compact = false }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const normalize = (value) => String(value || '').trim().toLowerCase();
+
+    const filteredSchedules = useMemo(() => {
+        return schedules.filter((schedule) => {
+            const matchesType = activeType === 'ALL' || schedule.type === activeType;
+            const matchesSession = sessionFilter === 'ALL' || normalize(schedule.session) === normalize(sessionFilter);
+
+            const haystack = [
+                schedule.title,
+                schedule.subjectName,
+                schedule.description,
+                schedule.location,
+                schedule.department,
+                schedule.type?.replaceAll('_', ' '),
+                schedule.session,
+            ]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+
+            const matchesSearch = !searchTerm.trim() || haystack.includes(searchTerm.trim().toLowerCase());
+
+            return matchesType && matchesSession && matchesSearch;
+        });
+    }, [activeType, schedules, searchTerm, sessionFilter]);
+
+    const availableSessions = useMemo(() => {
+        const sessionSet = new Set(
+            schedules
+                .map((schedule) => normalize(schedule.session).toUpperCase())
+                .filter(Boolean)
+        );
+        return ['ALL', ...Array.from(sessionSet)];
+    }, [schedules]);
+
     // Group schedules by date
-    const groupedSchedules = schedules.reduce((groups, schedule) => {
+    const groupedSchedules = filteredSchedules.reduce((groups, schedule) => {
         const date = schedule.date;
         if (!groups[date]) {
             groups[date] = [];
@@ -70,11 +119,70 @@ const ScheduleView = ({ compact = false }) => {
         <div className="schedule-view-container">
             {!compact && (
                 <div className="schedule-header">
-                    <h2>Academic Schedule</h2>
-                    {/* Potential filters could go here */}
+                    <div>
+                        <h2>Academic Schedule</h2>
+                        <p className="schedule-subtitle">Filter timetable items by class type, session, or semester keywords.</p>
+                    </div>
                 </div>
             )}
 
+            <div className="schedule-filter-panel">
+                <div className="schedule-filter-topline">
+                    <div className="schedule-filter-title">
+                        <Filter size={16} />
+                        <span>Filters</span>
+                    </div>
+                    <span className="schedule-filter-count">
+                        {filteredSchedules.length} of {schedules.length} items
+                    </span>
+                </div>
+
+                <div className="schedule-filter-controls">
+                    <label className="schedule-search-box">
+                        <Search size={16} />
+                        <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Search semester, subject, venue, or title"
+                        />
+                    </label>
+
+                    <label className="schedule-select-wrap">
+                        <span>Session</span>
+                        <select value={sessionFilter} onChange={(e) => setSessionFilter(e.target.value)}>
+                            {availableSessions.map((session) => (
+                                <option key={session} value={session}>
+                                    {session === 'ALL' ? 'All Sessions' : session}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+                </div>
+
+                <div className="schedule-filter-chips">
+                    {TYPE_FILTERS.map((filter) => (
+                        <button
+                            key={filter.value}
+                            type="button"
+                            className={`schedule-filter-chip ${activeType === filter.value ? 'active' : ''}`}
+                            onClick={() => setActiveType(filter.value)}
+                        >
+                            {filter.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {filteredSchedules.length === 0 && (
+                <div className="empty-state">
+                    <Calendar size={42} style={{ marginBottom: '1rem', opacity: 0.5 }} />
+                    <h3>No Matching Schedule Items</h3>
+                    <p>Try a different type, session, or search term.</p>
+                </div>
+            )}
+
+            {filteredSchedules.length > 0 && (
             <div className="schedule-list">
                 {sortedDates.map(date => (
                     <div key={date} className="date-group">
@@ -126,6 +234,7 @@ const ScheduleView = ({ compact = false }) => {
                     </div>
                 ))}
             </div>
+            )}
         </div>
     );
 };

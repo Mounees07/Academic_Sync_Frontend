@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import FloatingSidebar from './FloatingSidebar';
 import Navbar from './Navbar';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import BrandLogo from './BrandLogo';
 import useSessionTimeout from '../hooks/useSessionTimeout';
 import {
@@ -15,6 +16,7 @@ import './DashboardLayout.css';
 const LayoutNew = ({ children }) => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const { userData, logout } = useAuth();
+    const { resolvedTheme } = useTheme();
     const navigate = useNavigate();
     const homeRoute = userData?.role === 'ADMIN'
         ? '/admin/dashboard'
@@ -39,11 +41,31 @@ const LayoutNew = ({ children }) => {
         enabled: Boolean(userData),
     });
 
+    React.useEffect(() => {
+        const root = document.documentElement;
+        const role = userData?.role || '';
+
+        if (role) {
+            root.setAttribute('data-app-role', role);
+            document.body.setAttribute('data-app-role', role);
+        } else {
+            root.removeAttribute('data-app-role');
+            document.body.removeAttribute('data-app-role');
+        }
+
+        root.setAttribute('data-theme', resolvedTheme === 'light' ? 'light' : 'dark');
+
+        return () => {
+            root.removeAttribute('data-app-role');
+            document.body.removeAttribute('data-app-role');
+        };
+    }, [resolvedTheme, userData?.role]);
+
     return (
         <div className="dashboard-container">
             <div
                 className="page-logo-container"
-                onClick={() => window.location.assign(homeRoute)}
+                onClick={() => navigate(homeRoute)}
                 style={{ cursor: 'pointer' }}
             >
                 <BrandLogo />

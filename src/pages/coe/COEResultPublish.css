@@ -16,6 +16,16 @@
     color: var(--coe-ink);
 }
 
+[data-theme='dark'][data-app-role='COE'] .coe-result-page {
+    --coe-line: rgba(255, 255, 255, 0.08);
+    --coe-primary: #1f1f23;
+    --coe-primary-strong: #3a3a40;
+    --coe-accent: #d4d4d8;
+    --coe-surface: linear-gradient(180deg, rgba(11, 11, 13, 0.98), rgba(7, 7, 9, 0.98));
+    --coe-surface-strong: linear-gradient(180deg, rgba(15, 15, 18, 0.98), rgba(10, 10, 12, 0.98));
+    --coe-soft: linear-gradient(180deg, rgba(14, 14, 17, 0.98), rgba(9, 9, 11, 0.98));
+}
+
 .coe-result-hero {
     display: grid;
     grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.9fr);
@@ -813,4 +823,86 @@
     .coe-student-identity h3 {
         font-size: 1.2rem;
     }
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-result-page {
+    --coe-ink: #f5f5f5;
+    --coe-muted: #a1a1aa;
+    --coe-line: rgba(255, 255, 255, 0.08);
+    --coe-primary: #1a1a1d;
+    --coe-primary-strong: #323238;
+    --coe-accent: #e4e4e7;
+    --coe-surface: linear-gradient(180deg, rgba(11, 11, 13, 0.98), rgba(7, 7, 9, 0.98));
+    --coe-surface-strong: linear-gradient(180deg, rgba(15, 15, 18, 0.98), rgba(9, 9, 11, 0.98));
+    --coe-soft: linear-gradient(180deg, rgba(14, 14, 17, 0.98), rgba(8, 8, 10, 0.98));
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-result-hero-panel,
+[data-theme='dark'][data-app-role='COE'] .coe-result-shell,
+[data-theme='dark'][data-app-role='COE'] .coe-log-panel,
+[data-theme='dark'][data-app-role='COE'] .coe-filter-card,
+[data-theme='dark'][data-app-role='COE'] .coe-summary-banner,
+[data-theme='dark'][data-app-role='COE'] .coe-panel,
+[data-theme='dark'][data-app-role='COE'] .coe-stat-card,
+[data-theme='dark'][data-app-role='COE'] .coe-student-card,
+[data-theme='dark'][data-app-role='COE'] .coe-student-meta {
+    background: var(--coe-surface);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.38);
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-result-hero-panel,
+[data-theme='dark'][data-app-role='COE'] .coe-filter-card,
+[data-theme='dark'][data-app-role='COE'] .coe-stat-card,
+[data-theme='dark'][data-app-role='COE'] .coe-panel,
+[data-theme='dark'][data-app-role='COE'] .coe-summary-banner {
+    background: linear-gradient(180deg, rgba(14, 14, 17, 0.98), rgba(8, 8, 10, 0.98));
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-hero-chip,
+[data-theme='dark'][data-app-role='COE'] .coe-message-warning,
+[data-theme='dark'][data-app-role='COE'] .coe-student-avatar,
+[data-theme='dark'][data-app-role='COE'] .coe-pill {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f5f5f5;
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-hero-meta span,
+[data-theme='dark'][data-app-role='COE'] .coe-mode-toggle,
+[data-theme='dark'][data-app-role='COE'] .coe-filter-input,
+[data-theme='dark'][data-app-role='COE'] .coe-score-input,
+[data-theme='dark'][data-app-role='COE'] .coe-btn-secondary,
+[data-theme='dark'][data-app-role='COE'] .coe-code,
+[data-theme='dark'][data-app-role='COE'] .coe-upload-box,
+[data-theme='dark'][data-app-role='COE'] .coe-message {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: var(--coe-ink);
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-filter-input:focus,
+[data-theme='dark'][data-app-role='COE'] .coe-score-input:focus {
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-mode-btn.active,
+[data-theme='dark'][data-app-role='COE'] .coe-btn-primary {
+    background: linear-gradient(135deg, #151518, #2f2f35);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.42);
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-callout {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-upload-box {
+    border: 1.5px dashed rgba(255, 255, 255, 0.12);
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-upload-box:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 18px 30px rgba(0, 0, 0, 0.34);
 }

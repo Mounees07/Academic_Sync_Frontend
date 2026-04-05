@@ -1,6 +1,22 @@
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
+let xlsxModulePromise;
+let pdfModulePromise;
+
+const loadXlsx = async () => {
+    if (!xlsxModulePromise) {
+        xlsxModulePromise = import('xlsx');
+    }
+    return xlsxModulePromise;
+};
+
+const loadPdfTools = async () => {
+    if (!pdfModulePromise) {
+        pdfModulePromise = Promise.all([
+            import('jspdf'),
+            import('jspdf-autotable')
+        ]);
+    }
+    return pdfModulePromise;
+};
 
 const sanitizeFileName = (fileName) =>
     String(fileName || 'export')
@@ -57,7 +73,8 @@ export const exportToCsv = ({ fileName, rows = [], columns = [] }) => {
     );
 };
 
-export const exportToXlsx = ({ fileName, rows = [], columns = [], sheetName = 'Data' }) => {
+export const exportToXlsx = async ({ fileName, rows = [], columns = [], sheetName = 'Data' }) => {
+    const XLSX = await loadXlsx();
     const { headers, body } = buildExportMatrix(rows, columns);
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...body]);
     const workbook = XLSX.utils.book_new();
@@ -65,7 +82,8 @@ export const exportToXlsx = ({ fileName, rows = [], columns = [], sheetName = 'D
     XLSX.writeFile(workbook, `${sanitizeFileName(fileName)}.xlsx`);
 };
 
-export const exportToPdf = ({ fileName, title, rows = [], columns = [] }) => {
+export const exportToPdf = async ({ fileName, title, rows = [], columns = [] }) => {
+    const [{ jsPDF }, { default: autoTable }] = await loadPdfTools();
     const { headers, body } = buildExportMatrix(rows, columns);
     const doc = new jsPDF({ orientation: headers.length > 6 ? 'landscape' : 'portrait' });
 
@@ -84,15 +102,14 @@ export const exportToPdf = ({ fileName, title, rows = [], columns = [] }) => {
     doc.save(`${sanitizeFileName(fileName)}.pdf`);
 };
 
-export const exportData = ({ format, ...config }) => {
+export const exportData = async ({ format, ...config }) => {
     if (format === 'xlsx') {
-        exportToXlsx(config);
+        await exportToXlsx(config);
         return;
     }
     if (format === 'pdf') {
-        exportToPdf(config);
+        await exportToPdf(config);
         return;
     }
     exportToCsv(config);
 };
-

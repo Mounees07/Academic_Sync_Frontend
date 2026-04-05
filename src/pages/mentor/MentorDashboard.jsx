@@ -239,6 +239,7 @@ const MentorDashboard = () => {
     const [attendanceData, setAttendanceData] = useState({});
 
     const [loading, setLoading] = useState(true);
+    const [facultyInsightsLoading, setFacultyInsightsLoading] = useState(false);
     const [mentees, setMentees] = useState([]);
     const [meetings, setMeetings] = useState([]);
     const [facultySections, setFacultySections] = useState([]);
@@ -275,25 +276,24 @@ const MentorDashboard = () => {
     }, [userData]);
 
     useEffect(() => {
-        const fetchDashboardData = async () => {
-            if (!currentUser) return;
+        let cancelled = false;
+
+        const loadFacultyInsights = async (sectionsData, pendingLeaves, meetingsData, menteesData) => {
+            if (!sectionsData.length) {
+                if (!cancelled) {
+                    setFacultyDashboard(prev => ({
+                        ...prev,
+                        pendingApprovals: pendingLeaves.length,
+                        classItems: [],
+                        taskBoard: { Upcoming: [], 'This Week': [], Later: [] },
+                        recentActivity: []
+                    }));
+                }
+                return;
+            }
+
+            setFacultyInsightsLoading(true);
             try {
-                const [menteesRes, meetingsRes, sectionsRes, pendingLeavesRes] = await Promise.all([
-                    api.get(`/users/mentees/${currentUser.uid}`).catch(() => ({ data: [] })),
-                    api.get(`/meetings/mentor/${currentUser.uid}`).catch(() => ({ data: [] })),
-                    api.get(`/courses/sections/faculty/${currentUser.uid}`).catch(() => ({ data: [] })),
-                    api.get(`/leaves/pending/${currentUser.uid}`).catch(() => ({ data: [] }))
-                ]);
-
-                const menteesData = menteesRes.data || [];
-                const meetingsData = meetingsRes.data || [];
-                const sectionsData = sectionsRes.data || [];
-                const pendingLeaves = (pendingLeavesRes.data || []).filter(leave => leave?.mentorStatus === 'PENDING');
-
-                setMentees(menteesData);
-                setMeetings(meetingsData);
-                setFacultySections(sectionsData);
-
                 const sectionDetails = await Promise.all(
                     sectionsData.map(async (section) => {
                         const [assignmentsRes, submissionsRes, sessionsRes] = await Promise.all([
@@ -321,28 +321,22 @@ const MentorDashboard = () => {
                     })
                 );
 
+                if (cancelled) return;
+
                 const now = new Date();
                 const currentMonth = now.getMonth();
-
-                const pendingCount = meetingsData.filter(m =>
-                    m.status === 'SCHEDULED' && new Date(m.startTime) >= now
-                ).length;
-
-                const sessionsThisMonth = meetingsData.filter(m =>
-                    new Date(m.startTime).getMonth() === currentMonth
-                ).length;
-
                 const lowGpaCount = menteesData.filter(m => {
                     const gpa = m.studentDetails?.gpa || m.gpa;
                     return gpa && gpa < 7.0;
                 }).length;
-
                 const openConcernsCount = menteesData.filter(m => {
                     const attendance = m.studentDetails?.attendance || m.attendance;
                     return attendance && attendance < 75;
                 }).length;
-
                 const totalStudentsTaught = sectionsData.reduce((sum, sec) => sum + (sec.enrollmentCount || 0), 0);
+                const sessionsThisMonth = meetingsData.filter(m =>
+                    new Date(m.startTime).getMonth() === currentMonth
+                ).length;
                 const allAssignments = sectionDetails.flatMap(detail =>
                     detail.assignments.map(assignment => ({ ...assignment, section: detail.section }))
                 );
@@ -496,13 +490,15 @@ const MentorDashboard = () => {
                 setStats({
                     activeMentees: menteesData.length,
                     openConcerns: openConcernsCount,
-                    pendingCheckIns: pendingCount,
+                    pendingCheckIns: meetingsData.filter(m =>
+                        m.status === 'SCHEDULED' && new Date(m.startTime) >= now
+                    ).length,
                     alertsHigh: openConcernsCount > 0 ? 1 : 0,
                     alertsLow: lowGpaCount > 0 ? 1 : 0,
-                    sessionsThisMonth: sessionsThisMonth,
-                    lowGpaCount: lowGpaCount,
+                    sessionsThisMonth,
+                    lowGpaCount,
                     activeCourses: sectionsData.length,
-                    totalStudentsTaught: totalStudentsTaught,
+                    totalStudentsTaught,
                     pendingGrading: pendingGradingCount
                 });
                 setFacultyDashboard({
@@ -514,17 +510,81 @@ const MentorDashboard = () => {
                     taskBoard,
                     recentActivity
                 });
+            } catch (err) {
+                console.error("Error fetching faculty insights:", err);
+            } finally {
+                if (!cancelled) {
+                    setFacultyInsightsLoading(false);
+                }
+            }
+        };
 
+        const fetchDashboardData = async () => {
+            if (!currentUser) return;
+            try {
+                const [menteesRes, meetingsRes, sectionsRes, pendingLeavesRes] = await Promise.all([
+                    api.get(`/users/mentees/${currentUser.uid}`).catch(() => ({ data: [] })),
+                    api.get(`/meetings/mentor/${currentUser.uid}`).catch(() => ({ data: [] })),
+                    api.get(`/courses/sections/faculty/${currentUser.uid}`).catch(() => ({ data: [] })),
+                    api.get(`/leaves/pending/${currentUser.uid}`).catch(() => ({ data: [] }))
+                ]);
+
+                if (cancelled) return;
+
+                const menteesData = menteesRes.data || [];
+                const meetingsData = meetingsRes.data || [];
+                const sectionsData = sectionsRes.data || [];
+                const pendingLeaves = (pendingLeavesRes.data || []).filter(leave => leave?.mentorStatus === 'PENDING');
+                const now = new Date();
+                const lowGpaCount = menteesData.filter(m => {
+                    const gpa = m.studentDetails?.gpa || m.gpa;
+                    return gpa && gpa < 7.0;
+                }).length;
+                const openConcernsCount = menteesData.filter(m => {
+                    const attendance = m.studentDetails?.attendance || m.attendance;
+                    return attendance && attendance < 75;
+                }).length;
+
+                setMentees(menteesData);
+                setMeetings(meetingsData);
+                setFacultySections(sectionsData);
+                setStats({
+                    activeMentees: menteesData.length,
+                    openConcerns: openConcernsCount,
+                    pendingCheckIns: meetingsData.filter(m =>
+                        m.status === 'SCHEDULED' && new Date(m.startTime) >= now
+                    ).length,
+                    alertsHigh: openConcernsCount > 0 ? 1 : 0,
+                    alertsLow: lowGpaCount > 0 ? 1 : 0,
+                    sessionsThisMonth: meetingsData.filter(m =>
+                        new Date(m.startTime).getMonth() === now.getMonth()
+                    ).length,
+                    lowGpaCount,
+                    activeCourses: sectionsData.length,
+                    totalStudentsTaught: sectionsData.reduce((sum, sec) => sum + (sec.enrollmentCount || 0), 0),
+                    pendingGrading: 0
+                });
+                setFacultyDashboard(prev => ({
+                    ...prev,
+                    pendingApprovals: pendingLeaves.length
+                }));
+                setLoading(false);
+
+                loadFacultyInsights(sectionsData, pendingLeaves, meetingsData, menteesData);
             } catch (err) {
                 console.error("Error fetching mentor dashboard data:", err);
-            } finally {
-                setLoading(false);
+                if (!cancelled) {
+                    setLoading(false);
+                }
             }
         };
 
         fetchDashboardData();
-        const refreshInterval = setInterval(fetchDashboardData, 30000);
-        return () => clearInterval(refreshInterval);
+        const refreshInterval = setInterval(fetchDashboardData, 45000);
+        return () => {
+            cancelled = true;
+            clearInterval(refreshInterval);
+        };
     }, [currentUser]);
 
     useEffect(() => {
@@ -2065,6 +2125,7 @@ const MentorDashboard = () => {
                     title="Mentor Calendar"
                     subtitle="Shared leave days and vacation periods to plan mentee check-ins better"
                     compact
+                    variant="workspace"
                 />
             </div>
         </div>
@@ -2134,7 +2195,9 @@ const MentorDashboard = () => {
                     </div>
 
                     <div className="mw-mentee-list">
-                        {filteredFacultyClassItems.length === 0 ? (
+                        {facultyInsightsLoading ? (
+                            <p style={{ fontSize: '0.8rem', color: '#64748b', textAlign: 'center', padding: '1rem' }}>Loading class insights...</p>
+                        ) : filteredFacultyClassItems.length === 0 ? (
                             <p style={{ fontSize: '0.8rem', color: '#64748b', textAlign: 'center', padding: '1rem' }}>No sections found.</p>
                         ) : (
                             filteredFacultyClassItems.slice(0, 6).map((section, index) => {
@@ -2214,7 +2277,12 @@ const MentorDashboard = () => {
                     <div className="mw-kanban">
                         <div className="kanban-col">
                             <div className="kanban-header">Upcoming</div>
-                            {facultyTaskColumns.Upcoming.length === 0 ? (
+                            {facultyInsightsLoading ? (
+                                <div className="kanban-card">
+                                    <h4>Loading tasks</h4>
+                                    <p>Gathering recent teaching activity.</p>
+                                </div>
+                            ) : facultyTaskColumns.Upcoming.length === 0 ? (
                                 <div className="kanban-card">
                                     <h4>No scheduled</h4>
                                     <p>events found.</p>
@@ -2228,7 +2296,12 @@ const MentorDashboard = () => {
                         </div>
                         <div className="kanban-col">
                             <div className="kanban-header">This Week</div>
-                            {facultyTaskColumns['This Week'].length === 0 ? (
+                            {facultyInsightsLoading ? (
+                                <div className="kanban-card highlight">
+                                    <h4>Loading tasks</h4>
+                                    <p>Gathering recent teaching activity.</p>
+                                </div>
+                            ) : facultyTaskColumns['This Week'].length === 0 ? (
                                 <div className="kanban-card">
                                     <h4>No tasks</h4>
                                     <p>found.</p>
@@ -2242,7 +2315,12 @@ const MentorDashboard = () => {
                         </div>
                         <div className="kanban-col">
                             <div className="kanban-header">Later</div>
-                            {facultyTaskColumns.Later.length === 0 ? (
+                            {facultyInsightsLoading ? (
+                                <div className="kanban-card">
+                                    <h4>Loading tasks</h4>
+                                    <p>Gathering recent teaching activity.</p>
+                                </div>
+                            ) : facultyTaskColumns.Later.length === 0 ? (
                                 <div className="kanban-card">
                                     <h4>No tasks</h4>
                                     <p>found.</p>
@@ -2265,7 +2343,15 @@ const MentorDashboard = () => {
                     </div>
 
                     <div className="mw-timeline">
-                        {facultyDashboard.recentActivity.length === 0 ? (
+                        {facultyInsightsLoading ? (
+                            <div className="timeline-item">
+                                <div className="timeline-dot"></div>
+                                <div className="timeline-content">
+                                    <h4>Loading activity</h4>
+                                    <p>Recent course updates are being prepared.</p>
+                                </div>
+                            </div>
+                        ) : facultyDashboard.recentActivity.length === 0 ? (
                             <div className="timeline-item">
                                 <div className="timeline-dot"></div>
                                 <div className="timeline-content">
@@ -2322,6 +2408,7 @@ const MentorDashboard = () => {
                     title="Faculty Calendar"
                     subtitle="Campus holidays and vacations visible while planning classes and grading"
                     compact
+                    variant="workspace"
                 />
             </div>
         </div>

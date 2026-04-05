@@ -298,3 +298,19 @@
     border: 2px dashed var(--glass-border);
     grid-column: 1 / -1;
 }
+
+[data-theme='dark'][data-app-role='COE'] .btn-add-venue,
+[data-theme='dark'][data-app-role='COE'] .btn-save {
+    background: linear-gradient(135deg, #141416, #303036);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'][data-app-role='COE'] .btn-add-venue:hover,
+[data-theme='dark'][data-app-role='COE'] .btn-save:hover {
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.48);
+}
+
+[data-theme='dark'][data-app-role='COE'] .venue-capacity-badge {
+    background: rgba(255, 255, 255, 0.08);
+    color: #d4d4d8;
+}

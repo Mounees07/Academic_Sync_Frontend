@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
-import { Bell, CheckCheck, X, AlertTriangle, Clock, CreditCard, FileText, Star, Calendar, Award, GraduationCap, ArrowRight } from 'lucide-react';
+import { Bell, Check, CheckCheck, Trash2, AlertTriangle, Clock, CreditCard, FileText, Star, Calendar, Award, GraduationCap, ArrowRight } from 'lucide-react';
 import { Hourglass } from 'ldrs/react';
+import Pagination from '../../components/Pagination';
 import 'ldrs/react/Hourglass.css';
 import './StudentNotifications.css';
 
@@ -31,11 +32,21 @@ const timeAgo = (dateStr) => {
 };
 
 const StudentNotifications = () => {
+    const ITEMS_PER_PAGE = 10;
     const { currentUser } = useAuth();
     const navigate = useNavigate();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('ALL');
+    const [deletingIds, setDeletingIds] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const syncUnreadCount = (items) => {
+        const unread = Array.isArray(items) ? items.filter((item) => !item.isRead).length : 0;
+        window.dispatchEvent(new CustomEvent('notifications:changed', {
+            detail: { unreadCount: unread },
+        }));
+    };
 
     useEffect(() => {
         if (!currentUser) return;
@@ -48,9 +59,11 @@ const StudentNotifications = () => {
                 // Sort newest first
                 data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 setNotifications(data);
+                syncUnreadCount(data);
             } catch (err) {
                 console.error("Failed to load notifications", err);
                 setNotifications([]);
+                syncUnreadCount([]);
             } finally {
                 setLoading(false);
             }
@@ -63,7 +76,11 @@ const StudentNotifications = () => {
         try {
             await api.put(`/notifications/${id}/read`);
         } catch (_err) { /* ignore */ }
-        setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+        setNotifications(prev => {
+            const updated = prev.map(n => n.id === id ? { ...n, isRead: true } : n);
+            syncUnreadCount(updated);
+            return updated;
+        });
     };
 
     const openNotification = async (notification) => {
@@ -82,7 +99,31 @@ const StudentNotifications = () => {
         try {
             await api.put(`/notifications/user/${currentUser.uid}/read-all`);
         } catch (_err) { /* ignore */ }
-        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+        setNotifications(prev => {
+            const updated = prev.map(n => ({ ...n, isRead: true }));
+            syncUnreadCount(updated);
+            return updated;
+        });
+    };
+
+    const deleteNotification = async (id) => {
+        if (!currentUser?.uid || !id) return;
+
+        setDeletingIds(prev => [...prev, id]);
+        try {
+            await api.delete(`/notifications/${id}`, {
+                params: { uid: currentUser.uid },
+            });
+            setNotifications(prev => {
+                const updated = prev.filter(n => n.id !== id);
+                syncUnreadCount(updated);
+                return updated;
+            });
+        } catch (err) {
+            console.error("Failed to delete notification", err);
+        } finally {
+            setDeletingIds(prev => prev.filter(item => item !== id));
+        }
     };
 
     const unreadCount = notifications.filter(n => !n.isRead).length;
@@ -90,6 +131,21 @@ const StudentNotifications = () => {
     const filtered = filter === 'ALL' ? notifications
         : filter === 'UNREAD' ? notifications.filter(n => !n.isRead)
             : notifications.filter(n => n.type === filter);
+    const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+    const paginatedNotifications = filtered.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    );
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filter]);
+
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages);
+        }
+    }, [currentPage, totalPages]);
 
     if (loading) return <div className="loading-screen"><Hourglass size="40" bgOpacity="0.1" speed="1.75" color="black" /></div>;
 
@@ -128,7 +184,7 @@ const StudentNotifications = () => {
                         <p>No notifications here.</p>
                     </div>
                 ) : (
-                    filtered.map((n) => {
+                    paginatedNotifications.map((n) => {
                         const cfg = TYPE_CONFIG[n.type] || TYPE_CONFIG.GENERAL;
                         const Icon = cfg.icon;
                         return (
@@ -156,16 +212,49 @@ const StudentNotifications = () => {
                                         )}
                                     </div>
                                 </div>
-                                {!n.isRead && (
-                                    <button className="notif-read-btn" onClick={(e) => { e.stopPropagation(); markRead(n.id); }}>
-                                        <X size={14} />
+                                <div className="notif-actions">
+                                    {!n.isRead && (
+                                        <button
+                                            className="notif-action-btn"
+                                            title="Mark as read"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                markRead(n.id);
+                                            }}
+                                        >
+                                            <Check size={14} />
+                                        </button>
+                                    )}
+                                    <button
+                                        className="notif-action-btn notif-delete-btn"
+                                        title="Delete notification"
+                                        disabled={deletingIds.includes(n.id)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            deleteNotification(n.id);
+                                        }}
+                                    >
+                                        <Trash2 size={14} />
                                     </button>
-                                )}
+                                </div>
                             </div>
                         );
                     })
                 )}
             </div>
+            {filtered.length > 0 && (
+                <div className="notif-pagination-wrap">
+                    <div className="notif-pagination-meta">
+                        Showing {Math.min(filtered.length, (currentPage - 1) * ITEMS_PER_PAGE + 1)}-
+                        {Math.min(filtered.length, currentPage * ITEMS_PER_PAGE)} of {filtered.length}
+                    </div>
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                    />
+                </div>
+            )}
         </div>
     );
 };

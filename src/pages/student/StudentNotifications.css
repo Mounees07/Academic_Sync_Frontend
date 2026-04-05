@@ -99,6 +99,17 @@
     gap: 10px;
 }
 
+.notif-pagination-wrap {
+    margin-top: 20px;
+}
+
+.notif-pagination-meta {
+    margin-bottom: 12px;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    text-align: right;
+}
+
 .notif-empty {
     display: flex;
     flex-direction: column;
@@ -143,6 +154,13 @@
 }
 
 .notif-body { flex: 1; min-width: 0; }
+
+.notif-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
 
 .notif-title {
     font-size: 0.9rem;
@@ -203,7 +221,7 @@
     border-radius: 999px;
 }
 
-.notif-read-btn {
+.notif-action-btn {
     padding: 6px;
     border-radius: 8px;
     border: none;
@@ -217,13 +235,24 @@
     transition: background 0.2s;
 }
 
-.notif-read-btn:hover {
+.notif-action-btn:hover:not(:disabled) {
+    background: rgba(37,99,235,0.12);
+    color: #2563eb;
+}
+
+.notif-delete-btn:hover:not(:disabled) {
     background: rgba(239,68,68,0.1);
     color: #ef4444;
 }
 
+.notif-action-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
 @media (max-width: 640px) {
     .notif-page { padding: 16px; }
+    .notif-pagination-meta { text-align: left; }
 }
 
 @keyframes fadeInUp {

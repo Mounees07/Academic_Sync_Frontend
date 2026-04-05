@@ -1,4 +1,11 @@
-import * as XLSX from 'xlsx';
+let xlsxModulePromise;
+
+const loadXlsx = async () => {
+    if (!xlsxModulePromise) {
+        xlsxModulePromise = import('xlsx');
+    }
+    return xlsxModulePromise;
+};
 
 const normalizeHeader = (value) =>
     String(value || '')
@@ -17,6 +24,7 @@ export const parseSpreadsheetFile = async (file) => {
         throw new Error('Only CSV and XLSX files are supported.');
     }
 
+    const XLSX = await loadXlsx();
     const buffer = await file.arrayBuffer();
     const workbook = XLSX.read(buffer, { type: 'array' });
     const sheetName = workbook.SheetNames[0];
@@ -61,4 +69,3 @@ export const validateImportedRows = (rows, requiredFields = []) => {
 
     return rows;
 };
-

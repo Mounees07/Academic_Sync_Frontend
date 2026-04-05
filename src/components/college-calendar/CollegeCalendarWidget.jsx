@@ -185,7 +185,8 @@ const CollegeCalendarWidget = ({
     editable = false,
     className = '',
     compact = false,
-    allowedViews = ['day']
+    allowedViews = ['day'],
+    variant = 'default'
 }) => {
     const { userData } = useAuth();
     const userRole = userData?.role || '';
@@ -448,7 +449,7 @@ const CollegeCalendarWidget = ({
     };
 
     return (
-        <section className={`college-calendar-widget ${compact ? 'compact' : ''} ${className}`.trim()}>
+        <section className={`college-calendar-widget ${compact ? 'compact' : ''} college-calendar-widget--${variant} ${className}`.trim()}>
             <div className="college-calendar-header">
                 <div className="college-calendar-heading">
                     <h3>{title}</h3>

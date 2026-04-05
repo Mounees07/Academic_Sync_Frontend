@@ -15,6 +15,15 @@
     box-sizing: border-box;
 }
 
+[data-theme='dark'][data-app-role='COE'] .coe-exam-page {
+    --coe-exam-line: rgba(255, 255, 255, 0.08);
+    --coe-exam-primary: #1f1f23;
+    --coe-exam-primary-strong: #38383f;
+    --coe-exam-accent: #d4d4d8;
+    --coe-exam-surface: linear-gradient(180deg, rgba(11, 11, 13, 0.98), rgba(7, 7, 9, 0.98));
+    --coe-exam-soft: linear-gradient(180deg, rgba(14, 14, 16, 0.98), rgba(8, 8, 10, 0.98));
+}
+
 .coe-exam-hero {
     display: grid;
     grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.85fr);
@@ -439,4 +448,54 @@
         min-height: 200px;
         padding: 20px;
     }
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-exam-page {
+    --coe-exam-ink: #f5f5f5;
+    --coe-exam-muted: #a1a1aa;
+    --coe-exam-line: rgba(255, 255, 255, 0.08);
+    --coe-exam-primary: #1a1a1d;
+    --coe-exam-primary-strong: #323238;
+    --coe-exam-accent: #e4e4e7;
+    --coe-exam-surface: linear-gradient(180deg, rgba(11, 11, 13, 0.98), rgba(7, 7, 9, 0.98));
+    --coe-exam-soft: linear-gradient(180deg, rgba(14, 14, 17, 0.98), rgba(8, 8, 10, 0.98));
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-exam-hero-panel,
+[data-theme='dark'][data-app-role='COE'] .coe-exam-shell,
+[data-theme='dark'][data-app-role='COE'] .coe-exam-block,
+[data-theme='dark'][data-app-role='COE'] .coe-exam-stat,
+[data-theme='dark'][data-app-role='COE'] .coe-exam-mini-item,
+[data-theme='dark'][data-app-role='COE'] .coe-exam-highlights span {
+    background: var(--coe-exam-surface);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.38);
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-exam-chip,
+[data-theme='dark'][data-app-role='COE'] .coe-exam-upload-icon {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f5f5f5;
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-exam-callout,
+[data-theme='dark'][data-app-role='COE'] .coe-exam-template-btn,
+[data-theme='dark'][data-app-role='COE'] .coe-exam-upload-box {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: var(--coe-exam-ink);
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-exam-upload-box {
+    border: 1.5px dashed rgba(255, 255, 255, 0.12);
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-exam-upload-box:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 18px 30px rgba(0, 0, 0, 0.34);
+}
+
+[data-theme='dark'][data-app-role='COE'] .coe-exam-submit-btn {
+    background: linear-gradient(135deg, #151518, #2f2f35);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.42);
 }

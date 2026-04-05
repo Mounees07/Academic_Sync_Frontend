@@ -119,14 +119,6 @@ const DashboardOverview = () => {
                 setRecentClipboardList(sortedActivities);
 
                 // ── Fetch section assignments in parallel ─────────────────────────────
-                const assignmentPromises = enrollments.map(e =>
-                    api.get(`/assignments/section/${e.section.id}`).then(res => res.data).catch(() => [])
-                );
-                const allSectionAssignments = (await Promise.all(assignmentPromises)).flat();
-
-                const submissionIds = new Set(subsRes.data.map(s => s.assignment.id));
-                const pendingCount = allSectionAssignments.filter(a => !submissionIds.has(a.id)).length;
-
                 // Leave balance
                 const approvedLeaves = leaveRes.data ? leaveRes.data.filter(l => l.status === 'APPROVED').length : 0;
                 const totalLeaves = 10;
@@ -167,11 +159,29 @@ const DashboardOverview = () => {
                     sgpa: currentSgpa,
                     attendance: biometricAttendance.percentage.toString(),
                     activeCourses: enrollments.length.toString(),
-                    pendingAssignments: pendingCount.toString(),
+                    pendingAssignments: "0",
                     arrearCount: userRes.data.arrearCount || 0,
                     feesDue: realFeesDue,
                     placementStatus: placement
                 });
+                setLoading(false);
+
+                const assignmentPromises = enrollments.map(e =>
+                    api.get(`/assignments/section/${e.section.id}`).then(res => res.data).catch(() => [])
+                );
+                Promise.all(assignmentPromises)
+                    .then((assignmentLists) => {
+                        const allSectionAssignments = assignmentLists.flat();
+                        const submissionIds = new Set((subsRes.data || []).map(s => s.assignment.id));
+                        const pendingCount = allSectionAssignments.filter(a => !submissionIds.has(a.id)).length;
+                        setDashboardStats(prev => ({
+                            ...prev,
+                            pendingAssignments: pendingCount.toString()
+                        }));
+                    })
+                    .catch((assignmentErr) => {
+                        console.error("Error fetching section assignments:", assignmentErr);
+                    });
 
             } catch (err) {
                 console.error("Error fetching dashboard data:", err);

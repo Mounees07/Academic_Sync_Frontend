@@ -37,7 +37,11 @@ export default defineConfig({
         // Scalability: Manual chunk splitting to ensure vendor code is cached
         // separately from app code. Users only re-download changed chunks.
         manualChunks(id) {
-          if (id.includes('node_modules')) {
+            if (id.includes('node_modules')) {
+            // Spreadsheet / export tooling should load only on demand
+            if (id.includes('xlsx') || id.includes('jspdf') || id.includes('jspdf-autotable')) {
+              return 'vendor-office';
+            }
             // Icons — loaded by many pages, cache separately
             if (id.includes('lucide-react') || id.includes('@fortawesome')) {
               return 'vendor-icons';
