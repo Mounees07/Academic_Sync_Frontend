@@ -422,11 +422,22 @@
 .user-profile-wrapper {
     position: relative;
     cursor: pointer;
+    padding-bottom: 12px;
+    margin-bottom: -12px;
+}
+
+.user-profile-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 100%;
+    height: 12px;
 }
 
 .profile-dropdown {
     position: absolute;
-    top: calc(100% + 12px);
+    top: 100%;
     right: 0;
     background: var(--bg-card);
     /* Keep this thematic (Dark/Light) */

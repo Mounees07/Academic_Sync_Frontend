@@ -461,7 +461,7 @@ const PlacementCoordinatorDashboard = () => {
         }
 
         try {
-            const [dashboardRes, studentsRes, analyticsRes, companiesRes, drivesRes] = await Promise.all([
+            const [dashboardRes, studentsRes, analyticsRes, companiesRes, drivesRes] = await Promise.allSettled([
                 api.get('/placement/coordinator/dashboard'),
                 api.get('/placement/coordinator/students'),
                 api.get('/placement/coordinator/analytics'),
@@ -469,13 +469,60 @@ const PlacementCoordinatorDashboard = () => {
                 api.get('/placement/coordinator/drives')
             ]);
 
-            setDashboard(dashboardRes.data);
-            setStudents(Array.isArray(studentsRes.data) ? studentsRes.data : []);
-            setAnalytics(analyticsRes.data);
-            setCompanies(Array.isArray(companiesRes.data) ? companiesRes.data : []);
-            setDrives(Array.isArray(drivesRes.data) ? drivesRes.data : []);
+            const failures = [];
+
+            if (dashboardRes.status === 'fulfilled') {
+                setDashboard(dashboardRes.value.data);
+            } else {
+                failures.push('dashboard');
+                setDashboard(null);
+                console.error('Failed to fetch placement dashboard', dashboardRes.reason);
+            }
+
+            if (studentsRes.status === 'fulfilled') {
+                setStudents(Array.isArray(studentsRes.value.data) ? studentsRes.value.data : []);
+            } else {
+                failures.push('students');
+                setStudents([]);
+                console.error('Failed to fetch placement students', studentsRes.reason);
+            }
+
+            if (analyticsRes.status === 'fulfilled') {
+                setAnalytics(analyticsRes.value.data);
+            } else {
+                failures.push('analytics');
+                setAnalytics(null);
+                console.error('Failed to fetch placement analytics', analyticsRes.reason);
+            }
+
+            if (companiesRes.status === 'fulfilled') {
+                setCompanies(Array.isArray(companiesRes.value.data) ? companiesRes.value.data : []);
+            } else {
+                failures.push('companies');
+                setCompanies([]);
+                console.error('Failed to fetch placement companies', companiesRes.reason);
+            }
+
+            if (drivesRes.status === 'fulfilled') {
+                setDrives(Array.isArray(drivesRes.value.data) ? drivesRes.value.data : []);
+            } else {
+                failures.push('drives');
+                setDrives([]);
+                console.error('Failed to fetch placement drives', drivesRes.reason);
+            }
+
+            if (failures.length === 0) {
+                setStatusMessage(null);
+            } else if (failures.length === 5) {
+                setStatusMessage({ type: 'error', text: 'Failed to load placement coordinator data.' });
+            } else {
+                setStatusMessage({
+                    type: 'error',
+                    text: `Some placement data could not be loaded (${failures.join(', ')}).`
+                });
+            }
         } catch (error) {
-            console.error('Failed to fetch placement coordinator data', error);
+            console.error('Unexpected placement coordinator fetch error', error);
             setStatusMessage({ type: 'error', text: 'Failed to load placement coordinator data.' });
         } finally {
             setLoading(false);

@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { SettingsProvider } from './context/SettingsContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import { preloadRoleRoutes } from './utils/routePreload';
 // Lazy load pages for code splitting
 import LayoutNew from './components/LayoutNew';
 const DashboardOverview = React.lazy(() => import('./pages/DashboardOverview'));
@@ -146,12 +147,27 @@ const DashboardOnlyCalendarRedirect = () => {
 
 import Loader from './components/Loader';
 
+const AuthenticatedAppWarmup = () => {
+  const { userData } = useAuth();
+
+  React.useEffect(() => {
+    if (!userData?.role) {
+      return undefined;
+    }
+
+    return preloadRoleRoutes(userData.role);
+  }, [userData?.role]);
+
+  return null;
+};
+
 function App() {
   return (
     <ErrorBoundary message="A critical error occurred. Please refresh the page.">
       <Router>
         <ThemeProvider>
           <AuthProvider>
+            <AuthenticatedAppWarmup />
             <Suspense fallback={<Loader fullScreen={true} />}>
               <SettingsProvider>
                 <Routes>

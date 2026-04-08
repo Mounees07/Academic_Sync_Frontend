@@ -21,10 +21,14 @@ import {
 } 
 from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { preloadRoute } from '../utils/routePreload';
 import './FloatingSidebar.css';
 
 const FloatingSidebar = ({ isOpen, setIsOpen }) => {
     const { userData } = useAuth();
+    const handleRouteWarmup = React.useCallback((path) => {
+        void preloadRoute(path, userData?.role);
+    }, [userData?.role]);
 
     const studentLinks = [
         { to: '/dashboard', icon: <LayoutDashboard size={22} />, label: 'Overview' },
@@ -119,6 +123,9 @@ const FloatingSidebar = ({ isOpen, setIsOpen }) => {
                         key={link.to}
                         to={link.to}
                         onClick={() => setIsOpen && setIsOpen(false)}
+                        onMouseEnter={() => handleRouteWarmup(link.to)}
+                        onFocus={() => handleRouteWarmup(link.to)}
+                        onTouchStart={() => handleRouteWarmup(link.to)}
                         className={({ isActive }) => `f-nav-link ${isActive ? 'active' : ''}`}
                     >
                         {link.icon}
@@ -135,6 +142,9 @@ const FloatingSidebar = ({ isOpen, setIsOpen }) => {
                 <NavLink
                     to="/my-profile"
                     onClick={() => setIsOpen && setIsOpen(false)}
+                    onMouseEnter={() => handleRouteWarmup('/my-profile')}
+                    onFocus={() => handleRouteWarmup('/my-profile')}
+                    onTouchStart={() => handleRouteWarmup('/my-profile')}
                     className={({ isActive }) => `f-nav-link sidebar-profile-nav ${isActive ? 'active' : ''}`}
                 >
                     {userData?.profilePictureUrl ? (
