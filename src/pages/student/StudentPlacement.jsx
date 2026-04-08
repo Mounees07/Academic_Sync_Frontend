@@ -12,6 +12,23 @@ const SKILLS_LIST = [
     'OOP Concepts', 'Problem Solving',
 ];
 
+const emptyPlacementProfile = {
+    resumeUploaded: false,
+    resumeUrl: '',
+    skillsCompleted: 0,
+    totalSkills: 10,
+    aptitudeScore: 0,
+    mockInterviewScore: 0,
+    readinessScore: 0,
+    completedSkillsList: '',
+    preferredRole: '',
+    preferredCompanies: '',
+    placementStatus: 'NOT_READY',
+    resumeReviewStatus: 'PENDING',
+    resumeRemarks: '',
+    availableDrives: [],
+};
+
 const RadialProgress = ({ value, size = 140, stroke = 10, color = '#6366f1' }) => {
     const r = (size - stroke) / 2;
     const circ = 2 * Math.PI * r;
@@ -71,6 +88,7 @@ const StudentPlacement = () => {
     const [saving, setSaving] = useState(false);
     const [resumeSaving, setResumeSaving] = useState(false);
     const [editMode, setEditMode] = useState(false);
+    const [loadError, setLoadError] = useState('');
     const [form, setForm] = useState({
         resumeUrl: '',
         aptitudeScore: '',
@@ -104,19 +122,22 @@ const StudentPlacement = () => {
 
         api.get(`/placement/student/${currentUser.uid}`)
             .then((res) => {
-                const data = res.data;
-                setProfile(data || null);
-                if (data) {
-                    setForm({
-                        resumeUrl: data.resumeUrl || '',
-                        aptitudeScore: data.aptitudeScore || '',
-                        mockInterviewScore: data.mockInterviewScore || '',
-                        preferredRole: data.preferredRole || '',
-                        preferredCompanies: data.preferredCompanies || '',
-                    });
-                }
+                const data = { ...emptyPlacementProfile, ...(res.data || {}) };
+                setProfile(data);
+                setLoadError('');
+                setForm({
+                    resumeUrl: data.resumeUrl || '',
+                    aptitudeScore: data.aptitudeScore || '',
+                    mockInterviewScore: data.mockInterviewScore || '',
+                    preferredRole: data.preferredRole || '',
+                    preferredCompanies: data.preferredCompanies || '',
+                });
             })
-            .catch(() => setProfile(null))
+            .catch((error) => {
+                console.error('Failed to load student placement profile', error);
+                setProfile(emptyPlacementProfile);
+                setLoadError('Some placement details could not be loaded. You can still update your resume and try again shortly.');
+            })
             .finally(() => setLoading(false));
     }, [currentUser]);
 
@@ -145,7 +166,7 @@ const StudentPlacement = () => {
                 completedSkillsList: updatedList,
                 skillsCompleted: updated.length,
             });
-            if (res.data) setProfile(res.data);
+            if (res.data) setProfile({ ...emptyPlacementProfile, ...res.data });
         } catch (_) {
             // Keep the optimistic UI.
         }
@@ -162,7 +183,7 @@ const StudentPlacement = () => {
                 preferredRole: form.preferredRole,
                 preferredCompanies: form.preferredCompanies,
             });
-            setProfile(res.data);
+            setProfile({ ...emptyPlacementProfile, ...res.data });
             setEditMode(false);
         } catch (_) {
             setProfile((prev) => ({
@@ -188,7 +209,7 @@ const StudentPlacement = () => {
                 resumeUploaded: Boolean(form.resumeUrl.trim()),
             };
             const res = await api.put(`/placement/student/${currentUser.uid}/update`, payload);
-            setProfile(res.data);
+            setProfile({ ...emptyPlacementProfile, ...res.data });
             setForm((prev) => ({ ...prev, resumeUrl: res.data.resumeUrl || '' }));
         } catch (error) {
             console.error('Failed to update resume:', error);
@@ -263,6 +284,12 @@ const StudentPlacement = () => {
                     </button>
                 ) : null}
             </div>
+
+            {loadError ? (
+                <div className="pc-status-banner error">
+                    {loadError}
+                </div>
+            ) : null}
 
             {canManagePlacement && editMode ? (
                 <div className="placement-edit-card">
