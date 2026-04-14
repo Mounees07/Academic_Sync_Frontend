@@ -69,6 +69,19 @@ export const AuthProvider = ({ children }) => {
         return res.data;
     }, [applySession]);
 
+    const refreshUserData = useCallback(async (uid) => {
+        const targetUid = uid || auth.currentUser?.uid;
+        if (!targetUid) {
+            return null;
+        }
+
+        const response = await api.get(`/users/${targetUid}`, {
+            skipSessionActivity: true,
+        });
+        setUserData(response.data);
+        return response.data;
+    }, []);
+
     const loginWithGoogle = async () => {
         setError('');
         try {
@@ -180,10 +193,7 @@ export const AuthProvider = ({ children }) => {
                             await registerSession();
                         }
 
-                        const response = await api.get(`/users/${user.uid}`, {
-                            skipSessionActivity: true,
-                        });
-                        setUserData(response.data);
+                        await refreshUserData(user.uid);
                     } catch (err) {
                         console.error('Auth state user load error:', err);
 
@@ -291,6 +301,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         resetPassword,
         refreshSession,
+        refreshUserData,
     };
 
     return (

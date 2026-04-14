@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../utils/api';
-import { Loader, CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle } from 'lucide-react';
 import { Hourglass } from 'ldrs/react';
 import 'ldrs/react/Hourglass.css';
 
@@ -11,6 +11,15 @@ const ParentResponse = () => {
     const [loading, setLoading] = useState(true);
     const [actionProcessed, setActionProcessed] = useState(false);
     const [error, setError] = useState("");
+
+    const studentName = leave?.student?.fullName || leave?.studentName || 'Student';
+    const fromDate = leave?.fromDate
+        ? new Date(leave.fromDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+        : '-';
+    const toDate = leave?.toDate
+        ? new Date(leave.toDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+        : '-';
+    const reason = leave?.reason || '-';
 
     useEffect(() => {
         const fetchLeave = async () => {
@@ -59,7 +68,7 @@ const ParentResponse = () => {
                             Request Approved
                         </h1>
                         <p style={{ color: '#64748b', marginBottom: '30px' }}>
-                            You have successfully approved the leave request for <strong>{leave.student.fullName}</strong>.
+                            You have successfully approved the leave request for <strong>{studentName}</strong>.
                         </p>
 
                         {leave.approvalOtp && (
@@ -100,23 +109,23 @@ const ParentResponse = () => {
                 <div style={{ padding: '30px' }}>
                     <div style={{ marginBottom: '24px' }}>
                         <label style={{ display: 'block', color: '#64748b', fontSize: '0.85rem', marginBottom: '4px' }}>Student Name</label>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 600 }}>{leave.student.fullName}</div>
+                        <div style={{ fontSize: '1.2rem', fontWeight: 600, color: '#0f172a' }}>{studentName}</div>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
                         <div>
                             <label style={{ display: 'block', color: '#64748b', fontSize: '0.85rem', marginBottom: '4px' }}>From Date</label>
-                            <div style={{ fontWeight: 500 }}>{leave.fromDate}</div>
+                            <div style={{ fontWeight: 600, color: '#0f172a' }}>{fromDate}</div>
                         </div>
                         <div>
                             <label style={{ display: 'block', color: '#64748b', fontSize: '0.85rem', marginBottom: '4px' }}>To Date</label>
-                            <div style={{ fontWeight: 500 }}>{leave.toDate}</div>
+                            <div style={{ fontWeight: 600, color: '#0f172a' }}>{toDate}</div>
                         </div>
                     </div>
 
                     <div style={{ marginBottom: '30px', background: '#f1f5f9', padding: '16px', borderRadius: '8px' }}>
                         <label style={{ display: 'block', color: '#64748b', fontSize: '0.85rem', marginBottom: '4px' }}>Reason</label>
-                        <div style={{ color: '#334155', lineHeight: 1.5 }}>{leave.reason}</div>
+                        <div style={{ color: '#334155', lineHeight: 1.5 }}>{reason}</div>
                     </div>
 
                     <div style={{ display: 'flex', gap: '16px' }}>

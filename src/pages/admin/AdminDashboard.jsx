@@ -39,10 +39,42 @@ const AdminDashboard = () => {
     const totalAwards = stats?.totalAwards || 0;
 
     const statsData = [
-        { title: 'Students', value: totalStudents.toLocaleString(), change: '+16%', badgeColor: 'bg-light-purple', badgeText: 'text-purple', iconColor: 'bg-purple', icon: <Users size={24} className="text-white" /> },
-        { title: 'Teachers', value: totalTeachers.toLocaleString(), change: '+3%', badgeColor: 'bg-light-orange', badgeText: 'text-orange', iconColor: 'bg-orange', icon: <UserCheck size={24} className="text-white" /> },
-        { title: 'Staffs', value: totalStaff.toLocaleString(), change: '+3%', badgeColor: 'bg-light-yellow', badgeText: 'text-yellow', iconColor: 'bg-yellow', icon: <Users size={24} className="text-white" /> },
-        { title: 'Awards', value: totalAwards.toLocaleString(), change: '+5%', badgeColor: 'bg-light-blue', badgeText: 'text-blue', iconColor: 'bg-blue', icon: <Award size={24} className="text-white" /> },
+        {
+            title: 'Students',
+            value: totalStudents.toLocaleString(),
+            change: '+16%',
+            badgeColor: 'bg-light-purple',
+            badgeText: 'text-purple',
+            iconColor: 'bg-purple',
+            icon: <Users size={24} className="text-white" />
+        },
+        {
+            title: 'Teachers',
+            value: totalTeachers.toLocaleString(),
+            change: '+3%',
+            badgeColor: 'bg-light-orange',
+            badgeText: 'text-orange',
+            iconColor: 'bg-orange',
+            icon: <UserCheck size={24} className="text-white" />
+        },
+        {
+            title: 'Staffs',
+            value: totalStaff.toLocaleString(),
+            change: '+3%',
+            badgeColor: 'bg-light-yellow',
+            badgeText: 'text-yellow',
+            iconColor: 'bg-yellow',
+            icon: <Users size={24} className="text-white" />
+        },
+        {
+            title: 'Awards',
+            value: totalAwards.toLocaleString(),
+            change: '+5%',
+            badgeColor: 'bg-light-blue',
+            badgeText: 'text-blue',
+            iconColor: 'bg-blue',
+            icon: <Award size={24} className="text-white" />
+        },
     ];
 
     const studentGenderData = stats?.studentGenderData || [
@@ -55,10 +87,16 @@ const AdminDashboard = () => {
         color: entry?.color || '#94a3b8',
     }));
     const hasStudentGenderData = normalizedStudentGenderData.some((entry) => entry.value > 0);
+    const boysCount = normalizedStudentGenderData.find((entry) => entry.name?.toLowerCase() === 'boys')?.value || 0;
+    const girlsCount = normalizedStudentGenderData.find((entry) => entry.name?.toLowerCase() === 'girls')?.value || 0;
 
     const attendanceData = stats?.attendanceData || [];
+    const totalPresent = attendanceData.reduce((sum, entry) => sum + normalizeChartNumber(entry?.present), 0);
+    const totalAbsent = attendanceData.reduce((sum, entry) => sum + normalizeChartNumber(entry?.absent), 0);
 
     const earningsData = stats?.earningsData || [];
+    const latestIncome = earningsData.length ? normalizeChartNumber(earningsData[earningsData.length - 1]?.income) : 0;
+    const latestExpense = earningsData.length ? normalizeChartNumber(earningsData[earningsData.length - 1]?.expense) : 0;
 
     const [agendaItems, setAgendaItems] = useState([]);
     const [isAgendaModalOpen, setIsAgendaModalOpen] = useState(false);
@@ -169,7 +207,7 @@ const AdminDashboard = () => {
             {/* Top Stats Cards */}
             <div className="stats-grid">
                 {statsData.map((stat, index) => (
-                    <div key={index} className="admin-card">
+                    <div key={index} className="admin-card stat-summary-card">
                         <div className="stat-card-header">
                             <span className={`stat-badge ${stat.badgeColor} ${stat.badgeText}`}>
                                 {stat.change}
@@ -179,12 +217,11 @@ const AdminDashboard = () => {
                             </div>
                         </div>
 
-                        <div>
+                        <div className="stat-content">
                             <h3 className="stat-value">{stat.value}</h3>
                             <p className="stat-title">{stat.title}</p>
                         </div>
 
-                        {/* Decorative Background Circle */}
                         <div className={`stat-decor-circle ${stat.iconColor}`}></div>
                     </div>
                 ))}
@@ -196,9 +233,12 @@ const AdminDashboard = () => {
                     {/* ... Charts ... */}
                     <div className="charts-row">
                         {/* Students Pie Chart */}
-                        <div className="admin-card">
+                        <div className="admin-card analytics-card">
                             <div className="card-header">
-                                <h3 className="card-title">Students</h3>
+                                <div>
+                                    <p className="card-eyebrow">Enrollment Overview</p>
+                                    <h3 className="card-title">Students</h3>
+                                </div>
                                 <MoreHorizontal size={20} className="more-icon" />
                             </div>
                             <div style={{ height: '250px', position: 'relative' }}>
@@ -251,13 +291,32 @@ const AdminDashboard = () => {
                                     </div>
                                 )}
                             </div>
+                            <div className="analytics-card-footer">
+                                <div className="analytics-footer-item">
+                                    <span className="analytics-footer-label">Boys</span>
+                                    <strong className="analytics-footer-value">{boysCount}</strong>
+                                </div>
+                                <div className="analytics-footer-divider"></div>
+                                <div className="analytics-footer-item">
+                                    <span className="analytics-footer-label">Girls</span>
+                                    <strong className="analytics-footer-value">{girlsCount}</strong>
+                                </div>
+                                <div className="analytics-footer-divider"></div>
+                                <div className="analytics-footer-item">
+                                    <span className="analytics-footer-label">Total</span>
+                                    <strong className="analytics-footer-value">{totalStudents}</strong>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Attendance Bar Chart */}
-                        <div className="admin-card">
+                        <div className="admin-card analytics-card">
                             <div className="card-header">
-                                <h3 className="card-title">Attendance</h3>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', backgroundColor: 'var(--bg-subtle)', padding: '4px 12px', borderRadius: '99px' }}>Weekly</div>
+                                <div>
+                                    <p className="card-eyebrow">Campus Trend</p>
+                                    <h3 className="card-title">Attendance</h3>
+                                </div>
+                                <div className="card-chip">Weekly</div>
                             </div>
                             <div style={{ height: '250px' }}>
                                 <ResponsiveContainer width="100%" height="100%">
@@ -272,13 +331,32 @@ const AdminDashboard = () => {
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
+                            <div className="analytics-card-footer">
+                                <div className="analytics-footer-item">
+                                    <span className="analytics-footer-label">Present</span>
+                                    <strong className="analytics-footer-value">{totalPresent}</strong>
+                                </div>
+                                <div className="analytics-footer-divider"></div>
+                                <div className="analytics-footer-item">
+                                    <span className="analytics-footer-label">Absent</span>
+                                    <strong className="analytics-footer-value">{totalAbsent}</strong>
+                                </div>
+                                <div className="analytics-footer-divider"></div>
+                                <div className="analytics-footer-item">
+                                    <span className="analytics-footer-label">Days tracked</span>
+                                    <strong className="analytics-footer-value">{attendanceData.length}</strong>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     {/* Earnings Chart */}
-                    <div className="admin-card">
+                    <div className="admin-card analytics-card">
                         <div className="card-header">
-                            <h3 className="card-title">Earnings</h3>
+                            <div>
+                                <p className="card-eyebrow">Financial Pulse</p>
+                                <h3 className="card-title">Earnings</h3>
+                            </div>
                             <MoreHorizontal size={20} className="more-icon" />
                         </div>
                         <div style={{ height: '250px' }}>
@@ -293,6 +371,22 @@ const AdminDashboard = () => {
                                     <Line type="monotone" dataKey="expense" stroke="#FB7D5B" strokeWidth={3} dot={{ r: 4, fill: '#FB7D5B', strokeWidth: 2, stroke: '#fff' }} />
                                 </LineChart>
                             </ResponsiveContainer>
+                        </div>
+                        <div className="analytics-card-footer">
+                            <div className="analytics-footer-item">
+                                <span className="analytics-footer-label">Latest income</span>
+                                <strong className="analytics-footer-value">{latestIncome}</strong>
+                            </div>
+                            <div className="analytics-footer-divider"></div>
+                            <div className="analytics-footer-item">
+                                <span className="analytics-footer-label">Latest expense</span>
+                                <strong className="analytics-footer-value">{latestExpense}</strong>
+                            </div>
+                            <div className="analytics-footer-divider"></div>
+                            <div className="analytics-footer-item">
+                                <span className="analytics-footer-label">Periods</span>
+                                <strong className="analytics-footer-value">{earningsData.length}</strong>
+                            </div>
                         </div>
                     </div>
                 </div>

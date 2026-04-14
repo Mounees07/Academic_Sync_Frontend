@@ -1,44 +1,100 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import DashboardLayout from '../components/DashboardLayout';
 import {
-    User, Mail, Phone, MapPin, Calendar, BookOpen,
-    ShieldCheck, ClipboardList, Edit2, Save, X, Briefcase, GraduationCap
+    User, MapPin, Calendar, BookOpen,
+    ShieldCheck, ClipboardList, Briefcase, GraduationCap,
+    Clock3, BadgeCheck, Shield
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
+import './MyProfile.css';
+
+const TABS = [
+    { id: 'Personal', label: 'Personal' },
+    { id: 'Academic', label: 'Academic' },
+    { id: 'Admission', label: 'Admission' },
+    { id: 'Address', label: 'Address' },
+    { id: 'Hostel', label: 'Hostel' },
+    { id: 'School', label: 'School' },
+    { id: 'Institute', label: 'Institute' },
+];
+
+const humanizeEnum = (value) => {
+    if (!value) return '-';
+    return String(value)
+        .replace(/_/g, ' ')
+        .toLowerCase()
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+const formatDateTime = (value) => {
+    if (!value) return '-';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+};
+
+const statusTone = (status) => {
+    const normalized = String(status || '').trim().toLowerCase();
+    if (['active', 'present', 'verified', 'eligible'].includes(normalized)) return 'success';
+    if (['inactive', 'blocked', 'expired', 'suspended'].includes(normalized)) return 'danger';
+    if (['pending', 'warning', 'probation'].includes(normalized)) return 'warning';
+    return 'neutral';
+};
+
+const resolveAccountStatus = (profile, currentUser) => {
+    const sessionExpiry = profile?.sessionExpiresAt ? new Date(profile.sessionExpiresAt).getTime() : null;
+    if (sessionExpiry) {
+        return sessionExpiry > Date.now() ? 'Active' : 'Expired';
+    }
+    if (profile?.studentStatus) {
+        return profile.studentStatus;
+    }
+    return currentUser ? 'Active' : 'Inactive';
+};
+
+const getAvatarFallback = (name) => {
+    if (!name) return 'U';
+    return name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part[0])
+        .join('')
+        .toUpperCase();
+};
 
 const MyProfile = () => {
     const { currentUser } = useAuth();
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState({});
     const [activeTab, setActiveTab] = useState('Personal');
 
-    useEffect(() => {
-        console.log("MyProfile Component Mounted - Version 2.0");
-        fetchProfile();
-    }, []);
+    const normalizeUserData = useCallback((data) => ({
+        ...data,
+        ...(data?.studentDetails || {}),
+    }), []);
 
-    const fetchProfile = async () => {
+    const fetchProfile = useCallback(async () => {
+        if (!currentUser?.uid) {
+            return;
+        }
+
         try {
             setLoading(true);
-            const token = await currentUser?.getIdToken();
-            const response = await axios.get('${import.meta.env.VITE_API_URL}/api/users/profile', {
-                headers: { Authorization: `Bearer ${token}` }
+            const response = await api.get(`/users/${currentUser.uid}`, {
+                skipSessionActivity: true,
             });
-            console.log("Profile Data Fetched:", response.data);
-            
-            // Unpack nested studentDetails if Jackson @JsonUnwrapped failed on backend
-            const userData = {
-                ...response.data,
-                ...(response.data.studentDetails || {})
-            };
-            
+            const userData = normalizeUserData(response.data);
+
             setProfile(userData);
-            setFormData(userData);
             setError(null);
         } catch (err) {
             console.error("Error fetching profile:", err);
@@ -46,283 +102,180 @@ const MyProfile = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [currentUser?.uid, normalizeUserData]);
 
-    const handleEdit = () => {
-        setIsEditing(true);
-    };
+    useEffect(() => {
+        fetchProfile();
+    }, [fetchProfile]);
 
-    const handleCancel = () => {
-        setIsEditing(false);
-        setFormData(profile); // Revert changes
-    };
+    useEffect(() => {
+        const refreshIfVisible = () => {
+            if (document.visibilityState === 'visible') {
+                fetchProfile();
+            }
+        };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
+        window.addEventListener('focus', fetchProfile);
+        document.addEventListener('visibilitychange', refreshIfVisible);
 
-    const handleSave = async () => {
-        try {
-            setLoading(true);
-            const token = await currentUser?.getIdToken();
-            // Using the UID from the profile data logic
-            // Typically PUT /api/users/{uid}
-            await axios.put(`http://localhost:8080/api/users/${profile.firebaseUid}`, {
-                mobileNumber: formData.mobileNumber,
-                address: formData.address,
-                parentContact: formData.parentContact
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            setProfile(prev => ({ ...prev, ...formData }));
-            setIsEditing(false);
-            alert("Profile updated successfully!");
-        } catch (err) {
-            console.error("Error updating profile:", err);
-            alert("Failed to update profile.");
-        } finally {
-            setLoading(false);
-        }
-    };
+        return () => {
+            window.removeEventListener('focus', fetchProfile);
+            document.removeEventListener('visibilitychange', refreshIfVisible);
+        };
+    }, [fetchProfile]);
 
     if (loading && !profile) {
         return (
-            <DashboardLayout>
-                <div className="flex items-center justify-center h-screen">
-                    <div className="text-xl font-semibold text-gray-500">Loading Profile...</div>
-                </div>
-            </DashboardLayout>
+            <div className="flex items-center justify-center h-screen">
+                <div className="text-xl font-semibold text-gray-500">Loading Profile...</div>
+            </div>
         );
     }
 
     if (error) {
         return (
-            <DashboardLayout>
-                <div className="flex items-center justify-center h-screen text-red-500">
-                    {error}
-                </div>
-            </DashboardLayout>
+            <div className="flex items-center justify-center h-screen text-red-500">
+                {error}
+            </div>
         );
     }
 
-    const SectionCard = ({ title, icon: Icon, iconColor, children }) => (
-        <div className="rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 mb-6 overflow-hidden bg-white dark:bg-[#1e1e1e]"
-            style={{ background: 'var(--bg-card)' }}>
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-blue-50/50 dark:bg-blue-900/10 flex items-center gap-3">
-                <div className={`p-2 rounded-lg bg-white dark:bg-gray-800 shadow-sm ${iconColor}`}>
+    const SectionCard = ({ title, icon: Icon, accentClass = 'profile-section-blue', children }) => (
+        <div className="profile-section-card">
+            <div className={`profile-section-header ${accentClass}`}>
+                <div className="profile-section-icon">
                     <Icon size={18} />
                 </div>
-                <h3 className="text-lg font-bold tracking-tight uppercase" style={{ color: 'var(--text-primary)' }}>
-                    {title}
-                </h3>
+                <div>
+                    <h3>{title}</h3>
+                    <p>Verified information from your student record</p>
+                </div>
             </div>
-            <div className="p-6">
+            <div className="profile-section-body">
                 {children}
             </div>
         </div>
     );
 
-    const InfoRow = ({ label, value, name, editable = false }) => (
-        <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            padding: '16px',
-            background: 'var(--bg-subtle)',
-            borderRadius: '12px',
-            border: '1px solid var(--glass-border)',
-            transition: 'all 0.2s ease',
-            minHeight: '88px',
-        }} className="hover:shadow-sm hover:border-blue-300 dark:hover:border-blue-700">
-            <span style={{
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                color: 'var(--text-muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                marginBottom: '6px'
-            }}>{label}</span>
-            <div style={{
-                fontSize: '1rem',
-                fontWeight: 600,
-                color: 'var(--text-primary)',
-                wordBreak: 'break-word',
-                display: 'flex',
-                alignItems: 'center'
-            }}>
-                {editable && isEditing ? (
-                    <input
-                        type="text"
-                        name={name}
-                        value={formData[name] || ''}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 rounded-lg border text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-transparent"
-                        style={{
-                            borderColor: 'var(--glass-border)',
-                            color: 'var(--text-primary)',
-                            marginTop: '4px'
-                        }}
-                    />
-                ) : (
-                    value || '-'
-                )}
-            </div>
+    const InfoRow = ({ label, value }) => (
+        <div className="profile-info-card">
+            <span className="profile-info-label">{label}</span>
+            <div className="profile-info-value">{value || '-'}</div>
         </div>
     );
 
+    const accountStatus = resolveAccountStatus(profile, currentUser);
+    const lastLogin = formatDateTime(profile?.sessionLoginAt || currentUser?.metadata?.lastSignInTime || profile?.createdAt);
+    const lastActivity = formatDateTime(profile?.sessionLastActivityAt);
+    const roleAccess = humanizeEnum(profile?.role);
+
     return (
-        <div className="max-w-7xl mx-auto p-6 space-y-8 animate-fade-in pb-20">
-            {/* Header Section */}
-            {/* Header Section */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div className="profile-page animate-fade-in">
+            <section className="profile-hero">
                 <div>
-                    <h1 style={{ fontSize: '1.875rem', fontWeight: 700, marginBottom: '0.5rem', fontFamily: 'var(--font-heading)', margin: 0 }}>My Profile</h1>
-                    <p style={{ color: '#6b7280', margin: 0 }}>Manage your personal and academic information</p>
+                    <span className="profile-eyebrow">Student identity</span>
+                    <h1>My Profile</h1>
+                    <p>Manage your personal, academic, and institutional information from one professional dashboard.</p>
+                    <div className="profile-chip-row">
+                        <span className="profile-chip"><Shield size={14} /> {humanizeEnum(profile.role)}</span>
+                        <span className="profile-chip"><BookOpen size={14} /> Semester {profile.semester || '-'}</span>
+                        <span className="profile-chip"><MapPin size={14} /> {profile.department || 'Department not assigned'}</span>
+                    </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                    {isEditing ? (
-                        <>
-                            <button onClick={handleCancel}
-                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.625rem 1.5rem', borderRadius: '0.75rem', fontWeight: 600, transition: 'all 0.2s', background: 'transparent', color: '#dc2626', border: '1px solid #fecaca', cursor: 'pointer' }}>
-                                <X size={18} /> Cancel
-                            </button>
-                            <button onClick={handleSave}
-                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.625rem 1.5rem', borderRadius: '0.75rem', fontWeight: 600, color: 'white', background: 'var(--primary)', boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.3)', border: 'none', cursor: 'pointer' }}>
-                                <Save size={18} /> Save Changes
-                            </button>
-                        </>
-                    ) : (
-                        <button onClick={handleEdit}
-                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.625rem 1.5rem', borderRadius: '0.75rem', fontWeight: 600, transition: 'all 0.2s', border: '1px solid var(--glass-border)', background: 'var(--bg-card)', color: 'var(--text-primary)', cursor: 'pointer' }}>
-                            <Edit2 size={18} /> Edit Profile
-                        </button>
-                    )}
-                </div>
-            </div>
+            </section>
 
-            {/* Main Layout Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-                {/* Left Side: Identity Card */}
-                <div className="lg:col-span-1 space-y-6">
-                    <div style={{
-                        borderRadius: '1.5rem',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        textAlign: 'center',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                        border: '1px solid rgba(229, 231, 235, 0.5)',
-                        background: 'var(--bg-card)',
-                        marginBottom: '1.5rem'
-                    }}>
-                        {/* Gradient Background */}
-                        <div style={{
-                            position: 'absolute', top: 0, left: 0, width: '100%', height: '8rem',
-                            background: 'linear-gradient(to right, #2563eb, #4f46e5)', opacity: 0.9, zIndex: 0
-                        }}></div>
-
-                        {/* Profile Image */}
-                        <div style={{ position: 'relative', zIndex: 10, marginTop: '4rem', marginBottom: '1rem' }}>
-                            <div style={{ width: '8rem', height: '8rem', borderRadius: '9999px', padding: '0.375rem', background: 'white', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', margin: '0 auto' }}>
-                                <div style={{ width: '100%', height: '100%', borderRadius: '9999px', overflow: 'hidden', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    {profile.profilePictureUrl ? (
-                                        <img src={profile.profilePictureUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    ) : (
-                                        <User size={48} style={{ color: '#9ca3af' }} />
-                                    )}
+            <div className="profile-layout">
+                <div className="profile-sidebar-column">
+                    <div className="profile-identity-card">
+                        <div className="profile-identity-banner" />
+                        <div className="profile-avatar-shell">
+                            {profile.profilePictureUrl ? (
+                                <img src={profile.profilePictureUrl} alt="Profile" className="profile-avatar-image" />
+                            ) : (
+                                <div className="profile-avatar-fallback">{getAvatarFallback(profile.fullName)}</div>
+                            )}
+                        </div>
+                        <div className="profile-identity-body">
+                            <h2>{profile.fullName}</h2>
+                            <p>{profile.email || 'No email available'}</p>
+                            <div className="profile-badge-row">
+                                <span className="profile-id-badge">
+                                    <BadgeCheck size={14} />
+                                    {profile.rollNumber || profile.registerNo || 'No ID'}
+                                </span>
+                                <span className={`profile-status-badge profile-status-${statusTone(accountStatus)}`}>
+                                    {humanizeEnum(accountStatus)}
+                                </span>
+                            </div>
+                            <div className="profile-mini-stats">
+                                <div>
+                                    <span>Section</span>
+                                    <strong>{profile.section || '-'}</strong>
+                                </div>
+                                <div>
+                                    <span>Admission</span>
+                                    <strong>{profile.admissionYear || '-'}</strong>
+                                </div>
+                                <div>
+                                    <span>Student ID</span>
+                                    <strong>{profile.id || '-'}</strong>
                                 </div>
                             </div>
                         </div>
-
-                        {/* Name and Role */}
-                        <div style={{ position: 'relative', zIndex: 10, width: '100%', paddingLeft: '1.5rem', paddingRight: '1.5rem', paddingBottom: '2rem' }}>
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', color: 'var(--text-primary)', margin: 0 }}>{profile.fullName}</h2>
-                            <p style={{ fontWeight: 500, marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.75rem', color: 'var(--primary)', marginTop: '0.5rem' }}>{profile.role}</p>
-
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '9999px', background: 'rgba(79, 70, 229, 0.1)', color: '#4f46e5', fontSize: '0.875rem', fontWeight: 600, margin: '0 auto', width: 'fit-content', border: '1px solid rgba(79, 70, 229, 0.2)' }}>
-                                <ShieldCheck size={16} />
-                                <span style={{ textTransform: 'uppercase', letterSpacing: '0.1em' }}>{profile.rollNumber || 'No ID'}</span>
-                            </div>
-                        </div>
                     </div>
 
-                    {/* Account Status Card */}
-                    <div style={{ padding: '1.5rem', borderRadius: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', border: '1px solid rgba(229, 231, 235, 0.5)', background: 'var(--bg-card)' }}>
-                        <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-primary)' }}>
-                            <ClipboardList size={20} className="text-emerald-500" />
-                            Account Status
-                        </h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: '1px dashed #e5e7eb', width: '100%' }}>
-                                <span style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280' }}>Status</span>
-                                <span style={{ color: '#059669', fontWeight: 700, background: '#ecfdf5', padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Active</span>
+                    <div className="profile-account-card">
+                        <div className="profile-account-header">
+                            <div>
+                                <span className="profile-eyebrow">Account summary</span>
+                                <h3>Access & session details</h3>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: '1px dashed #e5e7eb', width: '100%' }}>
-                                <span style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280' }}>Last Login</span>
-                                <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-primary)' }}>Just Now</span>
+                            <span className={`profile-status-badge profile-status-${statusTone(accountStatus)}`}>
+                                {humanizeEnum(accountStatus)}
+                            </span>
+                        </div>
+
+                        <div className="profile-account-list">
+                            <div className="profile-account-item">
+                                <div className="profile-account-meta">
+                                    <Clock3 size={16} />
+                                    <span>Last Login</span>
+                                </div>
+                                <strong>{lastLogin}</strong>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', width: '100%' }}>
-                                <span style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280' }}>Role Access</span>
-                                <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-primary)' }}>{profile.role}</span>
+                            <div className="profile-account-item">
+                                <div className="profile-account-meta">
+                                    <ShieldCheck size={16} />
+                                    <span>Role Access</span>
+                                </div>
+                                <strong>{roleAccess}</strong>
                             </div>
+                            <div className="profile-account-item">
+                                <div className="profile-account-meta">
+                                    <ClipboardList size={16} />
+                                    <span>Status</span>
+                                </div>
+                                <strong>{humanizeEnum(accountStatus)}</strong>
+                            </div>
+                        </div>
+
+                        <div className="profile-account-footer">
+                            <span>Last activity</span>
+                            <strong>{lastActivity}</strong>
+                            <span>Session expiry</span>
+                            <strong>{formatDateTime(profile?.sessionExpiresAt)}</strong>
                         </div>
                     </div>
                 </div>
 
-                {/* Right Side: Details Sections */}
-                <div className="lg:col-span-2 space-y-6">
-                    {/* Tabs Navigation */}
-                    {/* Tabs Navigation */}
-                    <div className="no-scrollbar" style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '6px',
-                        backgroundColor: '#fff',
-                        borderRadius: '9999px',
-                        border: '1px solid #e5e7eb',
-                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                        marginBottom: '32px',
-                        overflowX: 'auto',
-                        scrollbarWidth: 'none'
-                    }}>
-                        {[
-                            { id: 'Personal', label: 'Personal' },
-                            { id: 'Academic', label: 'Academic' },
-                            { id: 'Admission', label: 'Admission' },
-                            { id: 'Address', label: 'Address' },
-                            { id: 'Hostel', label: 'Hostel' },
-                            { id: 'School', label: 'School' },
-                            { id: 'Institute', label: 'Institute' }
-                        ].map((tab) => (
+                <div className="profile-details-column">
+                    <div className="profile-tabs">
+                        {TABS.map((tab) => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                style={{
-                                    flex: '1',
-                                    whiteSpace: 'nowrap',
-                                    minWidth: 'fit-content',
-                                    padding: '8px 20px',
-                                    borderRadius: '9999px',
-                                    fontSize: '0.875rem',
-                                    fontWeight: activeTab === tab.id ? '600' : '500',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease',
-                                    backgroundColor: activeTab === tab.id ? '#f3f4f6' : 'transparent',
-                                    color: activeTab === tab.id ? '#111827' : '#6b7280',
-                                    boxShadow: activeTab === tab.id ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
-                                    outline: 'none'
-                                }}
+                                className={`profile-tab ${activeTab === tab.id ? 'active' : ''}`}
                             >
                                 {tab.label}
                             </button>

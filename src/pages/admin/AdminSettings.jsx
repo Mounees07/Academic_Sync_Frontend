@@ -17,7 +17,9 @@ import {
     AlertCircle,
     Users,
     LogOut,
-    RefreshCw
+    RefreshCw,
+    ChevronLeft,
+    ChevronRight
 } from 'lucide-react';
 import './AdminSettings.css';
 import api from '../../utils/api';
@@ -31,8 +33,12 @@ const AdminSettings = () => {
         maintenanceMode: false,
         allowRegistration: true,
         emailNotifications: true,
+        smsNotifications: true,
         defaultLanguage: 'English',
         sessionTimeout: '30',
+        'app.sms.twilio.account-sid': '',
+        'app.sms.twilio.auth-token': '',
+        'app.sms.twilio.from-number': '',
         // Features
         'feature.leave.enabled': true,
         'feature.result.enabled': true,
@@ -88,6 +94,9 @@ const AdminSettings = () => {
                         adminEmail: d.adminEmail ?? prev.adminEmail,
                         defaultLanguage: d.defaultLanguage ?? prev.defaultLanguage,
                         sessionTimeout: d.sessionTimeout ?? prev.sessionTimeout,
+                        'app.sms.twilio.account-sid': d['app.sms.twilio.account-sid'] ?? prev['app.sms.twilio.account-sid'],
+                        'app.sms.twilio.auth-token': d['app.sms.twilio.auth-token'] ?? prev['app.sms.twilio.auth-token'],
+                        'app.sms.twilio.from-number': d['app.sms.twilio.from-number'] ?? prev['app.sms.twilio.from-number'],
                         'env.label': d['env.label'] ?? prev['env.label'],
                         'policy.password.complexity': d['policy.password.complexity'] ?? prev['policy.password.complexity'],
 
@@ -95,8 +104,8 @@ const AdminSettings = () => {
                         maintenanceMode: bool('maintenanceMode', false),
                         allowRegistration: bool('allowRegistration', true),
                         emailNotifications: bool('emailNotifications', true),
+                        smsNotifications: bool('smsNotifications', true),
                         'report.export.enabled': bool('report.export.enabled', true),
-                        'security.captcha.enabled': bool('security.captcha.enabled', false),
                         'env.debugMode': bool('env.debugMode', false),
                         'feature.leave.enabled': bool('feature.leave.enabled', true),
                         'feature.result.enabled': bool('feature.result.enabled', true),
@@ -146,6 +155,7 @@ const AdminSettings = () => {
                 maintenanceMode: String(settings.maintenanceMode),
                 allowRegistration: String(settings.allowRegistration),
                 emailNotifications: String(settings.emailNotifications),
+                smsNotifications: String(settings.smsNotifications),
                 'report.export.enabled': String(settings['report.export.enabled']),
                 'security.captcha.enabled': String(settings['security.captcha.enabled']),
                 'security.singleSession.enabled': String(settings['security.singleSession.enabled']),
@@ -341,6 +351,17 @@ const AdminSettings = () => {
                                     </div>
                                     <div className="toggle-row">
                                         <div className="toggle-info">
+                                            <label>SMS Notifications
+                                                {!settings.smsNotifications && (
+                                                    <span style={{ marginLeft: 8, fontSize: '0.7rem', padding: '2px 8px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', color: '#ef4444', fontWeight: 700 }}>DISABLED</span>
+                                                )}
+                                            </label>
+                                            <p>Send leave updates and approval requests to the parent's registered mobile number.{!settings.smsNotifications && <strong style={{ color: '#ef4444' }}> Parent SMS delivery is currently blocked.</strong>}</p>
+                                        </div>
+                                        <ToggleSwitch name="smsNotifications" checked={settings.smsNotifications} onChange={handleChange} />
+                                    </div>
+                                    <div className="toggle-row">
+                                        <div className="toggle-info">
                                             <label>Export Features
                                                 {!settings['report.export.enabled'] && (
                                                     <span style={{ marginLeft: 8, fontSize: '0.7rem', padding: '2px 8px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', color: '#ef4444', fontWeight: 700 }}>DISABLED</span>
@@ -349,6 +370,32 @@ const AdminSettings = () => {
                                             <p>Allow exporting reports to CSV/PDF.{!settings['report.export.enabled'] && <strong style={{ color: '#ef4444' }}> Export buttons are currently hidden/disabled.</strong>}</p>
                                         </div>
                                         <ToggleSwitch name="report.export.enabled" checked={settings['report.export.enabled']} onChange={handleChange} />
+                                    </div>
+                                    <div style={{ marginTop: '24px' }}>
+                                        <InputField
+                                            label="Twilio Account SID"
+                                            name="app.sms.twilio.account-sid"
+                                            value={settings['app.sms.twilio.account-sid']}
+                                            onChange={handleChange}
+                                            placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                                        />
+                                    </div>
+                                    <div className="section-grid" style={{ gap: '24px', marginTop: '24px' }}>
+                                        <InputField
+                                            label="Twilio Auth Token"
+                                            name="app.sms.twilio.auth-token"
+                                            type="password"
+                                            value={settings['app.sms.twilio.auth-token']}
+                                            onChange={handleChange}
+                                            placeholder="Enter Twilio auth token"
+                                        />
+                                        <InputField
+                                            label="Twilio From Number"
+                                            name="app.sms.twilio.from-number"
+                                            value={settings['app.sms.twilio.from-number']}
+                                            onChange={handleChange}
+                                            placeholder="+1xxxxxxxxxx"
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -757,6 +804,8 @@ const ActiveSessionsViewer = ({ singleSessionEnabled }) => {
 const AuditLogViewer = () => {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const logsPerPage = 10;
 
     React.useEffect(() => {
         const fetchLogs = async () => {
@@ -778,34 +827,109 @@ const AuditLogViewer = () => {
         fetchLogs();
     }, []);
 
+    React.useEffect(() => {
+        const totalPages = Math.max(1, Math.ceil(logs.length / logsPerPage));
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages);
+        }
+    }, [currentPage, logs.length]);
+
     if (loading) return <div style={{ padding: '40px', textAlign: 'center', color: '#A098AE' }}>Loading ClipboardList logs...</div>;
 
     if (logs.length === 0) return <div style={{ padding: '40px', textAlign: 'center', color: '#A098AE' }}>No recent ClipboardList found.</div>;
 
+    const totalPages = Math.ceil(logs.length / logsPerPage);
+    const startIndex = (currentPage - 1) * logsPerPage;
+    const paginatedLogs = logs.slice(startIndex, startIndex + logsPerPage);
+    const showingFrom = startIndex + 1;
+    const showingTo = Math.min(startIndex + logsPerPage, logs.length);
+
+    const getPageNumbers = () => {
+        if (totalPages <= 5) {
+            return Array.from({ length: totalPages }, (_, index) => index + 1);
+        }
+
+        if (currentPage <= 3) {
+            return [1, 2, 3, 4, totalPages];
+        }
+
+        if (currentPage >= totalPages - 2) {
+            return [1, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+        }
+
+        return [1, currentPage - 1, currentPage, currentPage + 1, totalPages];
+    };
+
+    const pageNumbers = getPageNumbers();
+
     return (
-        <div className="audit-table-wrapper">
-            <table className="audit-table">
-                <thead>
-                    <tr>
-                        <th width="15%">Action</th>
-                        <th width="20%">User</th>
-                        <th width="30%">Details</th>
-                        <th width="15%">IP Address</th>
-                        <th width="20%">Time</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {logs.map(log => (
-                        <tr key={log.id}>
-                            <td><span className="action-badge">{log.action}</span></td>
-                            <td style={{ fontWeight: '500' }}>{log.actorEmail}</td>
-                            <td>{log.details}</td>
-                            <td><span className="code-text">{log.ipAddress}</span></td>
-                            <td style={{ color: '#A098AE' }}>{new Date(log.timestamp).toLocaleString()}</td>
+        <div className="audit-log-section">
+            <div className="audit-table-wrapper">
+                <table className="audit-table">
+                    <thead>
+                        <tr>
+                            <th width="15%">Action</th>
+                            <th width="20%">User</th>
+                            <th width="30%">Details</th>
+                            <th width="15%">IP Address</th>
+                            <th width="20%">Time</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {paginatedLogs.map(log => (
+                            <tr key={log.id}>
+                                <td><span className="action-badge">{log.action}</span></td>
+                                <td style={{ fontWeight: '500' }}>{log.actorEmail}</td>
+                                <td>{log.details}</td>
+                                <td><span className="code-text">{log.ipAddress}</span></td>
+                                <td style={{ color: '#A098AE' }}>{new Date(log.timestamp).toLocaleString()}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <div className="audit-pagination">
+                <p className="audit-pagination-text">
+                    Showing {showingFrom}-{showingTo} of {logs.length} logs
+                </p>
+                <div className="audit-pagination-controls">
+                    <button
+                        type="button"
+                        className="audit-pagination-btn"
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        aria-label="Previous page"
+                    >
+                        <ChevronLeft size={16} />
+                    </button>
+                    {pageNumbers.map((page, index) => {
+                        const previousPage = pageNumbers[index - 1];
+                        const showEllipsis = previousPage && page - previousPage > 1;
+
+                        return (
+                            <React.Fragment key={page}>
+                                {showEllipsis && <span className="audit-pagination-ellipsis">...</span>}
+                                <button
+                                    type="button"
+                                    className={`audit-pagination-number ${currentPage === page ? 'active' : ''}`}
+                                    onClick={() => setCurrentPage(page)}
+                                >
+                                    {page}
+                                </button>
+                            </React.Fragment>
+                        );
+                    })}
+                    <button
+                        type="button"
+                        className="audit-pagination-btn"
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        aria-label="Next page"
+                    >
+                        <ChevronRight size={16} />
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };
