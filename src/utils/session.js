@@ -4,6 +4,7 @@ export const SESSION_TOKEN_KEY = 'sessionToken';
 export const SESSION_DEADLINE_KEY = 'sessionDeadlineAt';
 export const SESSION_EVENT_KEY = 'sessionEvent';
 export const SESSION_MESSAGE_KEY = 'sessionMessage';
+export const SESSION_DEADLINE_UPDATED_EVENT = 'session-deadline-updated';
 
 export const SESSION_EVENT_TYPES = {
     REFRESH: 'refresh',
@@ -38,6 +39,12 @@ export const setStoredDeadline = (deadlineAt) => {
         sessionStorage.setItem(SESSION_DEADLINE_KEY, String(deadlineAt));
     } else {
         sessionStorage.removeItem(SESSION_DEADLINE_KEY);
+    }
+
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent(SESSION_DEADLINE_UPDATED_EVENT, {
+            detail: { deadlineAt: deadlineAt ?? null },
+        }));
     }
 };
 

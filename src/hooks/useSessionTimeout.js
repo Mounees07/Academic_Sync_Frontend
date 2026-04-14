@@ -3,6 +3,7 @@ import {
     getStoredDeadline,
     setStoredDeadline,
     SESSION_DEADLINE_KEY,
+    SESSION_DEADLINE_UPDATED_EVENT,
     SESSION_EVENT_KEY,
     SESSION_EVENT_TYPES,
 } from '../utils/session';
@@ -111,10 +112,13 @@ const useSessionTimeout = ({
             return undefined;
         }
 
+        const syncDeadline = () => {
+            setDeadlineAt(getStoredDeadline());
+        };
+
         const handleStorage = (event) => {
             if (event.key === SESSION_DEADLINE_KEY) {
-                const nextDeadline = getStoredDeadline();
-                setDeadlineAt(nextDeadline);
+                syncDeadline();
             }
 
             if (event.key === SESSION_EVENT_KEY && event.newValue) {
@@ -130,8 +134,12 @@ const useSessionTimeout = ({
             }
         };
 
+        window.addEventListener(SESSION_DEADLINE_UPDATED_EVENT, syncDeadline);
         window.addEventListener('storage', handleStorage);
-        return () => window.removeEventListener('storage', handleStorage);
+        return () => {
+            window.removeEventListener(SESSION_DEADLINE_UPDATED_EVENT, syncDeadline);
+            window.removeEventListener('storage', handleStorage);
+        };
     }, [enabled]);
 
     return { deadlineAt, refresh };

@@ -21,6 +21,9 @@ const toRoman = (num) => {
 
 const SessionTimer = ({ sessionTotalMs = 300000, deadlineAt = null }) => {
     const [now, setNow] = useState(() => Date.now());
+    const [fallbackDeadlineAt, setFallbackDeadlineAt] = useState(() => (
+        deadlineAt ?? (sessionTotalMs > 0 ? Date.now() + sessionTotalMs : null)
+    ));
 
     useEffect(() => {
         setNow(Date.now());
@@ -28,7 +31,17 @@ const SessionTimer = ({ sessionTotalMs = 300000, deadlineAt = null }) => {
         return () => window.clearInterval(intervalId);
     }, [deadlineAt]);
 
-    const safeMsLeft = Math.max(0, deadlineAt ? deadlineAt - now : sessionTotalMs);
+    useEffect(() => {
+        if (deadlineAt) {
+            setFallbackDeadlineAt(deadlineAt);
+            return;
+        }
+
+        setFallbackDeadlineAt(sessionTotalMs > 0 ? Date.now() + sessionTotalMs : null);
+    }, [deadlineAt, sessionTotalMs]);
+
+    const effectiveDeadlineAt = deadlineAt ?? fallbackDeadlineAt;
+    const safeMsLeft = Math.max(0, effectiveDeadlineAt ? effectiveDeadlineAt - now : 0);
     const pct = Math.min(1, Math.max(0, safeMsLeft / sessionTotalMs));
     const totalSecs = Math.floor(safeMsLeft / 1000);
     const mm = Math.floor(totalSecs / 60);
@@ -86,8 +99,8 @@ const SessionTimer = ({ sessionTotalMs = 300000, deadlineAt = null }) => {
             <div className="session-timer-text">
                 <span className="session-timer-label">Session</span>
                 <SessionCountdown
-                    deadlineAt={deadlineAt}
-                    fallbackMs={sessionTotalMs}
+                    deadlineAt={effectiveDeadlineAt}
+                    fallbackMs={0}
                     className="session-timer-countdown"
                 />
             </div>
