@@ -22,32 +22,44 @@
     color: var(--text-primary);
 }
 
-.allocations-header {
+.adjust-allocations-container .allocations-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 24px;
+    gap: 16px 24px;
+    flex-wrap: wrap;
 }
 
-.header-titles h1 {
+.adjust-allocations-container .allocations-header > *:first-child {
+    flex: 1 1 420px;
+    min-width: 0;
+}
+
+.adjust-allocations-container .header-titles h1 {
     font-size: 24px;
     font-weight: 700;
     margin: 0 0 8px 0;
     line-height: 1;
 }
 
-.header-titles p {
+.adjust-allocations-container .header-titles p {
     color: var(--text-muted);
     font-size: 14px;
     margin: 0;
 }
 
-.header-actions {
+.adjust-allocations-container .header-actions {
     display: flex;
     gap: 12px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    flex: 0 0 auto;
 }
+.adjust-allocations-container .header-actions > * { flex: 0 0 auto; }
 
-.btn-secondary {
+.adjust-allocations-container .btn-secondary {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -61,11 +73,11 @@
     cursor: pointer;
     transition: all 0.2s;
 }
-.btn-secondary:hover {
+.adjust-allocations-container .btn-secondary:hover {
     background: var(--bg-subtle);
 }
 
-.btn-primary {
+.adjust-allocations-container .btn-primary {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -79,7 +91,7 @@
     cursor: pointer;
     transition: background 0.2s;
 }
-.btn-primary:hover {
+.adjust-allocations-container .btn-primary:hover {
     background: var(--primary-dark, #1D4ED8);
 }
 
@@ -495,7 +507,8 @@
 
 @media (max-width: 768px) {
     .allocations-layout { grid-template-columns: 1fr; }
-    .allocations-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .adjust-allocations-container .allocations-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .adjust-allocations-container .header-actions { justify-content: flex-start; flex-wrap: wrap; }
     .profile-top-row { flex-direction: column; gap: 24px; }
     .profile-limit-block { width: 100%; align-items: flex-start; }
     .stack-segment { font-size: 10px; }

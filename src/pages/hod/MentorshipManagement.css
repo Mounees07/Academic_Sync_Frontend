@@ -4,35 +4,43 @@
     color: var(--text-primary);
 }
 
-.page-header {
+.mentorship-mgmt .page-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 32px;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 16px 24px;
 }
 
-.header-content h1 {
+.mentorship-mgmt .page-header > *:first-child {
+    flex: 1 1 420px;
+    min-width: 0;
+}
+
+.mentorship-mgmt .header-content h1 {
     font-size: 24px;
     font-weight: 700;
     margin-bottom: 8px;
     letter-spacing: -0.5px;
 }
 
-.header-content p {
+.mentorship-mgmt .header-content p {
     color: var(--text-muted);
     font-size: 14px;
 }
 
-.header-actions {
+.mentorship-mgmt .header-actions {
     display: flex;
     gap: 12px;
     align-items: center;
-    flex-wrap: wrap;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    flex: 0 0 auto;
 }
+.mentorship-mgmt .header-actions > * { flex: 0 0 auto; }
 
-.btn {
+.mentorship-mgmt .btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -46,38 +54,38 @@
     text-transform: uppercase;
 }
 
-.btn-secondary {
+.mentorship-mgmt .btn-secondary {
     background: var(--bg-card);
     border: 1px solid var(--glass-border);
     color: var(--text-primary);
 }
-.btn-secondary:hover {
+.mentorship-mgmt .btn-secondary:hover {
     background: var(--bg-subtle);
 }
 
-.btn-outline {
+.mentorship-mgmt .btn-outline {
     background: #FFFFFF;
     color: #000000;
     border: 1px solid #E5E7EB;
 }
-.btn-outline:hover {
+.mentorship-mgmt .btn-outline:hover {
     background: #F3F4F6;
 }
 
 /* Make icons in the bright outline button inherit color */
-.btn-outline svg {
+.mentorship-mgmt .btn-outline svg {
     color: #000;
 }
 
-.btn-primary {
+.mentorship-mgmt .btn-primary {
     background: #3B82F6;
     color: #FFFFFF;
 }
-.btn-primary:hover {
+.mentorship-mgmt .btn-primary:hover {
     background: #2563EB;
 }
 
-.btn-block {
+.mentorship-mgmt .btn-block {
     width: 100%;
     justify-content: center;
     padding: 12px;
@@ -250,5 +258,10 @@
 
     .arrow-icon {
         transform: rotate(90deg);
+    }
+
+    .mentorship-mgmt .header-actions {
+        justify-content: flex-start;
+        flex-wrap: wrap;
     }
 }

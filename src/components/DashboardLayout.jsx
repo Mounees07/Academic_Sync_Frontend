@@ -6,11 +6,12 @@ import { useAuth } from '../context/AuthContext';
 import BrandLogo from './BrandLogo';
 import SessionTimeoutModal from './SessionTimeoutModal';
 import useSessionTimeout from '../hooks/useSessionTimeout';
+import { SESSION_DURATION_MS, SESSION_WARNING_MS } from '../utils/session';
 import './DashboardLayout.css';
 
 // ── Session timeout configuration ─────────────────────────────────────────────
-const SESSION_TIMEOUT_MS  = 5 * 60 * 1000;   // 5 minutes from login
-const WARN_BEFORE_MS      = 1 * 60 * 1000;   // show warning 1 min before logout
+const SESSION_TIMEOUT_MS  = SESSION_DURATION_MS;
+const WARN_BEFORE_MS      = SESSION_WARNING_MS;
 const WARNING_SECONDS     = WARN_BEFORE_MS / 1000;
 // ────────────────────────────────────────────────────────────────────────────
 
@@ -34,7 +35,7 @@ const DashboardLayout = ({ children }) => {
         setShowTimeoutModal(true);
     }, []);
 
-    // Called when the 5-minute session expires — sign out and go to login
+    // Called when the session expires — sign out and go to login
     const handleTimeout = useCallback(async () => {
         setShowTimeoutModal(false);
         await logout();

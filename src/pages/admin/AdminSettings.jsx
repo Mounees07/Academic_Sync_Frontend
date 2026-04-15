@@ -35,7 +35,7 @@ const AdminSettings = () => {
         emailNotifications: true,
         smsNotifications: true,
         defaultLanguage: 'English',
-        sessionTimeout: '30',
+        sessionTimeout: '10',
         'app.sms.twilio.account-sid': '',
         'app.sms.twilio.auth-token': '',
         'app.sms.twilio.from-number': '',

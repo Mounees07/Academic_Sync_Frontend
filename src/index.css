@@ -178,6 +178,128 @@ body {
   /* Removed overflow-x: hidden to prevent clipping on zoom */
 }
 
+button {
+  font: inherit;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  vertical-align: middle;
+}
+
+button svg {
+  flex-shrink: 0;
+}
+
+:is(
+  .settings-header,
+  .student-list-header,
+  .leaves-header,
+  .header-actions,
+  .dashboard-data-card-header,
+  .card-header-row,
+  .coe-panel-header,
+  .coe-header-actions,
+  .coe-card-header,
+  .venues-header,
+  .venue-actions,
+  .pc-panel-header,
+  .placement-coordinator-hero,
+  .placement-coordinator-actions,
+  .pc-panel-actions,
+  .pc-form-actions,
+  .pc-list-actions,
+  .pc-modal-footer,
+  .pc-inline-actions,
+  .pc-drive-card-actions,
+  .pc-drive-card-top,
+  .pc-assessment-card-head,
+  .pc-assessment-footer-note,
+  .sa-header,
+  .sa-venues-toolbar,
+  .sa-view-actions,
+  .sa-filters-bar,
+  .sa-template-table-header,
+  .fh-toolbar,
+  .fh-card-header,
+  .attendance-header-actions,
+  .directory-toolbar,
+  .directory-filters,
+  .fin-header-actions,
+  .fin-table-controls,
+  .audit-pagination,
+  .audit-pagination-controls,
+  .notif-filters,
+  .schedule-filter-controls,
+  .schedule-filters,
+  .action-buttons-row,
+  .perf-card-header,
+  .header-controls,
+  .nav-controls,
+  .att-filters-row,
+  .otp-header-actions,
+  .card-header-flex,
+  .course-card-header
+) {
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 12px;
+}
+
+:is(
+  .settings-header,
+  .student-list-header,
+  .leaves-header,
+  .header-actions,
+  .dashboard-data-card-header,
+  .card-header-row,
+  .coe-panel-header,
+  .coe-header-actions,
+  .coe-card-header,
+  .venues-header,
+  .venue-actions,
+  .pc-panel-header,
+  .placement-coordinator-hero,
+  .placement-coordinator-actions,
+  .pc-panel-actions,
+  .pc-form-actions,
+  .pc-list-actions,
+  .pc-modal-footer,
+  .pc-inline-actions,
+  .pc-drive-card-actions,
+  .pc-drive-card-top,
+  .pc-assessment-card-head,
+  .pc-assessment-footer-note,
+  .sa-header,
+  .sa-venues-toolbar,
+  .sa-view-actions,
+  .sa-filters-bar,
+  .sa-template-table-header,
+  .fh-toolbar,
+  .fh-card-header,
+  .attendance-header-actions,
+  .directory-toolbar,
+  .directory-filters,
+  .fin-header-actions,
+  .fin-table-controls,
+  .audit-pagination,
+  .audit-pagination-controls,
+  .notif-filters,
+  .schedule-filter-controls,
+  .schedule-filters,
+  .action-buttons-row,
+  .perf-card-header,
+  .header-controls,
+  .nav-controls,
+  .att-filters-row,
+  .otp-header-actions,
+  .card-header-flex,
+  .course-card-header
+) > :is(button, .btn, [role='button']) {
+  align-self: center;
+}
+
 h1,
 h2,
 h3,

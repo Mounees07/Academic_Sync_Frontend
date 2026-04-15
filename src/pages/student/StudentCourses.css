@@ -8,7 +8,7 @@
     min-height: 100vh;
 }
 
-.page-header {
+.student-courses-container .page-header {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     border-radius: 20px;
@@ -18,14 +18,14 @@
     backdrop-filter: blur(var(--backdrop-blur));
 }
 
-.page-header h1 {
+.student-courses-container .page-header h1 {
     font-size: 1.5rem;
     font-weight: 800;
     color: var(--text-primary);
     margin-bottom: 0.5rem;
 }
 
-.page-header p {
+.student-courses-container .page-header p {
     color: var(--text-secondary);
     font-size: 0.9rem;
 }

@@ -1,4 +1,4 @@
-export const SESSION_DURATION_MS = 5 * 60 * 1000;
+export const SESSION_DURATION_MS = 10 * 60 * 1000;
 export const SESSION_WARNING_MS = 60 * 1000;
 export const SESSION_TOKEN_KEY = 'sessionToken';
 export const SESSION_DEADLINE_KEY = 'sessionDeadlineAt';

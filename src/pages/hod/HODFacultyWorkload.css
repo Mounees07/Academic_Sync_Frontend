@@ -24,32 +24,44 @@
     color: var(--text-primary);
 }
 
-.workload-header {
+.faculty-workload-container .workload-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 24px;
+    gap: 16px 24px;
+    flex-wrap: wrap;
 }
 
-.header-titles h1 {
+.faculty-workload-container .workload-header > *:first-child {
+    flex: 1 1 420px;
+    min-width: 0;
+}
+
+.faculty-workload-container .header-titles h1 {
     font-size: 24px;
     font-weight: 700;
     margin: 0 0 8px 0;
     line-height: 1;
 }
 
-.header-titles p {
+.faculty-workload-container .header-titles p {
     color: var(--text-muted);
     font-size: 14px;
     margin: 0;
 }
 
-.header-actions {
+.faculty-workload-container .header-actions {
     display: flex;
     gap: 12px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    flex: 0 0 auto;
 }
+.faculty-workload-container .header-actions > * { flex: 0 0 auto; }
 
-.btn-secondary {
+.faculty-workload-container .btn-secondary {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -63,11 +75,11 @@
     cursor: pointer;
     transition: all 0.2s;
 }
-.btn-secondary:hover {
+.faculty-workload-container .btn-secondary:hover {
     background: var(--bg-subtle);
 }
 
-.btn-primary {
+.faculty-workload-container .btn-primary {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -81,8 +93,13 @@
     cursor: pointer;
     transition: background 0.2s;
 }
-.btn-primary:hover {
+.faculty-workload-container .btn-primary:hover {
     background: var(--primary-dark, #1D4ED8);
+}
+
+.faculty-workload-container .header-actions select {
+    height: 40px;
+    min-width: 110px;
 }
 
 /* KPI Cards */
@@ -436,7 +453,8 @@
 
 @media (max-width: 640px) {
     .kpi-cards-grid-workload { grid-template-columns: 1fr; }
-    .workload-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .faculty-workload-container .workload-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .faculty-workload-container .header-actions { justify-content: flex-start; flex-wrap: wrap; }
     .section-header-flex { flex-direction: column; align-items: flex-start; gap: 16px; }
     .table-actions { width: 100%; flex-direction: column; }
     .search-box { width: 100%; }

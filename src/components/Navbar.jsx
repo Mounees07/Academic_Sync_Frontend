@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import api from '../utils/api';
+import { SESSION_DURATION_MS } from '../utils/session';
 import SessionCountdown from './SessionCountdown';
 import './Navbar.css';
 
@@ -19,7 +20,7 @@ const toRoman = (num) => {
     return roman;
 };
 
-const SessionTimer = ({ sessionTotalMs = 300000, deadlineAt = null }) => {
+const SessionTimer = ({ sessionTotalMs = SESSION_DURATION_MS, deadlineAt = null }) => {
     const [now, setNow] = useState(() => Date.now());
     const [fallbackDeadlineAt, setFallbackDeadlineAt] = useState(() => (
         deadlineAt ?? (sessionTotalMs > 0 ? Date.now() + sessionTotalMs : null)
@@ -108,7 +109,7 @@ const SessionTimer = ({ sessionTotalMs = 300000, deadlineAt = null }) => {
     );
 };
 
-const Navbar = ({ toggleSidebar, sessionTotalMs = 300000, sessionDeadlineAt = null }) => {
+const Navbar = ({ toggleSidebar, sessionTotalMs = SESSION_DURATION_MS, sessionDeadlineAt = null }) => {
     const { userData, logout } = useAuth();
     const { theme, setTheme } = useTheme();
     const navigate = useNavigate();

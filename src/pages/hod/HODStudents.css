@@ -9,32 +9,44 @@
 }
 
 /* Page Header */
-.students-page-header {
+.hod-students-container-new .students-page-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: flex-start;
     margin-bottom: 24px;
+    gap: 16px 24px;
+    flex-wrap: wrap;
 }
 
-.students-page-header h1 {
+.hod-students-container-new .students-page-header > *:first-child {
+    flex: 1 1 420px;
+    min-width: 0;
+}
+
+.hod-students-container-new .students-page-header h1 {
     font-size: 24px;
     font-weight: 700;
     margin: 0 0 4px 0;
     color: var(--text-primary);
 }
 
-.students-page-header p {
+.hod-students-container-new .students-page-header p {
     font-size: 14px;
     color: var(--text-muted);
     margin: 0;
 }
 
-.header-actions {
+.hod-students-container-new .header-actions {
     display: flex;
     gap: 12px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    flex: 0 0 auto;
 }
+.hod-students-container-new .header-actions > * { flex: 0 0 auto; }
 
-.import-btn {
+.hod-students-container-new .import-btn {
     background: var(--bg-card);
     border: 1px solid var(--glass-border);
     padding: 8px 16px;
@@ -49,12 +61,12 @@
     transition: all 0.2s;
 }
 
-.import-btn:hover {
+.hod-students-container-new .import-btn:hover {
     background: var(--bg-subtle);
     border-color: var(--primary);
 }
 
-.add-student-btn {
+.hod-students-container-new .add-student-btn {
     background: #2563EB;
     color: white;
     border: none;
@@ -69,7 +81,7 @@
     transition: all 0.2s;
 }
 
-.add-student-btn:hover {
+.hod-students-container-new .add-student-btn:hover {
     background: var(--primary-dark, #1D4ED8);
 }
 
@@ -448,4 +460,11 @@
 .page-nav-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .hod-students-container-new .header-actions {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
 }

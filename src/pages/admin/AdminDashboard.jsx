@@ -221,8 +221,6 @@ const AdminDashboard = () => {
                             <h3 className="stat-value">{stat.value}</h3>
                             <p className="stat-title">{stat.title}</p>
                         </div>
-
-                        <div className={`stat-decor-circle ${stat.iconColor}`}></div>
                     </div>
                 ))}
             </div>

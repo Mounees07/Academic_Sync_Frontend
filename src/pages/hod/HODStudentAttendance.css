@@ -9,11 +9,13 @@
 }
 
 /* Header */
-.attendance-header {
+.attendance-tracking-container .attendance-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 24px;
+    gap: 16px 24px;
+    flex-wrap: wrap;
 }
 
 .header-left {
@@ -40,26 +42,36 @@
     background: var(--bg-subtle);
 }
 
-.header-titles h1 {
+.attendance-tracking-container .header-left {
+    flex: 1 1 420px;
+    min-width: 0;
+}
+
+.attendance-tracking-container .header-titles h1 {
     font-size: 24px;
     font-weight: 700;
     margin: 0 0 8px 0;
     line-height: 1;
 }
 
-.header-titles p {
+.attendance-tracking-container .header-titles p {
     color: var(--text-muted);
     font-size: 14px;
     margin: 0;
 }
 
-.header-actions {
+.attendance-tracking-container .header-actions {
     display: flex;
     gap: 12px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    flex: 0 0 auto;
 }
+.attendance-tracking-container .header-actions > * { flex: 0 0 auto; }
 
 /* Buttons */
-.btn-secondary {
+.attendance-tracking-container .btn-secondary {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -73,11 +85,11 @@
     cursor: pointer;
     transition: all 0.2s;
 }
-.btn-secondary:hover {
+.attendance-tracking-container .btn-secondary:hover {
     background: var(--bg-subtle);
 }
 
-.btn-primary {
+.attendance-tracking-container .btn-primary {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -91,7 +103,7 @@
     cursor: pointer;
     transition: background 0.2s;
 }
-.btn-primary:hover {
+.attendance-tracking-container .btn-primary:hover {
     background: var(--primary-dark, #1D4ED8);
 }
 
@@ -414,7 +426,8 @@
 
 @media (max-width: 640px) {
     .kpi-cards-grid-att { grid-template-columns: 1fr; }
-    .attendance-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .attendance-tracking-container .attendance-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .attendance-tracking-container .header-actions { justify-content: flex-start; flex-wrap: wrap; }
     .filter-group { flex-wrap: wrap; }
     .table-header-flex { flex-direction: column; align-items: flex-start; gap: 16px; }
     .table-actions { width: 100%; flex-direction: column; }

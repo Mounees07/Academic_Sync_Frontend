@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+    SESSION_DURATION_MS,
     getStoredDeadline,
     setStoredDeadline,
     SESSION_DEADLINE_KEY,
@@ -9,7 +10,7 @@ import {
 } from '../utils/session';
 
 const useSessionTimeout = ({
-    timeout = 5 * 60 * 1000,
+    timeout = SESSION_DURATION_MS,
     warnBefore = 60 * 1000,
     onWarn,
     onTimeout,

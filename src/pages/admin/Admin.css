@@ -176,18 +176,6 @@
     z-index: 2;
 }
 
-.stat-decor-circle {
-    position: absolute;
-    bottom: -26px;
-    right: -18px;
-    width: 132px;
-    height: 132px;
-    border-radius: 50%;
-    opacity: 0.12;
-    z-index: 1;
-    filter: blur(4px);
-}
-
 /* Card Headers */
 .card-header {
     display: flex;
@@ -706,7 +694,7 @@
     margin: 0;
 }
 
-.header-actions {
+.student-list-container .header-actions {
     display: flex;
     align-items: center;
     gap: 16px;
@@ -1105,7 +1093,7 @@
         align-items: flex-start;
         gap: 16px;
     }
-    .header-actions {
+    .student-list-container .header-actions {
         width: 100%;
         flex-wrap: wrap;
         gap: 12px;

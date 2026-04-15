@@ -33,32 +33,44 @@
     color: var(--text-primary);
 }
 
-.performance-header {
+.academic-performance-container .performance-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: flex-start;
     margin-bottom: 24px;
+    gap: 16px 24px;
+    flex-wrap: wrap;
 }
 
-.header-titles h1 {
+.academic-performance-container .performance-header > *:first-child {
+    flex: 1 1 420px;
+    min-width: 0;
+}
+
+.academic-performance-container .header-titles h1 {
     font-size: 24px;
     font-weight: 700;
     margin: 0 0 8px 0;
     color: var(--text-primary);
 }
 
-.header-titles p {
+.academic-performance-container .header-titles p {
     color: var(--text-muted);
     font-size: 14px;
     margin: 0;
 }
 
-.header-actions {
+.academic-performance-container .header-actions {
     display: flex;
     gap: 12px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    flex: 0 0 auto;
 }
+.academic-performance-container .header-actions > * { flex: 0 0 auto; }
 
-.btn-secondary {
+.academic-performance-container .btn-secondary {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -73,11 +85,11 @@
     transition: all 0.2s;
 }
 
-.btn-secondary:hover {
+.academic-performance-container .btn-secondary:hover {
     background: var(--bg-subtle);
 }
 
-.btn-primary {
+.academic-performance-container .btn-primary {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -92,7 +104,7 @@
     transition: background 0.2s;
 }
 
-.btn-primary:hover {
+.academic-performance-container .btn-primary:hover {
     background: var(--primary-dark, #1D4ED8);
 }
 
@@ -410,7 +422,8 @@
 
 @media (max-width: 640px) {
     .kpi-cards-grid { grid-template-columns: 1fr; }
-    .performance-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .academic-performance-container .performance-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .academic-performance-container .header-actions { justify-content: flex-start; flex-wrap: wrap; }
 }
 
 /* GPA highlight in Dean's list table */

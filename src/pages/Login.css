@@ -190,9 +190,9 @@ body {
     background: #25324a;
 }
 
-.welcome-google-btn,
-.social-btn,
-.btn-primary {
+.login-shell .welcome-google-btn,
+.login-shell .social-btn,
+.login-shell .btn-primary {
     border: none;
     border-radius: 999px;
     cursor: pointer;
@@ -362,7 +362,7 @@ body {
     font-size: 0.98rem;
 }
 
-.btn-primary {
+.login-shell .btn-primary {
     width: 100%;
     background: linear-gradient(90deg, var(--login-purple) 0%, #8f5cff 100%);
     color: #fff;
@@ -373,9 +373,9 @@ body {
     box-shadow: 0 14px 30px rgba(124, 77, 255, 0.24);
 }
 
-.welcome-google-btn:hover,
-.social-btn:hover,
-.btn-primary:hover {
+.login-shell .welcome-google-btn:hover,
+.login-shell .social-btn:hover,
+.login-shell .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 16px 34px rgba(68, 35, 126, 0.18);
 }

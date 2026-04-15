@@ -372,7 +372,7 @@ textarea.custom-input {
     min-height: 80px;
 }
 
-.btn-primary {
+.visitor-dashboard .btn-primary {
     background: linear-gradient(135deg, var(--primary), #4338ca);
     color: white;
     border: none;
@@ -386,7 +386,7 @@ textarea.custom-input {
     margin-top: 0.5rem;
 }
 
-.btn-primary:hover {
+.visitor-dashboard .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
 }

@@ -2,18 +2,18 @@
     padding: 20px;
 }
 
-.header-content h1 {
+.mentees-page .header-content h1 {
     margin-bottom: 4px;
 }
 
-.page-header {
+.mentees-page .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
 }
 
-.header-actions {
+.mentees-page .header-actions {
     display: flex;
     gap: 12px;
 }
@@ -457,20 +457,20 @@
         padding: 16px;
     }
 
-    .page-header {
+    .mentees-page .page-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
         margin-bottom: 20px;
     }
 
-    .header-actions {
+    .mentees-page .header-actions {
         width: 100%;
         flex-wrap: wrap;
         gap: 8px;
     }
 
-    .header-actions > * {
+    .mentees-page .header-actions > * {
         flex: 1;
         justify-content: center;
     }
@@ -550,7 +550,7 @@
         padding: 12px;
     }
 
-    .page-header {
+    .mentees-page .page-header {
         margin-bottom: 16px;
     }
 
